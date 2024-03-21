@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: flask-boilersaas
+Version: 0.1
+Summary: A boilerplate for flask SAAS apps, with social sign in, email confirmation, and more.
+Home-page: http://example.com/your_package
+Author: DS
+Author-email: hello@davidstern.me
+Keywords: flask,boilerplate,saas,app
