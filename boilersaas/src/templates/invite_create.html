@@ -1,0 +1,21 @@
+{% extends "blank.html" %}
+
+{% block content %}
+<form action="{{ url_for('users.invite_create') }}" method="post" class="w-full max-w-sm" novalidate>
+  {{ form.hidden_tag() }}
+  <div class="mb-6">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+      {{form.email.label.text }}
+    </label>
+    {{ form.email(size=32) }}
+    {% for error in form.email.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+
+  <p>{{ form.submit() }}</p>
+
+</form>
+
+{% endblock %}

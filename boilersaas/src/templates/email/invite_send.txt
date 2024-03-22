@@ -1,0 +1,13 @@
+Subject: You're Invited!
+
+Hello,
+
+You've been invited to join our platform. To accept the invitation, please use the link and code provided below:
+
+Invitation Link: [Join Now]({{ url_for('users.invite', _external=True) }})
+Your Invitation Code: {{ code }}
+
+If you did not request this invitation or believe it was sent to you in error, please ignore this email.
+
+Regards,
+The Awesome App Team

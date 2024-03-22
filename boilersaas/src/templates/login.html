@@ -1,0 +1,40 @@
+{% extends "blank.html" %}
+
+{% block content %}
+<form action="{{ url_for('users.login') }}" method="post" class="w-full max-w-sm" novalidate>
+  {{ form.hidden_tag() }}
+  <div class="mb-6">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+      {{form.email.label.text }}
+    </label>
+    {{ form.email(size=32) }}
+    {% for error in form.email.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+
+  <div class="mb-6">
+    <div class="flex justify-between items-center">
+      <label for="{{ form.password.id }}" class="text-sm font-semibold leading-6 text-gray-900">
+        {{form.password.label.text}}
+      </label>
+      <a href="{{ url_for('users.reset_request') }}" class=" text-slate-300 hover:text-slate-400 text-xs">Forgot
+        Password?</a>
+    </div>
+
+    {{ form.password(size=32) }}
+    {% for error in form.password.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+
+  <p>{{ form.remember }} {{ form.remember.label }}</p>
+  <p>{{ form.submit() }}</p>
+
+</form>
+
+{% include "components/section_social_signin.html" %}
+
+{% endblock %}
