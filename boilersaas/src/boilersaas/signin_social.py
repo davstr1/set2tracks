@@ -1,12 +1,12 @@
 import datetime
 from flask_dance.contrib.google import make_google_blueprint,google
 # from flask_dance.contrib.facebook import make_facebook_blueprint,facebook
-from utils.db import db
-from models import OAuth
+from .utils.db import db
+from .models import OAuth
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
 from flask_login import current_user
 from flask import flash, redirect, url_for,current_app as app
-from models import User,UserConnectMethod,UserType
+from .models import User,UserConnectMethod,UserType
 from flask_login import login_user
 from sqlalchemy import String, and_
 from flask_babel import _

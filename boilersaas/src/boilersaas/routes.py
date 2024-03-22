@@ -1,17 +1,13 @@
 
-from curses.ascii import SI
-from re import S
 import string
 from flask import render_template, flash, redirect, url_for,request, current_app as app
 from flask_login import current_user, login_user, logout_user
-from utils.db import db
-
-from utils.mail import send_email
+from .utils.db import db
+from .types import UserType, UserConnectMethod
+from .utils.mail import send_email
 from . import bp
-#from config import SIGNUP_OPTIONS, Config, UserType, UserConnectMethod
-
-from models import User, Invite
-from forms import InviteForm, RegistrationByInviteForm, RegistrationForm,LoginForm,RequestResetForm,ResetPasswordForm
+from .models import User, Invite
+from .forms import InviteForm, RegistrationByInviteForm, RegistrationForm,LoginForm,RequestResetForm,ResetPasswordForm
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_babel import _, lazy_gettext as _l
 import secrets
@@ -39,7 +35,7 @@ def register():
         #     return redirect(url_for('users.register'))  # Adjust to your actual registration page route
 
         hashed_pwd = generate_password_hash(form.password.data, method=app.config.get('PWD_HASH_METHOD'), salt_length=app.config.get('PWD_SALT_LENGTH'))
-        user = User(fname=form.fname.data, email=form.email.data, password=hashed_pwd,connect_method=app.config.get('UserConnectMethod').Site, type=app.config.get('UserType').User, lang='en')
+        user = User(fname=form.fname.data, email=form.email.data, password=hashed_pwd,connect_method=UserConnectMethod.Site, type=UserType.User, lang='en')
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True)
@@ -77,7 +73,7 @@ def register_invite(invite_code):
     if form.validate_on_submit():
         
         hashed_pwd = generate_password_hash(form.password.data, method=app.config.get('PWD_HASH_METHOD'), salt_length=app.config.get('PWD_SALT_LENGTH'))
-        user = User(fname=form.fname.data, email=invite.email, password=hashed_pwd,connect_method=app.config.get('UserConnectMethod').Site, type=app.config.get('UserType').User, lang='en')
+        user = User(fname=form.fname.data, email=invite.email, password=hashed_pwd,connect_method=UserConnectMethod.Site, type=UserType.User, lang='en')
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True)

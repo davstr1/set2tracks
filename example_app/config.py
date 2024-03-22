@@ -27,17 +27,5 @@ class Config:
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
     SIGNUP_OPTIONS = SIGNUP_OPTIONS
     
-import enum
 
-class UserType(enum.Enum):
-    Admin = 1
-    User = 2
-    Guest = 3
-
-class UserConnectMethod(enum.Enum):
-    Site = 'site'
-    Google = 'google'
-    GitHub = 'github'
-    Facebook = 'fb'
-    
     

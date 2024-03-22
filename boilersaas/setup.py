@@ -2,9 +2,17 @@ from setuptools import setup, find_packages
 
 setup(
     name="boilersaas",
-    version="0.2.1",
+    version="0.6.1",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
+    #include_package_data=True,
+      package_data={
+        # Include templates, translations, and any other non-python files
+      "boilersaas": [
+            "templates/**/*.html",  # Recursively include all HTML files in templates directory
+            "translations/**/*",  # Recursively include all files in translations directory
+        ],
+      },
     install_requires=[
         "Babel==2.14.0",
         "Flask==3.0.2",
@@ -19,7 +27,8 @@ setup(
         "requests==2.31.0",
         "SQLAlchemy==2.0.28",
         "Werkzeug==3.0.1",
-        "WTForms==3.1.2"
+        "WTForms==3.1.2",
+        "email_validator==2.1.1" # WFForms dependency, not included in Flask-WTF
     ],
     author="DS",
     author_email="hello@davidstern.me",
