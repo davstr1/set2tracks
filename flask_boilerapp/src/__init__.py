@@ -1,4 +1,3 @@
-from mimetypes import init
 from flask import Blueprint
 from signin_social import google_blueprint
 from flask_login import LoginManager,current_user
