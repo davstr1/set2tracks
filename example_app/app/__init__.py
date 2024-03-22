@@ -1,9 +1,9 @@
 from flask import Flask
 from config import Config
 from app.main import init_app as init_main_app # important to import before. templates takes precedence
-from flask_boilersaas import init_boilerplate_app 
+from boilersaas import init_boilerplate_app 
 
-from flask_boilersaas.utils.db import db
+from boilersaas.utils.db import db
 #from app.utils.mail import mail
 from flask_migrate import Migrate
 
