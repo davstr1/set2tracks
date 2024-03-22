@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="flask_boilersaas",
-    version="0.2",
+    version="0.2.0",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[

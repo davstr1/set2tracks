@@ -5,4 +5,4 @@ Flask==3.0.2
 flask-babel==4.0.0
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
-flask_boilersaas==0.1.0
+flask_boilersaas==0.2.0
