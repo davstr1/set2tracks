@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name="flask_boilersaas",
     version="0.1",
-    packages=find_packages(),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     install_requires=[
         "Babel==2.14.0",
         "Flask==3.0.2",

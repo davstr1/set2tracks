@@ -1,6 +1,0 @@
-setup.py
-flask_boilersaas.egg-info/PKG-INFO
-flask_boilersaas.egg-info/SOURCES.txt
-flask_boilersaas.egg-info/dependency_links.txt
-flask_boilersaas.egg-info/requires.txt
-flask_boilersaas.egg-info/top_level.txt
