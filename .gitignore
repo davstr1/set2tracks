@@ -9,6 +9,10 @@ __pycache__/
 # Mac
 **/.DS_Store
 
+# Npm
+**/node_modules
+**/package-lock.json
+
 # Distribution / packaging
 .Python
 build/
