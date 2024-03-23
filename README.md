@@ -49,49 +49,63 @@ Cause i need it for all my projects, and i will need all my project for being ab
 
 
 
-# Usage
+# Install
 ## General
 
-Get the thing, yes
+### 1 - Get the thing, yes
 
 `gh repo clone davstr1/flask-boilersaas`
 
  or just download it.
 
-
-`pip install  > -r requirements.txt.`
-
+### 2 - Install and run Tailwind
 install tailwind stuff with npm
 
 `npm i tailwindcss`
 
-then launch the tailwind watcher.
+Then launch the tailwind watcher.
 This will watch for the css we use and add/remove them from our css/output.css
 ( Go and learn a bit about Tailwind if you have to)
 
 `npx tailwindcss -i ./example_app/static/css/input.css -o ./example_app/static/css/output.css --watch`
 
-go inside the "example_app" folder and
+### 3 - Install python dependencies
+
+`pip install  > -r requirements.txt.`
+
+
+### 4 - Edit environment variables
+
+Copy example.env into a .env, and fill it with your data.
+
+
+### 5 - Proudly run the app
 
 `python run.py`
 
-(PROD : Delete the boilerplate folder. It's included only for developping the package, and copying the template)
+### Notes
 
-Note : You can rename "example_app" to your likings, 
+- PROD : You can the boilerplate folder. It's included only for developping the package, and copying the templates. (See styling and templates) 
+All you really need in prod is the content of the "example_app" folder.
+
+
+- You can rename "example_app" to your likings, 
 just also change the npx command accordingly.
 
 ## Usage for devs
 if you want to contribute to the repo, or modify the boilerplate.
 
 
-Same process, except instead of pip install the boilersaas from Pypi,
-make an editable install :
+Same process, except instead of #3 
+
+You don't pip install the boilersaas from Pypi,
+but do an editable install instead :
 
 `pip install -r > requirements_dev.txt.` 
 
 `pip install -e ./boilersaas`
 
-`python run.py`
+Now you can edit ./boilersaas and see immediate results.
 
 
 # Styling and Templates
