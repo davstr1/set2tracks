@@ -10,7 +10,3 @@ template_files = glob.glob(template_dir + '/**/*.html', recursive=True)
 
 if __name__ == '__main__':
     app.run(debug=True,extra_files=template_files,use_reloader=True)
-     
-        
-    
-
