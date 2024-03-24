@@ -50,90 +50,98 @@ Cause i need it for all my projects, and i will need all my project for being ab
 
 
 # Install
-## General
 
-### 1 - Get the thing, yes
+## First Get the thing (yep..)
 
-`gh repo clone davstr1/flask-boilersaas`
+```
+gh repo clone davstr1/flask-boilersaas
+```
+or just download it.
 
- or just download it.
+## 1 - Setup 
 
-### 2 - Install and run Tailwind
-install tailwind stuff with npm
+On terminal
 
-`npm i tailwindcss`
+```
+./setup.sh
+```
 
-Then launch the tailwind watcher.
-This will watch for the css we use and add/remove them from our css/output.css
-( Go and learn a bit about Tailwind if you have to)
+Or if you want to develop the boilerplate, contribute to the project :
+```
+./setup.sh dev
+```
+This will install ./boilerplate locally instead of from a remote pip. So you can edit it and see immediatly the results.
 
-`npx tailwindcss -i ./web/app/static/css/input.css -o ./web/app/static/css/output.css --watch`
+## 2 - Fill web/.env with your data
 
-### 3 - Install python dependencies
+# Run
 
-`pip install -r web/requirements.txt`
-
-
-### 4 - Edit environment variables
-
-Copy example.env into a .env, and fill it with your data.
-
-
-### 5 - Proudly run the app
-
-`python run.py`
-
-### Notes
-
-- PROD : You can the boilerplate folder. It's included only for developping the package, and copying the templates. (See styling and templates) 
-All you really need in prod is the content of the "web" folder.
+```
+npx tailwindcss -i ./web/app/static/css/input.css -o ./web/app/static/css/output.css --watch
+python web/run.py
+```
 
 
-- You can rename "web" to your likings, 
-just also change the npx command accordingly.
+## Or manual install
 
-## Usage for devs
-if you want to contribute to the repo, or modify the boilerplate.
+### 1 - Install python dependencies
 
+```
+pip install -r web/requirements.txt
+```
 
-Same process, except instead of #3 
+or if you want to developp the boilersaas, ( and contribute to the project) : 
 
-You don't pip install the boilersaas from Pypi,
+```
+pip install -r web/requirements_dev.txt
+```
+
+Then don't pip install the boilersaas from Pypi,
 but do an editable install instead :
 
-`pip install -r  exampler_app/requirements_dev.txt` 
-
-`pip install -e ./boilersaas`
+```
+pip install -e ./boilersaas
+```
 
 Now you can edit ./boilersaas and see immediate results.
 
 
+### 2 - Edit environment variables
+
+Copy example.env into a .env, and fill it with your data.
+
+
+## Notes
+
+- DEV : don't ditch the /boilerplate folder.
+This has css tailwind is listening too, which are crucial to the whole shebang.
+
+- PROD : All you really need in prod is the content of the "web" folder.
+
+
+
 # Styling and Templates
 
-The templates are in the pip package (boilerplate)
+Most templates are in the package (boilerplate)
 Like login, registration, header etc..
 But you can overwrite anything, just copying the corresponding templates 
 
 from 
-`./boilersaas/src/boilersaas/templates `
+./boilersaas/src/boilersaas/templates
 to
-`./web/templates 
-`
-
-and then edit it there.
+./web/templates 
 
 
+and then edit them there.
 
 
-
-
-## Quick memo for myself
+# Quick memo for myself
 
 Build then publish the package on Pypi:
 
-`python setup.py sdist bdist_wheel`
+```python setup.py sdist bdist_wheel```
 
-`twine upload dist/* --v  ` 
+```twine upload dist/* --v  ``` 
 
 # Still here ??
 
