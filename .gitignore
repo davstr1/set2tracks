@@ -9,6 +9,9 @@ __pycache__/
 # Mac
 **/.DS_Store
 
+# tailwind output
+./web/app/static/css/output.css
+
 # Npm
 **/node_modules
 **/package-lock.json
