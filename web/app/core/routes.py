@@ -1,6 +1,6 @@
 from flask import render_template,redirect,url_for
 from flask_login import login_required
-from app.main import bp
+from app.core import bp
 from flask_babel import lazy_gettext as _l
 
 

@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from app.main import init_app as init_main_app # important to import before. templates takes precedence
+from app.core import init_app as init_main_app # important to import before. templates takes precedence
 from boilersaas import init_boilerplate_app 
 
 from boilersaas.utils.db import db
