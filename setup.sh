@@ -54,8 +54,7 @@ if [ "$1" == "dev" ]; then
 else
     echo "Installing Python production dependencies..."
     pip install -r web/requirements.txt
-    echo "Removing ./boilerplate directory..."
-    rm -rf ./boilerplate
+    
 fi
 
 echo "Setup completed successfully!"
