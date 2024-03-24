@@ -40,13 +40,6 @@ if [ ! -f "./web/.env" ]; then
 fi
 
 
-
-echo "Installing npm packages..."
-npm install tailwindcss
-
-echo "Running Tailwind CSS build and watching for changes..."
-npx tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --watch &
-
 if [ "$1" == "dev" ]; then
     echo "Installing Python development dependencies..."
     pip install -r web/requirements_dev.txt
@@ -56,6 +49,12 @@ else
     pip install -r web/requirements.txt
     
 fi
+
+echo "Installing npm packages..."
+npm install tailwindcss
+
+# echo "Running Tailwind CSS build and watching for changes..."
+# npx tailwindcss -i ./web/app/static/css/input.css -o ./web/app/static/css/output.css --watch &
 
 echo "Setup completed successfully!"
 echo "Please ensure the .env file in the web directory is filled out before running the application."
