@@ -1,7 +1,7 @@
 from flask import Flask
 from web.config import Config
 
-from web.core import init_app as init_main_app # important to import before. templates takes precedence
+# important to import before. templates takes precedence
 from web.extend import init_app as init_extend_app 
 from boilersaas import init_boilerplate_app
 
@@ -20,7 +20,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     #mail.init_app(app)
     init_extend_app(app)
-    init_main_app(app)
+    
     init_boilerplate_app(app)
  
     #

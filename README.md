@@ -1,4 +1,9 @@
 
+# TODO 
+
+I got lost !
+No need for "core" !!! : displace everything that is essential to the boilersaas. The rest eliminate.
+- Lead to a simple structure, just web, and perhaps model templates, where user can do whatever he pleases.
 
 # Who cares
 Probably nobody at this point. I'm not promoting this thing thing either.
