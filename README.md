@@ -67,7 +67,7 @@ Then launch the tailwind watcher.
 This will watch for the css we use and add/remove them from our css/output.css
 ( Go and learn a bit about Tailwind if you have to)
 
-`npx tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --watch`
+`npx tailwindcss -i ./web/app/static/css/input.css -o ./web/app/static/css/output.css --watch`
 
 ### 3 - Install python dependencies
 
