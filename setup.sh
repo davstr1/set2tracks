@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check if setup has already been done.
-if [ -f "./web/app/static/css/output.css" ]; then
+if [ -f "./web/app/static/css/tailwind/output.css" ]; then
     echo "Setup has already been completed. Exiting..."
     exit 0
 fi
@@ -54,7 +54,7 @@ echo "Installing npm packages..."
 npm install tailwindcss
 
 # echo "Running Tailwind CSS build and watching for changes..."
-# npx tailwindcss -i ./web/app/static/css/input.css -o ./web/app/static/css/output.css --watch &
+# npx tailwindcss -i ./web/static/css/tailwind/input.css -o ./web/static/css/tailwind/output.css --watch &
 
 echo "Setup completed successfully!"
 echo "Please ensure the .env file in the web directory is filled out before running the application."
