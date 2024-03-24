@@ -10,7 +10,7 @@ __pycache__/
 **/.DS_Store
 
 # tailwind output
-./web/app/static/css/output.css
+web/app/static/css/output.css
 
 # Npm
 **/node_modules
