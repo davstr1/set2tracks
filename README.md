@@ -67,11 +67,11 @@ Then launch the tailwind watcher.
 This will watch for the css we use and add/remove them from our css/output.css
 ( Go and learn a bit about Tailwind if you have to)
 
-`npx tailwindcss -i ./example_app/static/css/input.css -o ./example_app/static/css/output.css --watch`
+`npx tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --watch`
 
 ### 3 - Install python dependencies
 
-`pip install -r example_app/requirements.txt`
+`pip install -r web/requirements.txt`
 
 
 ### 4 - Edit environment variables
@@ -86,10 +86,10 @@ Copy example.env into a .env, and fill it with your data.
 ### Notes
 
 - PROD : You can the boilerplate folder. It's included only for developping the package, and copying the templates. (See styling and templates) 
-All you really need in prod is the content of the "example_app" folder.
+All you really need in prod is the content of the "web" folder.
 
 
-- You can rename "example_app" to your likings, 
+- You can rename "web" to your likings, 
 just also change the npx command accordingly.
 
 ## Usage for devs
@@ -117,7 +117,7 @@ But you can overwrite anything, just copying the corresponding templates
 from 
 `./boilersaas/src/boilersaas/templates `
 to
-`./example_app/templates 
+`./web/templates 
 `
 
 and then edit it there.
