@@ -71,7 +71,7 @@ This will watch for the css we use and add/remove them from our css/output.css
 
 ### 3 - Install python dependencies
 
-`pip install  > -r requirements.txt.`
+`pip install -r example_app/requirements.txt`
 
 
 ### 4 - Edit environment variables
@@ -101,7 +101,7 @@ Same process, except instead of #3
 You don't pip install the boilersaas from Pypi,
 but do an editable install instead :
 
-`pip install -r > requirements_dev.txt.` 
+`pip install -r  exampler_app/requirements_dev.txt` 
 
 `pip install -e ./boilersaas`
 
