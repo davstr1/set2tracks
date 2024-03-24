@@ -9,10 +9,10 @@ from flask_migrate import Migrate
 
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    app = Flask(__name__,static_url_path='/static',static_folder='./core/static')
     app.config.from_object(config_class)
 
-
+    print (app.static_folder)
     db.init_app(app)
     #mail.init_app(app)
     init_main_app(app)

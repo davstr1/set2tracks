@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask_babel import Babel
-from app.utils.locale import get_locale,add_babel_translation_directory
+from app.core.utils.locale import get_locale,add_babel_translation_directory
 bp = Blueprint('main', __name__,template_folder='templates')
 from app.core import routes,bp
 

@@ -77,7 +77,7 @@ This will install ./boilerplate locally instead of from a remote pip. So you can
 # Run
 
 ```
-npx tailwindcss -i ./web/app/static/css/input.css -o ./web/app/static/css/output.css --watch
+npx tailwindcss -i ./web/app/core/static/css/input.css -o ./web/app/core/static/css/output.css --watch
 python web/run.py
 ```
 
