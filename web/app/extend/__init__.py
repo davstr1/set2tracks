@@ -1,0 +1,12 @@
+from flask import Blueprint
+from flask_babel import Babel
+from app.core.utils.locale import get_locale,add_babel_translation_directory
+bp = Blueprint('extend', __name__,template_folder='templates')
+from app.extend import routes,bp
+
+
+def init_app(app):
+    app.register_blueprint(bp)
+    add_babel_translation_directory('core/translations',app)
+    babel = Babel(app)
+    babel.init_app(app,locale_selector=get_locale) 
