@@ -8,9 +8,6 @@ from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 
 
-print('models.py',app.config)
-
-
 class User(db.Model,UserMixin):
     __tablename__ = app.config.get('DB_TABLE_USERS')
 

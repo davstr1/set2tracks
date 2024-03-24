@@ -87,7 +87,7 @@ def register_invite(invite_code):
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-    print('login hit')
+   
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard')) 
     

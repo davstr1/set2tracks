@@ -1,6 +1,6 @@
 def get_locale():
-  print('getting locale and the result is es')
-  return 'es'
+    # TODO - Implement this function
+  return 'en'
    # return request.accept_languages.best_match(Config['LANGUAGES'])
    
    

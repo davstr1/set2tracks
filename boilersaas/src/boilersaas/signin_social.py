@@ -43,7 +43,7 @@ def after_authorize():
         
     assert resp.ok, resp.text
     info = resp.json()
-    print("info",info)
+  
     user = User.query.filter_by(email=info["email"]).first()
     if not user:
         user = User(fname=info['given_name'], email=info["email"], password='0000',connect_method=UserConnectMethod.Google, type=UserType.User, lang=info['locale'])
