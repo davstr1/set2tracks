@@ -1,8 +1,8 @@
 from flask import Flask
-from config import Config
+from web.config import Config
 
-from app.core import init_app as init_main_app # important to import before. templates takes precedence
-from app.extend import init_app as init_extend_app 
+from web.core import init_app as init_main_app # important to import before. templates takes precedence
+from web.extend import init_app as init_extend_app 
 from boilersaas import init_boilerplate_app
 
 
@@ -34,6 +34,7 @@ def create_app(config_class=Config):
     migrate = Migrate(app, db)
     # with app.app_context():
     #     db.create_all()
+
 
 
     return app

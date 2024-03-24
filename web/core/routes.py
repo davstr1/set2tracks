@@ -1,24 +1,19 @@
 from flask import render_template,redirect,url_for
 from flask_login import login_required
-from app.extend import bp
+from web.core import bp_core
 from flask_babel import lazy_gettext as _l
 
 
 
-@bp.route('/')
+@bp_core.route('/')
 def index():
     #return str(_l('index hello world!'))
     return render_template('index.html')
 
-@bp.route('/dashboard')
+@bp_core.route('/dashboard')
 @login_required
 def dashboard():
-    return str(_l('dashboard hello world!'))
-   # return render_template('dashboard.html')
-   
-   
-@bp.route('/foo')
-def foo():
-    return 'foo'
+    #return str(_l('dashboard hello world!'))
+    return render_template('dashboard.html')
     
     
