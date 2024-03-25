@@ -1,9 +1,9 @@
 
 # TODO 
 
-I got lost !
-No need for "core" !!! : displace everything that is essential to the boilersaas. The rest eliminate.
-- Lead to a simple structure, just web, and perhaps model templates, where user can do whatever he pleases.
+- move the migration folder away
+- properly configure the ignore folders and files that user can edit
+- maybe build an install process to copy some files if user hasn't already touched them. (routes, templates...)
 
 # Who cares
 Probably nobody at this point. I'm not promoting this thing thing either.
