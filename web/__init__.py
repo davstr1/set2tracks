@@ -1,5 +1,5 @@
 from flask import Flask
-from web.config import Config
+from config import Config
 
 # important to import before. templates takes precedence
 #from web.init import init_app as init_extend_app 
@@ -46,7 +46,7 @@ def create_app(config_class=Config):
     
     #from app.users.models import User, Invite
     
-    migrate = Migrate(app, db,directory='../migrations')
+    migrate = Migrate(app, db,directory='../init_ressources/migrations')
     # with app.app_context():
     #     db.create_all()
 

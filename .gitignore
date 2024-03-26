@@ -9,8 +9,22 @@ __pycache__/
 # Mac
 **/.DS_Store
 
+
+
+# Default templates. They are copied from boilersaas/src/boilersaas/templates
+# Used for reference, to overright templates in the project
+templates_defaults/*
+!templates_defaults/README.md
+
+
+# User files
+web/*
+
 # tailwind output
-web/static/css/tailwind/output.css
+!web/static/css/tailwind/input.css
+!web/init.py
+!web/__init__.py
+!web/translations/README.md
 
 # Npm
 **/node_modules

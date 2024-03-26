@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Check if setup has already been done.
-if [ -f "./web/app/static/css/tailwind/output.css" ]; then
-    echo "Setup has already been completed. Exiting..."
-    exit 0
-fi
+# # Check if setup has already been done.
+# if [ -f "./web/static/css/tailwind/output.css" ]; then
+#     echo "Setup has already been completed. Exiting..."
+#     exit 0
+# fi
 
 echo "Starting app setup..."
 
@@ -33,20 +33,20 @@ if [ ! -z "$missing_cmds" ]; then
 fi
 
 # Check if .env file exists, if not, copy from example.env
-if [ ! -f "./web/.env" ]; then
+if [ ! -f ".env" ]; then
     echo "No .env file found in the web directory. Creating one from example.env..."
-    cp "./web/example.env" "./web/.env"
+    cp "init_ressources/.example.env" ".env"
     echo "A new .env file has been created from example.env. Please make sure to fill it out before running the application."
 fi
 
 
 if [ "$1" == "dev" ]; then
     echo "Installing Python development dependencies..."
-    pip install -r web/requirements_dev.txt
+    pip install -r requirements_dev.txt
     pip install -e ./boilersaas
 else
     echo "Installing Python production dependencies..."
-    pip install -r web/requirements.txt
+    pip install -r requirements.txt
     
 fi
 
