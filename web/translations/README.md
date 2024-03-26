@@ -1,25 +1,28 @@
+1. Generate the message pot. From the root directory (not web), run the command:
 
- # 1 - Generate the message pot.
- from root dir (not web), run the command
- 
-`pybabel extract -F PyBabel.cfg -k _l -o web/translations/messages.pot .`
+   ```
+   pybabel extract -F PyBabel.cfg -k _l -o web/translations/messages.pot .
+   ```
 
-# 2 - generate the translations
+2. Generate the translations:
 
-`pybabel init -i web/translations/messages.pot -d web/translations -l es `
+   ```
+   pybabel init -i web/translations/messages.pot -d web/translations -l es
+   ```
 
-`pybabel init -i web/translations/messages.pot -d web/translations -l fr `
+   ```
+   pybabel init -i web/translations/messages.pot -d web/translations -l fr
+   ```
 
+3. Edit the generated PO files, then:
 
+   ```
+   pybabel compile -d web/translations
+   ```
 
-# 3 - edit the generated PO files, then
+4. Update, when needed (without deleting existing translations):
 
-```
-pybabel compile -d web/translations
-
-```
-
-# 4 update, when needed (without deleting existing translations)
-`pybabel extract -F web/translations/PyBabel.cfg -k _l -o web/translations/messages.pot .`
-`pybabel update -i web/translations/messages.pot -d web/translations`
-
+   ```
+   pybabel extract -F web/translations/PyBabel.cfg -k _l -o web/translations/messages.pot .
+   pybabel update -i web/translations/messages.pot -d web/translations
+   ```
