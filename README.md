@@ -1,9 +1,19 @@
 
 # TODO 
 
-- move the migration folder away
+- UPDATE the manual import process here (readme)
+- check and end the translation
+- check how to overright translations from web/translations
+- integrate fb login
+- integrate https://www.paddle.com/
+- integrate https://daisyui.com/
+- put an app on it, and test
+- admin user management dashboard
+- user page
+
+~~- move the migration folder away
 - properly configure the ignore folders and files that user can edit
-- maybe build an install process to copy some files if user hasn't already touched them. (routes, templates...)
+- maybe build an install process to copy some files if user hasn't already touched them. (routes, templates...)~~
 
 # Who cares
 Probably nobody at this point. I'm not promoting this thing thing either.
