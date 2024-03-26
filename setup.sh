@@ -32,6 +32,54 @@ if [ ! -z "$missing_cmds" ]; then
     exit 1
 fi
 
+echo "Getting default_templates..."
+
+# Define source and destination directories
+SRC_DIR="boilersaas/src/boilersaas/templates"
+DEST_DIR="templates_defaults"
+
+# Check if the destination directory exists
+if [ -d "$DEST_DIR" ]; then
+    # Find all files and directories within DEST_DIR except for README.md
+    find "$DEST_DIR" -mindepth 1 -not -name 'README.md' | while read line; do
+        # Check if it's a directory or a file and delete accordingly
+        if [ -d "$line" ]; then
+            rm -rf "$line"
+        else
+            rm -f "$line"
+        fi
+    done
+else
+    # If the destination directory doesn't exist, create it
+    mkdir "$DEST_DIR"
+fi
+
+# Copy the source directory content to the destination
+cp -R "$SRC_DIR/" "$DEST_DIR/"
+
+
+WEB_TEMPLATES_DIR="web/templates"
+echo "Getting basic web/templates..."
+
+# Check and copy mail directory if it doesn't exist in web/templates
+if [ ! -d "$WEB_TEMPLATES_DIR/mail" ]; then
+    cp -R "$SRC_DIR/mail" "$WEB_TEMPLATES_DIR/"
+fi
+
+# Check and copy logo.html if it doesn't exist in web/templates
+if [ ! -f "$WEB_TEMPLATES_DIR/logo.html" ]; then
+    cp "$SRC_DIR/logo.html" "$WEB_TEMPLATES_DIR/"
+fi
+
+
+ROUTES_SRC_FILE="init_ressources/example_routes.py"
+ROUTES_DEST_FILE="web/routes.py"
+echo "Getting basic web/routes.py"
+# Check if web/routes.py exists, if not, copy from example_routes.py
+if [ ! -f "$ROUTES_DEST_FILE" ]; then
+    cp "$ROUTES_SRC_FILE" "$ROUTES_DEST_FILE"
+fi
+
 # Check if .env file exists, if not, copy from example.env
 if [ ! -f ".env" ]; then
     echo "No .env file found in the web directory. Creating one from example.env..."
