@@ -72,7 +72,7 @@ def after_authorize():
         oauth.user_id = user.id
         db.session.commit()
     else:
-        raise Exception("No matching OAuth record found.")
+        raise Exception(_("No matching OAuth record found."))
 
         
    

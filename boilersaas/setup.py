@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name="boilersaas",
-    version="0.6.3",
+    version="0.6.4",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
-    #include_package_data=True,
+    include_package_data=True,
       package_data={
         # Include templates, translations, and any other non-python files
       "boilersaas": [

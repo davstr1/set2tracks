@@ -22,7 +22,7 @@ from web import routes
 
 def init_extend_app(app):
     app.register_blueprint(bp)
-    add_babel_translation_directory('extend/translations',app)
+    add_babel_translation_directory('translations',app)
     babel = Babel(app)
     babel.init_app(app,locale_selector=get_locale) 
 

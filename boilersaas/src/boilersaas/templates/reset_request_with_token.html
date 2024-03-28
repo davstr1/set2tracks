@@ -3,7 +3,7 @@
 {% block content %}
 <form action="" method="post" class="w-full max-w-sm" novalidate>
   {{ form.hidden_tag() }}
-  <h2>Choose a New Password</h2>
+  <h2>{{_('Choose a New Password')}}</h2>
   <p>
     {{ form.password.label }}<br>
     {{ form.password(size=32) }}<br>

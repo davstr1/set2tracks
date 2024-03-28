@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Flask App{% endblock %}</title>
+    <title>{{ page_title }}</title>
     <link href="{{url_for('static',filename='css/tailwind/output.css')}}" rel="stylesheet">
 </head>
 
@@ -25,19 +25,18 @@
                     {% else %}
 
                     <div class="hidden lg:flex lg:gap-x-12">
-                        <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Features</a>
-                        <a href="#" class="text-sm font-semibold leading-6 text-gray-900">Pricing</a>
-                        <a href="#" class="text-sm font-semibold leading-6 text-gray-900">About</a>
+                        <a href="#" class="text-sm font-semibold leading-6 text-gray-900">{{_("Features")}}</a>
+                        <a href="#" class="text-sm font-semibold leading-6 text-gray-900">{{_("Pricing")}}</a>
+                        <a href="#" class="text-sm font-semibold leading-6 text-gray-900">{{_("About")}}</a>
                     </div>
 
                     <div class="hidden lg:flex lg:flex-1 lg:justify-end">
                         <a href="{{ url_for('users.login') }}"
-                            class="text-sm font-semibold leading-6 text-gray-900">Sign
-                            in </a>
+                            class="text-sm font-semibold leading-6 text-gray-900">{{_("Sign in")}} </a>
 
 
                         <a class=" justify-center rounded-lg text-sm font-semibold py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-700 -my-2.5 ml-8"
-                            href="{{ url_for('users.register') }}"><span>Register <span
+                            href="{{ url_for('users.register') }}"><span>{{_("Register")}}<span
                                     aria-hidden="true">→</span></span></a>
                     </div>
 
@@ -68,7 +67,7 @@
         </main>
 
         <footer>
-            <p>&copy; 2024 My Flask App</p>
+            <p>&copy; 2024 {{ app_name }}</p>
         </footer>
     </div>
 </body>

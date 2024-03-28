@@ -1,14 +1,9 @@
-# Spanish translations for PROJECT.
-# Copyright (C) 2024 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-10 15:45+0100\n"
-"PO-Revision-Date: 2024-03-10 15:26+0100\n"
+"POT-Creation-Date: 2024-03-28 15:40+0100\n"
+"PO-Revision-Date: 2024-03-28 15:40+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -18,35 +13,156 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.14.0\n"
 
-#: forms.py:14
-msgid "Email"
-msgstr "Email"
+#: forms.py:11 forms.py:23
+msgid "First Name"
+msgstr "Nombre"
 
-#: forms.py:15
+#: forms.py:12 forms.py:30 forms.py:43 forms.py:48
+msgid "Email"
+msgstr "Correo"
+
+#: forms.py:13 forms.py:24 forms.py:31
 msgid "Password"
 msgstr "Contraseña"
 
-#: forms.py:16
-msgid "Remember Me"
-msgstr "Quedarme connectado"
-
-#: forms.py:17 routes.py:42
-msgid "Log In"
-msgstr "Connexion"
-
-#: routes.py:13
-msgid "hello world!"
-msgstr "Hola mundo !"
-
-#: routes.py:24
-msgid "Congratulations, you are now a registered user!"
-msgstr "Felicidades, ya eres miembro !"
-
-#: routes.py:26
+#: forms.py:14 forms.py:25 routes.py:50 routes.py:88 templates/base.html:39
 msgid "Register"
-msgstr "Darme de alta"
+msgstr "Regístrate"
 
-#: routes.py:41
+#: forms.py:18
+msgid "An account with this email already exists."
+msgstr "Ya existe una cuenta con este correo."
+
+#: forms.py:33 routes.py:108
+msgid "Log In"
+msgstr "Iniciar sesión"
+
+#: forms.py:36
+msgid "New Password"
+msgstr "Nueva Contraseña"
+
+#: forms.py:37
+msgid "Confirm Password"
+msgstr "Confirma Contraseña"
+
+#: forms.py:39 routes.py:136 routes.py:154
+msgid "Reset Password"
+msgstr "Restablecer Contraseña"
+
+#: forms.py:44
+msgid "Request Password Reset"
+msgstr "Solicitar Restablecimiento de Contraseña"
+
+#: forms.py:49
+msgid "Create Invite"
+msgstr "Crear Invitación"
+
+#: routes.py:21
+msgid "hello world!"
+msgstr "¡hola mundo!"
+
+#: routes.py:30
+msgid "Registration is not currently allowed."
+msgstr "El registro no está permitido actualmente."
+
+#: routes.py:46 routes.py:84
+msgid "Congratulations, you are now a registered user!"
+msgstr "¡Felicidades, ahora estás registrado!"
+
+#: routes.py:60
+msgid "Invites are not currently allowed."
+msgstr "Las invitaciones no están permitidas actualmente."
+
+#: routes.py:71
+msgid "Invalid or expired invite code."
+msgstr "Código de invitación inválido o caducado."
+
+#: routes.py:74
+msgid "No invite code provided."
+msgstr "No se ha proporcionado un código de invitación."
+
+#: routes.py:107
 msgid "Invalid email or password"
-msgstr "Email o contraseña no valida"
+msgstr "Correo o contraseña inválidos"
 
+#: routes.py:127
+msgid ""
+"If an account with that email exists, you will receive an email with "
+"instructions to reset your password."
+msgstr "Si existe una cuenta con ese correo, recibirás un email con instrucciones para restablecer tu contraseña."
+
+#: routes.py:145
+msgid "That is an invalid or expired token"
+msgstr "Ese es un token inválido o caducado"
+
+#: routes.py:152
+msgid "Your password has been updated! You are now able to log in"
+msgstr "¡Tu contraseña ha sido actualizada! Ahora puedes iniciar sesión"
+
+#: routes.py:199
+msgid "Invite created successfully!"
+msgstr "Invitación creada con éxito"
+
+#: signin_social.py:32
+msgid "Google registration is not currently allowed."
+msgstr "El registro con Google no está permitido actualmente."
+
+#: signin_social.py:75
+msgid "No matching OAuth record found."
+msgstr "No se encontró un registro OAuth coincidente."
+
+#: templates/base.html:28
+msgid "Features"
+msgstr "Funcionalidades"
+
+#: templates/base.html:29
+msgid "Pricing"
+msgstr "Precios"
+
+#: templates/base.html:30
+msgid "About"
+msgstr "Acerca de"
+
+#: templates/base.html:35
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+#: templates/dashboard.html:7
+msgid "Dashboard"
+msgstr "Panel de Control"
+
+#: templates/dashboard.html:8
+msgid "Ight this is the dashboard. You can do stuff here."
+msgstr "Esto es el panel de control. Aquí puedes hacer tus cosas."
+
+#: templates/index.html:7
+msgid "Index"
+msgstr "Inicio"
+
+#: templates/index.html:8
+msgid ""
+"Ight this is the index, the landing page where we have all the features "
+"and stuffs."
+msgstr "Esto es el inicio, la página de bienvenida donde tenemos todas las funcionalidades y demás."
+
+#: templates/invites.html:7
+msgid "Create an invite"
+msgstr "Crear una invitación"
+
+#: templates/invites.html:55
+msgid "No invites for now"
+msgstr "No hay invitaciones por ahora"
+
+#: templates/reset_request_with_token.html:6
+msgid "Choose a New Password"
+msgstr "Elige una Nueva Contraseña"
+
+#: templates/components/button_signin_facebook.html:10
+#: templates/components/button_signin_google.html:21
+#: templates/components/button_signin_x.html:16
+msgid "Sign in with"
+msgstr "Iniciar sesión con"
+
+#: templates/components/section_social_signin.html:5
+msgid "OR"
+msgstr "O"

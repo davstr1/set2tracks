@@ -33,7 +33,7 @@ def init_boilerplate_app(app):
         app.register_blueprint(google_blueprint,url_prefix="/login")  
     
     
-    add_babel_translation_directory('users/translations',app)
+    add_babel_translation_directory('translations',app)
     babel = Babel(app)
     babel.init_app(app,locale_selector=get_locale)  
     

@@ -9,12 +9,16 @@ from . import bp
 from .models import User, Invite
 from .forms import InviteForm, RegistrationByInviteForm, RegistrationForm,LoginForm,RequestResetForm,ResetPasswordForm
 from werkzeug.security import generate_password_hash,check_password_hash
-from flask_babel import _, lazy_gettext as _l
+from flask_babel import _
 import secrets
+
+@app.context_processor
+def inject_translations():
+    return dict(_=_,page_title='TODO : page_title',app_name='TODO : app_name')
 
 @bp.route('/user')
 def user():
-    return _l('hello world!')
+    return _('hello world!')
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -101,7 +105,7 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
         else:
             flash(_('Invalid email or password'),'error')
-    return render_template('login.html', title=_l('Log In'), form=form,SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS'))
+    return render_template('login.html', title=_('Log In'), form=form,SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS'))
 
 @bp.route('/logout')
 def logout():
@@ -192,7 +196,7 @@ def invite_create():
         invite = Invite(email=email, invite_code=invite_code)
         db.session.add(invite)
         db.session.commit()
-        flash('Invite created successfully!', 'success')
+        flash(_('Invite created successfully!'), 'success')
         return redirect(url_for('users.manage_invites'))
   
     

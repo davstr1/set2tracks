@@ -1,6 +1,6 @@
 
  # 1 - Generate the message pot.
- from users, run the command
+ from boilersaas/src/boilersaas/, run the command
  
 `pybabel extract -F translations/PyBabel.cfg -k _l -o translations/messages.pot .`
 
