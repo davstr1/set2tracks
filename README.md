@@ -10,6 +10,8 @@
 - put an app on it, and test
 - admin user management dashboard
 - user page
+- Integrate crypto payment recurrent 
+- Integrate affiliate thing. But how then ?
 
 ~~- move the migration folder away
 - properly configure the ignore folders and files that user can edit
