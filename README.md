@@ -10,8 +10,12 @@
 - put an app on it, and test
 - admin user management dashboard
 - user page
-- Integrate crypto payment recurrent 
+- Integrate crypcto payment recurrent 
 - Integrate affiliate thing. But how then ?
+- Admin protected area
+- get the add_translation out
+- page_title function and app name CONSTANT
+- Translate emails
 
 ~~- move the migration folder away
 - properly configure the ignore folders and files that user can edit
