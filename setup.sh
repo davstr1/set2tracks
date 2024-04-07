@@ -32,16 +32,29 @@ if [ ! -z "$missing_cmds" ]; then
     exit 1
 fi
 
+if [ "$1" == "dev" ]; then
+    echo "Installing Python development dependencies..."
+    pip install -r requirements_dev.txt
+    pip install -e ./boilersaas
+else
+    echo "Installing Python production dependencies..."
+    pip install -r requirements.txt
+    
+fi
+
+echo "Installing npm packages..."
+npm install
+
 echo "Getting default_templates..."
 
 # Define source and destination directories
-SRC_DIR="boilersaas/src/boilersaas/templates"
-DEST_DIR="templates_defaults"
+TEMPLATES_SRC_DIR="boilersaas/src/boilersaas/templates"
+TEMPLATES_DEFAULTS_DIR="templates_defaults"
 
 # Check if the destination directory exists
-if [ -d "$DEST_DIR" ]; then
-    # Find all files and directories within DEST_DIR except for README.md
-    find "$DEST_DIR" -mindepth 1 -not -name 'README.md' | while read line; do
+if [ -d "$TEMPLATES_DEFAULTS_DIR" ]; then
+    # Find all files and directories within TEMPLATES_DEFAULTS_DIR except for README.md
+    find "$TEMPLATES_DEFAULTS_DIR" -mindepth 1 -not -name 'README.md' | while read line; do
         # Check if it's a directory or a file and delete accordingly
         if [ -d "$line" ]; then
             rm -rf "$line"
@@ -51,24 +64,35 @@ if [ -d "$DEST_DIR" ]; then
     done
 else
     # If the destination directory doesn't exist, create it
-    mkdir "$DEST_DIR"
+    mkdir "$TEMPLATES_DEFAULTS_DIR"
 fi
 
 # Copy the source directory content to the destination
-cp -R "$SRC_DIR/" "$DEST_DIR/"
+cp -R "$TEMPLATES_SRC_DIR/" "$TEMPLATES_DEFAULTS_DIR/"
 
 
 WEB_TEMPLATES_DIR="web/templates"
-echo "Getting basic web/templates..."
+echo "Checking for $WEB_TEMPLATES_DIR directory..."
 
-# Check and copy mail directory if it doesn't exist in web/templates
-if [ ! -d "$WEB_TEMPLATES_DIR/mail" ]; then
-    cp -R "$SRC_DIR/mail" "$WEB_TEMPLATES_DIR/"
-fi
+# Attempt to create the web/templates directory. Proceed with additional operations only if it didn't exist and has been created.
+if mkdir -p "$WEB_TEMPLATES_DIR" && [ "$(ls -A "$WEB_TEMPLATES_DIR")" ]; then
+    echo "$WEB_TEMPLATES_DIR already exists and is not empty."
+else
+    echo "$WEB_TEMPLATES_DIR did not exist or was empty. Setting up templates starter kit..."
 
-# Check and copy logo.html if it doesn't exist in web/templates
-if [ ! -f "$WEB_TEMPLATES_DIR/logo.html" ]; then
-    cp "$SRC_DIR/logo.html" "$WEB_TEMPLATES_DIR/"
+    # Since the templates directory was just created or was empty, copy the mail directory and logo.html
+
+    # Check and copy mail directory if it doesn't exist in web/templates
+    if [ ! -d "$WEB_TEMPLATES_DIR/email" ]; then
+        cp -R "$TEMPLATES_SRC_DIR/email" "$WEB_TEMPLATES_DIR/"
+        echo "Copied mail directory to $WEB_TEMPLATES_DIR."
+    fi
+
+    # Check and copy logo.html if it doesn't exist in web/templates
+    if [ ! -f "$WEB_TEMPLATES_DIR/logo.html" ]; then
+        cp "$TEMPLATES_SRC_DIR/logo.html" "$WEB_TEMPLATES_DIR/"
+        echo "Copied logo.html to $WEB_TEMPLATES_DIR."
+    fi
 fi
 
 
@@ -88,18 +112,7 @@ if [ ! -f ".env" ]; then
 fi
 
 
-if [ "$1" == "dev" ]; then
-    echo "Installing Python development dependencies..."
-    pip install -r requirements_dev.txt
-    pip install -e ./boilersaas
-else
-    echo "Installing Python production dependencies..."
-    pip install -r requirements.txt
-    
-fi
 
-echo "Installing npm packages..."
-npm install
 
 # echo "Running Tailwind CSS build and watching for changes..."
 # npx tailwindcss -i ./web/static/css/tailwind/input.css -o ./web/static/css/tailwind/output.css --watch &
