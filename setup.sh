@@ -99,7 +99,7 @@ else
 fi
 
 echo "Installing npm packages..."
-npm install tailwindcss
+npm install
 
 # echo "Running Tailwind CSS build and watching for changes..."
 # npx tailwindcss -i ./web/static/css/tailwind/input.css -o ./web/static/css/tailwind/output.css --watch &
