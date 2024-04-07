@@ -83,6 +83,8 @@ or just download it.
 
 On terminal
 
+You probably want to be inside a new virtual env first.
+
 ```
 ./setup.sh
 ```
