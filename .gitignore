@@ -22,7 +22,6 @@ web/*
 
 # tailwind output
 !web/static/css/tailwind/input.css
-!web/init.py
 !web/__init__.py
 !web/translations/README.md
 
