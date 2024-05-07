@@ -95,7 +95,7 @@ else
     fi
 fi
 
-WEB_CSS_DIR="web/static/css""
+WEB_CSS_DIR="web/static/css"
 # Check if custom.css exists or create it if it doesn't
 if [ ! -f "$WEB_CSS_DIR/tailwind/custom.css" ]; then
     mkdir -p "$WEB_CSS_DIR/tailwind" # Ensure the directory exists
@@ -105,6 +105,13 @@ else
     echo "$WEB_CSS_DIR/tailwind/custom.css already exists."
 fi
 
+# Check if tailwind.config.custom.js doesn't exist and create it in the current directory
+if [ ! -f "./tailwind.config.custom.js" ]; then
+    touch "./tailwind.config.custom.js" # Create the file
+    echo "Created tailwind.config.custom.js in the current directory."
+else
+    echo "tailwind.config.custom.js already exists in the current directory."
+fi
 
 
 ROUTES_SRC_FILE="init_ressources/example_routes.py"
