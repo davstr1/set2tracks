@@ -17,9 +17,6 @@ templates_defaults/*
 !templates_defaults/README.md
 
 
-# User files
-web/*
-
 # tailwind output
 !web/static/css/tailwind/input.css
 !web/__init__.py
