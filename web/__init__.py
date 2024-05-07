@@ -47,8 +47,8 @@ def create_app(config_class=Config):
     #from app.users.models import User, Invite
     
     migrate = Migrate(app, db,directory='../init_ressources/migrations')
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+         db.create_all()
 
 
 
