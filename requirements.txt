@@ -4,3 +4,4 @@ Flask-Login==0.6.3
 Flask-Migrate==4.0.7
 psycopg2==2.9.9
 boilersaas==0.6.4
+pipdeptree==2.19.1
