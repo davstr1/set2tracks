@@ -46,7 +46,7 @@ echo "Installing npm packages..."
 npm install
 
 
-INIT_RESSOURCES_DIR="init_ressources"
+INIT_RESOURCES_DIR="init_ressources"
 
 # Check if the 'dev' argument is provided
 if [ "$1" != "dev" ]; then
@@ -137,7 +137,7 @@ else
 fi
 
 
-ROUTES_SRC_FILE="init_ressources/example_routes.py"
+ROUTES_SRC_FILE="${INIT_RESOURCES_DIR}/example_routes.py"
 ROUTES_DEST_FILE="web/routes.py"
 echo "Getting basic web/routes.py"
 # Check if web/routes.py exists, if not, copy from example_routes.py
@@ -148,7 +148,7 @@ fi
 # Check if .env file exists, if not, copy from example.env
 if [ ! -f ".env" ]; then
     echo "No .env file found in the web directory. Creating one from example.env..."
-    cp "init_ressources/.example.env" ".env"
+    cp "${INIT_RESOURCES_DIR}/example.env" ".env"
     echo "A new .env file has been created from example.env. Please make sure to fill it out before running the application."
 fi
 
