@@ -45,6 +45,29 @@ fi
 echo "Installing npm packages..."
 npm install
 
+
+INIT_RESSOURCES_DIR="boilersaas/src/boilersaas/init_ressources"
+
+# Check if the 'dev' argument is provided
+if [ "$1" != "dev" ]; then
+    # No 'dev' argument provided, proceed with overwriting .gitignore
+    echo "No 'dev' argument given. Overwriting .gitignore with .gitignore_regular..."
+    
+    # Overwrite .gitignore with .gitignore_regular
+    cp "${INIT_RESOURCES_DIR}/.gitignore_regular" ./.gitignore
+    
+    # Confirm the operation
+    if [ $? -eq 0 ]; then
+        echo ".gitignore has been updated successfully."
+    else
+        echo "Error updating .gitignore. Please check your paths and permissions."
+    fi
+else
+    # 'dev' argument provided, do not overwrite .gitignore
+    echo "'dev' argument given. No changes made to .gitignore."
+fi
+
+
 echo "Getting default_templates..."
 
 # Define source and destination directories
