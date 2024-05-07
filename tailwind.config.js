@@ -1,18 +1,18 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const _ = require('lodash');
+const customConfig = require('./tailwind.config.custom');
+const baseConfig = {
+  
   content: [
     "./web/templates/*.html",
     "./web/templates/**/*.html",
     "./boilersaas/src/boilerssas/templates/*.html",
     "./boilersaas/src/boilersaas/templates/**/*.html"
   ],
-  theme: {
-    extend: {},
-  },
-  plugins: [require("daisyui"),require("@tailwindcss/typography"),],
+
+  plugins: [require("@tailwindcss/typography"), require("daisyui")], // order matters
   daisyui: {
-    themes: true, // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
-    darkTheme: "dark", // name of one of the included themes for dark mode
+       darkTheme: "dark", // name of one of the included themes for dark mode
     base: true, // applies background color and foreground color for root element by default
     styled: true, // include daisyUI colors and design decisions for all components
     utils: true, // adds responsive and modifier utility classes
@@ -21,3 +21,5 @@ module.exports = {
     themeRoot: ":root", // The element that receives theme color CSS variables
   },
 }
+
+module.exports = _.merge(baseConfig, customConfig);
