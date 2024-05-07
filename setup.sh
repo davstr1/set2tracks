@@ -46,7 +46,7 @@ echo "Installing npm packages..."
 npm install
 
 
-INIT_RESSOURCES_DIR="boilersaas/src/boilersaas/init_ressources"
+INIT_RESSOURCES_DIR="init_ressources"
 
 # Check if the 'dev' argument is provided
 if [ "$1" != "dev" ]; then
