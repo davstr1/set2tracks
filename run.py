@@ -9,4 +9,4 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 template_files = glob.glob(template_dir + '/**/*.html', recursive=True)
 
 if __name__ == '__main__':
-    app.run(debug=True,extra_files=template_files,use_reloader=True)
+    app.run(debug=True,port=50001,extra_files=template_files,use_reloader=True)
