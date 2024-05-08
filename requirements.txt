@@ -3,5 +3,5 @@ flask-babel==4.0.0
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
 psycopg2==2.9.9
-boilersaas==0.6.4
+boilersaas==0.6.6
 pipdeptree==2.19.1
