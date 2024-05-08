@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link href="{{url_for('static',filename='css/tailwind/output.css')}}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mx-auto ">
+        <header class=" border-b-2 border-slate-200">
+            <nav class="mx-auto flex  items-center justify-between py-5 " aria-label="Global">
+                <div class="flex lg:flex-1">
+                    {% include 'logo.html' %}
+                </div>
+
+                {% if current_user.is_authenticated %}
+
+                <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+                    <a href="{{ url_for('users.logout') }}" class="text-sm font-semibold leading-6 text-gray-900">
+                        Logout </a>
+
+                    {% else %}
+
+                    <div class="hidden lg:flex lg:gap-x-12">
+                        <a href="{{url_for('main.add')}}" class="text-sm font-semibold leading-6">{{_("Add")}}</a>
+
+                    </div>
+
+                    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+                        <a href="{{ url_for('users.login') }}" class="text-sm font-semibold leading-6 text-gray-900">{{_("Sign in")}} </a>
+
+
+                        <a class=" justify-center rounded-lg text-sm font-semibold py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-700 -my-2.5 ml-8" href="{{ url_for('users.register') }}"><span>{{_("Register")}}<span aria-hidden="true">→</span></span></a>
+                    </div>
+
+                    {% endif %}
+
+
+
+
+            </nav>
+        </header>
+
+
+        {% if not no_flash_top %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% endif %}
+
+
+
+
+
+        <main>
+            {% block content %}
+            <!-- Page specific content will be inserted here -->
+            {% endblock %}
+        </main>
+
+        <footer>
+            <p>&copy; 2024 {{ app_name }}</p>
+        </footer>
+    </div>
+</body>
+
+</html>
