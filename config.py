@@ -10,7 +10,7 @@ SIGNUP_OPTIONS = {
 
 class Config:
     try:
-        EXPLAIN_TEMPLATE_LOADING = True
+        EXPLAIN_TEMPLATE_LOADING = False # Suppress detailed template loading messages
         SQLALCHEMY_DATABASE_URI = f"postgresql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
         SECRET_KEY = os.environ['SECRET_KEY'] 
         DB_TABLE_USERS = os.environ['DB_TABLE_USERS']

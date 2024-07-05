@@ -1,0 +1,1183 @@
+
+
+import json
+import logging
+import os
+import shutil
+from venv import logger
+from flask_login import current_user
+from numpy import full
+from sqlalchemy import func, null
+from sqlalchemy.orm.exc import NoResultFound
+
+from web.lib.apple import add_apple_track_data_from_json
+from web.lib.audio import cut_audio
+#from web.lib.insert_set import insert_set
+from web.lib.process_shazam_json import write_deduplicated_segments, write_segments_from_chapter
+from web.lib.shazam import sync_process_segments
+from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
+from web.lib.utils import calculate_avg_properties
+from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
+from web.model import Genre, Playlist, RelatedTracks, Set, SetQueue, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
+from datetime import datetime, timezone
+from boilersaas.utils.db import db
+
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
+from pprint import pp, pprint
+from collections import OrderedDict, defaultdict
+from web.lib.format import cut_to_if_needed, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
+
+logger = logging.getLogger('root')
+
+
+    
+    
+def get_track_by_shazam_key(key_track_shazam):
+    return Track.query.filter_by(key_track_shazam=key_track_shazam).first()    
+     
+
+def get_track_by_id(id):
+    return Track.query.filter_by(id=id).first()    
+
+
+
+def get_or_create_channel(data):
+    print(data)
+    try:
+        existing_channel = Channel.query.filter_by(channel_id=data['channel_id']).first()
+        if existing_channel is not None:
+            logger.info("Channel already exists.")
+            return existing_channel
+        
+        logger.info("Creating new channel.")    
+        new_channel = Channel(
+            channel_id=data['channel_id'],
+            author=data.get('channel'),
+            channel_url=data.get('channel_url'),
+            channel_follower_count=data.get('channel_follower_count'),
+            updated_at=datetime.now(timezone.utc)
+        )
+        db.session.add(new_channel)
+        db.session.commit()
+        return new_channel
+        
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Error in get_or_create_channel: {e}")
+        return None
+
+def validate_set_data(data):
+    """ Validate set data to ensure it meets schema constraints. """
+    required_fields = ['video_id', 'title', 'channel_id']
+    for field in required_fields:
+        if not data.get(field):
+            logger.error(f"Missing required field: {field}")
+            return False
+
+    if 'duration' in data and not isinstance(data['duration'], int):
+        logger.error(f"Invalid data type for duration: {type(data['duration'])}")
+        return False
+
+    if 'publish_date' in data:
+        try:
+            datetime.strptime(data['publish_date'], '%Y%m%d')
+        except ValueError:
+            logger.error(f"Invalid date format for publish_date: {data['publish_date']}")
+            return False
+
+    return True
+
+def get_set_id_by_video_id(video_id):
+    set_record = Set.query.filter_by(video_id=video_id).first()
+    return set_record.id if set_record else None
+
+def is_set_in_queue(video_id):
+    # Check if the video is already in the queue
+    existing_entry = SetQueue.query.filter_by(video_id=video_id).first()
+    return existing_entry is not None
+
+def is_set_exists(video_id):
+    # Check if the video is already in the queue
+    existing_entry = Set.query.filter_by(video_id=video_id,published=True).first()
+    return existing_entry is not None
+
+def queue_set_discarted(video_id,reason):
+    discarded_entry = SetQueue(
+        video_id=video_id,
+        status='discarded',
+        discarded_reason=reason,
+        queued_at=datetime.now(timezone.utc)
+    )
+    db.session.add(discarded_entry)
+    db.session.commit()
+    discarded_entry.error = reason
+    return discarded_entry
+
+   
+
+def queue_set(video_id,user_id=None):
+    
+    if is_set_exists(video_id): # todo : the published stuff
+        return {'error': 'Set was already here.','video_id':video_id}
+    
+    if is_set_in_queue(video_id):
+        return {'error':'Set already in queue.'} # do not queue it again
+    
+    if not youtube_video_exists(video_id):
+        return queue_set_discarted('Youtube Video doesn\t exist.')
+    
+    video_info = youbube_video_info(video_id)
+    if video_info is None:        
+        return queue_set_discarted('Error getting video info.')
+    
+    chapters = video_info.get('chapters',[]) or []
+    if len(chapters) and len(chapters) < 5:
+        return queue_set_discarted(f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.')
+    
+    if not len(chapters) and video_info.get('duration',0) < 900:
+        return queue_set_discarted('Video shorter than 15m. Only sets longer than 15m are accepted.')
+    
+    if not video_info.get('playable_in_embed',False):
+        return queue_set_discarted('Video is not embeddable. (Set by the uploader)')
+    
+
+
+    video_info_json = {
+       'video_id': video_id, 
+       'upload_date': video_info.get('upload_date'),
+       'thumbnail': video_info.get('thumbnail'),
+       'title': video_info.get('title'),
+       'description': video_info.get('description'),
+       'channel': video_info.get('channel'),
+       'channel_id': video_info.get('channel_id'),
+       'channel_url': video_info.get('channel_url'),
+       'duration': video_info.get('duration'),
+       'playable_in_embed': video_info.get('playable_in_embed'),
+       'chapters': video_info.get('chapters'),
+       'channel_follower_count': video_info.get('channel_follower_count')
+       }
+    
+    queued_entry = SetQueue(
+        video_id=video_id,
+        user_id=user_id,
+        status='pending',
+        queued_at=datetime.now(timezone.utc),
+        video_info_json=video_info_json,
+        duration=video_info.get('duration', 0),
+        nb_chapters=len(chapters)
+    )
+    db.session.add(queued_entry)
+    db.session.commit()
+    return queued_entry
+
+def create_set_if_not_exists(data):
+    
+    try:
+        # Ensure the channel exists
+        channel = get_or_create_channel(data)
+        if channel is None:
+            logger.error("Channel could not be created or retrieved.")
+            return None
+
+        # Log that channel retrieval/creation was successful
+        logger.info("Channel retrieved/created successfully.")
+
+        # Validate set data
+        if not validate_set_data(data):
+            logger.error("Set data validation failed.")
+            return None
+
+        # Query using video_id to ensure uniqueness
+        existing_set = Set.query.filter_by(video_id=data['video_id']).first()
+        if existing_set:
+            logger.info("Set already exists.")
+            return existing_set
+
+        logger.info("Creating new set.")
+
+        publish_date = None
+        if data.get('upload_date'):
+            try:
+                publish_date = datetime.strptime(data['upload_date'], '%Y%m%d')
+                logger.info(f"Parsed publish_date: {publish_date}")
+            except ValueError as ve:
+                logger.error(f"Invalid upload_date format: {data['upload_date']}")
+                return None
+
+        try:
+            new_set = Set(
+                video_id=data['video_id'],
+                channel_id=channel.id,
+                title=data['title'],
+                duration=data.get('duration'),
+                publish_date=publish_date,
+                thumbnail=data.get('thumbnail'),
+                playable_in_embed=data.get('playable_in_embed', False),
+                chapters=data.get('chapters')
+            )
+            logger.info("New set instance created.")
+            db.session.add(new_set)
+            logger.info("New set added to session.")
+            channel.nb_sets = db.session.query(Set).filter_by(channel_id=channel.id).count()
+           
+            db.session.commit()
+            logger.info("New set committed to database.")
+            return new_set
+        except SQLAlchemyError as e:
+            logger.error(f"SQLAlchemyError during set creation: {e}")
+            import traceback
+            traceback.print_exc()
+            db.session.rollback()
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error during set creation: {e}")
+            import traceback
+            traceback.print_exc()
+            db.session.rollback()
+            return None
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Error in create_set_if_not_exists: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Unexpected error in create_set_if_not_exists: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+#def insert_set_from_queue():
+    # fetch the first pending entry queued_at ASC (FIFO)
+    # if not found return None
+    # update the time_in_queue to now - queued_at (in minutes)
+    # update the status to 'processing' and commit
+    # start a timer (start_time_processing)
+    # call insert_set with the video_info_json.
+    # this should return a dict with the 'set_id' or 'error'
+    # if successful update the status to 'done' 
+    # else update the status to 'failed' 
+    # update the time_processed to now - start_time_processing
+    # and update the time_processed_and_queued to now - queued_at
+    # commit
+    # return the Set instance or None
+    
+def insert_set_from_queue():
+    
+    logger.info('Starting insert_set_from_queue function')
+
+    # Fetch the first pending entry queued_at ASC (FIFO)
+    try:
+        pending_entry = SetQueue.query.filter_by(status='pending').order_by(SetQueue.queued_at.asc()).first()
+        #pending_entry = SetQueue.query.filter_by(id='23').first()
+    except NoResultFound:
+        logger.info('No pending entry found')
+        return None
+    
+    logger.debug(f'Fetched pending_entry: {pending_entry}')
+    logger.debug(f'Pending entry ID: {pending_entry.id}')
+    logger.debug(f'Pending entry video_id: {pending_entry.video_id}')
+
+
+    if not pending_entry:
+        logger.info('No pending entry found')
+        return None
+    
+    # Update the time_in_queue to now - queued_at (in sec)
+    now = datetime.now(timezone.utc)
+    pending_entry.time_in_queue = (now - pending_entry.queued_at).total_seconds()   
+    logger.debug(f'Updated time_in_queue: {pending_entry.time_in_queue}')
+
+    # Update the status to 'processing' and commit
+    pending_entry.status = 'processing'
+    db.session.commit()
+    logger.info('Updated status to processing and committed changes')
+
+    # Start a timer (start_time_processing)
+    start_time_processing = datetime.now(timezone.utc)
+    logger.debug('Started processing timer')
+
+    # Call insert_set with the video_info_json
+    video_info = pending_entry.video_info_json
+    result = insert_set(video_info)
+    logger.debug(f'insert_set result: {result}')
+
+    # Calculate time_processed and time_processed_and_queued
+    time_processed = (datetime.now(timezone.utc) - start_time_processing).total_seconds()
+    time_processed_and_queued = (pending_entry.time_in_queue + time_processed)
+    logger.debug(f'time_processed: {time_processed}, time_processed_and_queued: {time_processed_and_queued}')
+
+    # Check result and update status accordingly
+    if 'set_id' in result:
+        pending_entry.status = 'done'
+        logger.info('Set inserted successfully, updated status to done')
+    else:
+        pending_entry.status = 'failed'
+        distarted_reason = result.get('error', 'Unknown error')
+        logger.error(f'Set insertion failed, updated status to failed. Reason: {distarted_reason}')
+        pending_entry.discarded_reason = cut_to_if_needed(distarted_reason, 255)
+        logger.error('Set insertion failed, updated status to failed')
+
+    # Update times
+    pending_entry.time_processed = time_processed
+    pending_entry.time_processed_and_queued = time_processed_and_queued
+
+    # Commit the changes
+    db.session.commit()
+    logger.info('Committed final changes')
+
+    # Return the Set instance if successful, otherwise a string indicating failure
+    if pending_entry.status == 'done':
+        logger.info(f'Returning Set instance with id: {result["set_id"]}')
+        return Set.query.get(result['set_id'])
+    else:
+        logger.info('Returning "failed" due to failure')
+        return "failed"
+    
+    
+    
+    
+
+AUDIO_SEGMENTS_LENGTH = int(os.getenv('AUDIO_SEGMENTS_LENGTH'))
+
+def error_out(msg):
+    return({'error':msg})
+
+
+def merge_tracks_by_shazam_key(tracks, look_ahead):
+    """
+    Merges track records based on their 'key_track_shazam' field, looking ahead within a specified range
+    to find and merge duplicate records. The function updates track records by extending 'end_time' and
+    filling in missing details from duplicate records found within the look-ahead range.
+
+    Args:
+        tracks (list of dict): List of track records, each with 'key_track_shazam' and other metadata.
+        look_ahead (int): Number of subsequent records to check for duplicates based on 'key_track_shazam'.
+
+    Returns:
+        list of dict: List of merged and updated track records.
+    """
+
+    def update_record(current, new):
+        """Update current record with non-empty values from new record, except 'start_time'."""
+        for key, value in new.items():
+            if key != 'start_time' and value and not current.get(key):
+                current[key] = value
+
+    processed_tracks = []
+    i = 0
+
+    while i < len(tracks):
+        current_track = tracks[i]
+        j = i + 1
+
+        while j < len(tracks) and j <= i + look_ahead:
+            if current_track['key_track_shazam'] is not None and tracks[j]['key_track_shazam'] == current_track['key_track_shazam']:
+                current_track['end_time'] = tracks[j]['end_time']
+                update_record(current_track, tracks[j])
+                i = j  # move to the next record after the found duplicate
+            j += 1
+
+        processed_tracks.append(current_track)
+        i += 1
+
+    return processed_tracks
+
+def remove_small_unidentified_segments(tracks, min_duration_s):
+    """
+    Removes small unidentified segments from a list of tracks and adjusts the end time of the previous identified track accordingly.
+
+    Parameters:
+    tracks (list of dict): A list of track dictionaries, where each dictionary represents a track with 'title', 'start_time', and 'end_time' keys.
+    min_duration_s (int or float): The minimum duration in seconds. Unidentified tracks with a duration less than this value will be removed.
+
+    Returns:
+    list of dict: A cleaned list of tracks with small unidentified segments removed and the end times of the previous identified tracks adjusted.
+
+    Example:
+    tracks = [
+        {'title': 'Song 1', 'start_time': 0, 'end_time': 30},
+        {'title': '', 'start_time': 30, 'end_time': 32},  # This will be removed if min_duration_s is > 2
+        {'title': 'Song 2', 'start_time': 32, 'end_time': 60}
+    ]
+    min_duration_s = 3
+    cleaned_tracks = remove_small_unidentified_segments(tracks, min_duration_s)
+    # cleaned_tracks will be:
+    # [
+    #     {'title': 'Song 1', 'start_time': 0, 'end_time': 32},
+    #     {'title': 'Song 2', 'start_time': 32, 'end_time': 60}
+    # ]
+    """
+    
+    cleaned_tracks = []
+
+    for i in range(len(tracks)):
+        current_track = tracks[i]
+
+        # If the current track is unidentified and its duration is less than min_duration_s
+        if (not current_track['title']) and (current_track['end_time'] - current_track['start_time'] < min_duration_s):
+            # Extend the end_time of the previous identified track if there is one
+            if cleaned_tracks:
+                cleaned_tracks[-1]['end_time'] = current_track['end_time']
+        else:
+            cleaned_tracks.append(current_track)
+
+    return cleaned_tracks
+
+
+
+
+def insert_set(video_info,delete_temp_files=True):
+    try:
+        dl_dir = 'temp_downloads'
+        video_id = video_info['video_id']
+        chapters = video_info.get('chapters',[])
+        if chapters is None:
+            chapters = []
+       
+
+        set = create_set_if_not_exists(video_info)  
+        if set is None:
+            return error_out("Error creating Set.")
+
+
+        logger.info('Setup directories')
+        vid_dir = f"{dl_dir}/{video_id}"
+        segments_dir = f"{vid_dir}/segments"
+        shazam_json_dir = f"{vid_dir}/shazam_json"  
+        dedup_segments_filepath = f'{vid_dir}/segments_dedup.json'  
+        complete_songs_path = f'{vid_dir}/songs_complete.json'
+        full_opus_path = f'{vid_dir}/full.opus'
+        os.makedirs(vid_dir,exist_ok=True)
+        os.makedirs(segments_dir,exist_ok=True)
+        os.makedirs(shazam_json_dir,exist_ok=True)
+    
+        logger.debug(f"Constructed path: '{full_opus_path}'")
+        if not os.path.exists(full_opus_path):
+            logger.info(f'Downloading video {video_id}')
+            download_youtube_video(video_id,vid_dir)
+        else:
+            logger.info(f'Video {video_id} already downloaded.')
+        
+        if not os.path.exists(dedup_segments_filepath):
+            cut_audio(full_opus_path,chapters, AUDIO_SEGMENTS_LENGTH, None, segments_dir)
+            sync_process_segments(segments_dir, shazam_json_dir)
+            if not len(chapters):
+                write_deduplicated_segments(shazam_json_dir, dedup_segments_filepath,AUDIO_SEGMENTS_LENGTH)
+            else:
+                write_segments_from_chapter(shazam_json_dir, dedup_segments_filepath, chapters)
+
+    
+        if not os.path.exists(complete_songs_path) or True :
+            songs = json.load(open(dedup_segments_filepath))
+            
+            songs = merge_tracks_by_shazam_key(songs, 4)
+      
+            
+            songs = remove_small_unidentified_segments(songs, 90)
+           
+           
+            
+            songs = add_tracks_spotify_data_from_json(songs)
+           
+            songs = add_apple_track_data_from_json(songs)
+            
+            json.dump(songs,open(complete_songs_path,'w'),indent=4)
+            
+        songs = json.load(open(complete_songs_path))
+        
+        add_tracks_from_json(songs,set,add_to_set=True)
+
+        if delete_temp_files:
+            shutil.rmtree(vid_dir)
+
+        return {'set_id':set.id}
+    except Exception as e:
+        return error_out(str(e)) 
+    
+
+def add_tracks_from_json(tracks_json, set_instance=None, add_to_set=False,related_track_id=None):
+    """
+    Adds tracks from a JSON object to the database.
+
+    Args:
+        tracks_json (list): A list of track objects in JSON format.
+        set_instance (Set, optional): The set instance to which the tracks belong. Defaults to None.
+        add_to_set (bool, optional): Indicates whether to add the tracks to the set. Defaults to False.
+
+    Raises:
+        ValueError: If add_to_set is True but set_instance is None.
+        Exception: If an error occurs during the process.
+
+    Returns:
+        None
+    """
+    
+    if add_to_set and set_instance is None:
+        raise ValueError("set_instance cannot be None")
+    
+    if related_track_id and add_to_set:
+        raise ValueError("related_track_id cannot be provided when add_to_set is True")
+    
+    db.session.autoflush = False
+    pos = 0
+    unique_tracks = set()  
+    
+    try:
+        for track_json in tracks_json:
+            
+            try:
+                track = prepare_track_for_insertion(track_json,db)
+            except Exception as e:
+                logger.error(f"Error preparing track for insertion: {e}")
+                
+            
+    
+
+            db.session.flush()  # Flush here to ensure 'track.id' is filled
+            
+            unique_tracks.add(track)
+
+            start_time = track_json.get('start_time', 0)
+            end_time = track_json.get('end_time',0)
+            pos = pos + 1
+
+            # Check if TrackSet already exists
+            if add_to_set:
+                track_set = TrackSet.query.filter_by(track_id=track.id, set_id=set_instance.id, pos=pos).first()
+                if not track_set:
+                    track_set = TrackSet(
+                        track_id=track.id,
+                        set_id=set_instance.id,
+                        start_time=start_time,
+                        end_time=end_time,
+                        pos=pos
+                    )
+
+                    db.session.add(track_set)
+                    logger.info(f"Added new TrackSet entry with track_id={track.id}")
+                else:
+                    logger.info("TrackSet entry already exists, skipping insertion.")
+
+                    pos += 1  # Increment position regardless of addition
+            
+                set_instance.nb_tracks = len(unique_tracks)
+                db.session.add(set_instance)
+        
+        # Update n_sets for all unique tracks
+        for track in unique_tracks:
+            if add_to_set:
+                track.nb_sets = (track.nb_sets or 0) + 1
+            db.session.add(track)
+        
+        # Add set info and publish set    
+        if add_to_set:
+            set_characteristics = calculate_avg_properties(tracks_json)
+            for key, value in set_characteristics.items():
+                setattr(set_instance, key, value)
+                
+            set_instance.published = True 
+         
+        
+        db.session.commit()
+        
+        # Set related_tracks if related_track_id is provided
+        if related_track_id and not add_to_set:
+            logger.info('Related track ID provided.', related_track_id)
+            related_track_entries = []
+
+           
+        related_track = Track.query.filter_by(id=related_track_id).first()
+
+        if related_track:
+            logger.info('Related track found.') # goes here
+            for i, track in enumerate(unique_tracks):
+                track.insertion_order = i
+                related_track_entries.append(RelatedTracks(track_id=related_track.id, related_track_id=track.id, insertion_order=i))
+
+            # Add all the related track entries to the session
+            for entry in related_track_entries:
+                db.session.add(entry)
+            
+            db.session.commit() 
+        
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.info("An error occurred:", e)
+        raise e
+    finally:
+        db.session.autoflush = True  # Ensure autoflush is enabled again
+        
+def compile_and_sort_genres(track_sets):
+    genre_counts = defaultdict(int)
+
+    for track_set, track in track_sets:
+        for genre in track.genres:
+            genre_counts[genre.name] += 1
+
+    sorted_genre_counts = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)
+    
+    return sorted_genre_counts
+
+# def get_tracks_from_set(set_id):
+#     # Retrieve the set with the given ID along with its details
+#     set_instance:Set = Set.query.filter_by(id=set_id).first()
+#     if not set_instance:
+#         return []  # Return None and an empty list if the set does not exist
+    
+#         # Fetch all TrackSet entries for this set
+#     track_sets = db.session.query(TrackSet).filter(TrackSet.set_id == set_id).all()
+    
+#     #tracks = db.session.query(Track).filter(Track.set)
+
+#     # Create a dictionary mapping track_id to TrackSet details
+#     track_set_dict = {ts.track_id: {'start_time': ts.start_time, 'end_time': ts.end_time,'pos':ts.pos} for ts in track_sets}
+
+    
+#     tracks = format_db_tracks_for_template(set_instance.tracks)
+#     tracks = format_tracks_with_times(tracks, track_set_dict)
+
+#     return tracks
+  
+
+
+def get_playable_sets(page=1, per_page=20):
+    return Set.query.filter_by(playable_in_embed=True,published=True) \
+                    .order_by(Set.id.desc()) \
+                    .options(joinedload(Set.channel)) \
+                    .paginate(page=page, per_page=per_page, error_out=False)
+
+def get_set_with_tracks(set_id):
+    # Retrieve the set with the given ID along with its details
+    set_instance:Set = Set.query.filter_by(id=set_id).first()
+    if not set_instance:
+        return {'error', 'Set not found'}
+    
+        # Fetch all TrackSet entries for this set
+    track_sets = db.session.query(TrackSet).filter(TrackSet.set_id == set_id).all()
+    
+
+    # Create a dictionary mapping track_id to TrackSet details
+    track_set_dict = [ {'id':ts.track_id,'start_time': ts.start_time, 'end_time': ts.end_time,'pos':ts.pos} for ts in track_sets]
+    
+    #tracks = db.session.query(TrackSet).options(joinedload(TrackSet.track)).filter_by(set_id=set_instance.id).all()
+    tracks = [track_set.track for track_set in track_sets]
+   
+    tracks = format_db_tracks_for_template(tracks)
+   
+    tracks = format_tracks_with_times(tracks, track_set_dict)  
+
+    set_details = {
+        'id': set_instance.id,
+        'video_id': set_instance.video_id,
+        'title': set_instance.title,
+        'has_chapters':  set_instance.chapters is not None,
+        #'description': set_instance.description,
+        'channel_id': set_instance.channel_id,
+        'duration': set_instance.duration,
+        'publish_date': set_instance.publish_date,
+        'thumbnail': set_instance.thumbnail,
+        'channel_id': set_instance.channel_id,
+       
+        'playable_in_embed': set_instance.playable_in_embed,
+        'nb_tracks': set_instance.nb_tracks,
+        'tracks': tracks,
+    }
+    return set_details
+
+def create_playlist(user_id, playlist_name):
+    
+    # Check for existing playlists with the same name
+    existing_playlists = Playlist.query.filter(
+        Playlist.user_id == user_id,
+        func.lower(Playlist.title).like(func.lower(f"{playlist_name}%"))
+    ).all()
+
+    # If playlists with the same name exist, add a number suffix
+    if existing_playlists:
+        base_name = playlist_name
+        count = 1
+        while any(p.title.lower() == f"{playlist_name.lower()}" for p in existing_playlists):
+            playlist_name = f"{base_name} ({count})"
+            count += 1
+    
+    
+    
+    date_now = datetime.now(timezone.utc)
+    new_playlist = Playlist(
+          user_id=user_id,
+          title=playlist_name,
+          duration=0,
+          create_date=date_now,
+          edit_date=date_now,
+          nb_tracks=0
+      )
+    db.session.add(new_playlist)
+    db.session.commit()
+    return new_playlist
+
+
+def get_playlists_from_user(user_id, order_by='create_date'):
+    # Define the valid columns for ordering
+    valid_order_by_columns = {
+        'create_date': Playlist.create_date,
+        'edit_date': Playlist.edit_date,
+        'title': Playlist.title,
+        'duration': Playlist.duration,
+        'nb_tracks': Playlist.nb_tracks
+    }
+
+    # Check if the provided order_by column is valid
+    if order_by not in valid_order_by_columns:
+        raise ValueError(f"Invalid order_by column: {order_by}. Valid options are: {', '.join(valid_order_by_columns.keys())}")
+
+    # Get the column to order by
+    order_column = valid_order_by_columns[order_by]
+
+    # Return the filtered and ordered playlists
+    return Playlist.query.filter_by(user_id=user_id).order_by(order_column.desc()).all()
+
+
+def get_playlist_last_used_from_user(user_id):
+    return Playlist.query.filter_by(user_id=user_id).order_by(Playlist.edit_date.desc()).first()
+
+def get_playlist_with_tracks(playlist_id):
+    playlist = Playlist.query.get(playlist_id)
+    
+    tracks= format_db_tracks_for_template(playlist.tracks)
+    
+    tracks_playlist = db.session.query(TrackPlaylist).filter(TrackPlaylist.playlist_id == playlist_id).all()
+    #track_playlist_dict = {tp.track_id: {'pos':tp.pos} for tp in tracks_playlist}
+    track_playlist_dict = [ {'id':tp.track_id,'pos':tp.pos} for tp in tracks_playlist]
+    
+    
+    tracks_with_pos = format_tracks_with_pos(tracks, track_playlist_dict)
+    #pprint(tracks_ordered)
+    tracks = sorted(tracks_with_pos, key=lambda track: track['pos'])
+    playlist = {
+        'id': playlist.id,
+        'title': playlist.title,
+        'duration': playlist.duration,
+        'create_date': playlist.create_date,
+        'edit_date': playlist.edit_date,
+        'nb_tracks': playlist.nb_tracks,
+        #'tracks': playlist.tracks
+    }
+    
+    #return playlist
+
+    return {'playlist': playlist, 'tracks': tracks}
+
+
+def add_track_to_playlist(playlist_id, track_id):
+
+    # Fetch the playlist and track from the database
+    try:
+        playlist = Playlist.query.get(playlist_id)
+        track = Track.query.get(track_id)
+
+        if not playlist:
+            return {"error": "Playlist not found"}
+        if not track:
+            return {"error": "Track not found"}
+
+        existing_entry = TrackPlaylist.query.filter_by(playlist_id=playlist_id, track_id=track_id).first()
+        
+        if  existing_entry:         
+            return {"error": f"Track was already in \"{playlist.title}\""}
+        
+        
+        
+        # Determine the position of the new track
+        pos = db.session.query(db.func.max(TrackPlaylist.pos)).filter_by(playlist_id=playlist_id).scalar()
+        pos = (pos or 0) + 1
+        
+        # Add track to playlist
+        new_track_playlist_entry = TrackPlaylist(
+        track_id=track.id,
+        playlist_id=playlist.id,
+        added_date=datetime.now(timezone.utc),
+        pos=pos
+        )
+
+        db.session.add(new_track_playlist_entry)
+        playlist.nb_tracks = len(playlist.tracks)
+        playlist.edit_date = datetime.now(timezone.utc)
+        db.session.commit()
+
+        
+    except Exception as e:
+        return {"error": f"{str(e)} (playlist_id: {playlist_id}, track_id: {track_id})"}
+
+   
+    return {"message": f"Track added to \"{playlist.title}\""}
+
+
+def change_playlist_title(playlist_id, new_title):
+    
+    # TODO : check if the title is not already taken by another playlist of the user
+    try:
+        
+        existing_playlist = Playlist.query.filter_by(user_id=current_user.id, title=new_title).first()
+        if existing_playlist:
+            return {"error": "Title already taken by another playlist"}
+        
+        playlist = Playlist.query.get(playlist_id)
+        if not playlist:
+            return {"error": "Playlist not found"}
+        
+        playlist.title = new_title
+        playlist.edit_date = datetime.now(timezone.utc)
+        db.session.commit()
+        return {"message": f"Playlist title changed to \"{new_title}\""}
+    except Exception as e:
+        return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+   
+    
+# def delete_playlist(playlist_id):
+#     try:
+#         playlist = Playlist.query.filter_by(id=playlist_id,user_id=current_user.id).first()
+#         db.session.delete(playlist)
+#         db.session.commit()
+#         return {"message": f"Playlist \"{playlist.title}\" deleted"}
+#     except Exception as e:
+#         return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+
+
+def delete_playlist(playlist_id):
+    try:
+        # Find the playlist
+        playlist = Playlist.query.filter_by(id=playlist_id, user_id=current_user.id).first()
+        
+        if not playlist:
+            return {"error": "Playlist not found"}
+
+        # Delete related TrackPlaylist entries
+        TrackPlaylist.query.filter_by(playlist_id=playlist_id).delete()
+        
+        # Delete the playlist
+        db.session.delete(playlist)
+        db.session.commit()
+        
+        return {"message": f"Playlist \"{playlist.title}\" deleted"}
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of an error
+        return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+
+    
+def tracks_to_tracks_ids(tracks):
+    return [track['id'] for track in tracks]
+ 
+    
+
+def add_tracks_to_playlist(playlist_id, track_ids, user_id):
+    
+   
+    
+
+    try:
+        logger.info('add_tracks_to_playlist')
+        # Fetch the playlist from the database
+        playlist = Playlist.query.get(playlist_id)
+        if not playlist:
+            logger.error('Playlist not found')
+            return {"error": "Playlist not found"}
+        
+      
+      # @TODO : veryfy against real tracks in db. Like are the tracks existing in the db ?
+        
+        unique_tracks_number = len(set(track_ids))
+        # Fetch the tracks from the database
+        tracks_in_db_count = Track.query.filter(Track.id.in_(track_ids)).count()
+        
+        are_counts_equal = unique_tracks_number == tracks_in_db_count
+        
+        if not are_counts_equal:
+            logger.error('Tracks not found')
+            return {"error": "One or more tracks was not found"}
+        
+        
+        # Check for existing entries and add new ones
+        existing_entries = TrackPlaylist.query.filter(TrackPlaylist.playlist_id == playlist_id).all()
+        existing_track_ids = {entry.track_id for entry in existing_entries}
+        
+        
+       # does not keep order mofo  
+       # track_ids_to_add = list(set(track_ids) - set(existing_track_ids))
+
+        
+        pos = db.session.query(db.func.max(TrackPlaylist.pos)).filter_by(playlist_id=playlist_id).scalar()
+        pos = (pos or 0) + 1
+        
+        #pprint(track_dict) # still in the same order
+        
+        new_entries = []
+        for track_id in set(track_ids):
+            if track_id == 1 or track_id in existing_track_ids : # Unkown track, do not add it
+                continue
+
+            new_entry = TrackPlaylist(
+                track_id=track_id,
+                playlist_id=playlist_id,
+                added_date=datetime.now(timezone.utc),
+                pos=pos
+            )
+        
+            new_entries.append(new_entry)
+            pos += 1
+        
+   
+        if new_entries:
+            db.session.bulk_save_objects(new_entries)
+            playlist.nb_tracks += len(new_entries)
+            playlist.edit_date = datetime.now(timezone.utc)
+            db.session.commit()
+            return {"message": f"{len(new_entries)} tracks added to \"{playlist.title}\""}
+        else:
+            return {"error": "All tracks were already in the playlist"}
+
+    except Exception as e:
+        db.session.rollback()  # Rollback the session in case of an error
+        return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+
+    
+
+
+def add_track_to_playlist_last_used(track_id, user_id):
+    playlist = get_playlist_last_used_from_user(user_id)
+    autocreated_playlist_message = ''
+    if not playlist:
+        # Create a new playlist if none exists
+        playlist = create_playlist(user_id, "New Playlist")
+        autocreated_playlist_message = "(A new playlist was created for you since none existed.)"
+        
+    
+    ret = add_track_to_playlist(playlist.id, track_id)
+    if 'message' in ret and autocreated_playlist_message:
+        ret['message'] = f" {autocreated_playlist_message}" 
+    return ret
+    
+
+
+def get_set_genres_by_occurrence(set_id):
+    # Query to get the count of each genre
+    genres_count = (
+        db.session.query(
+            Genre.name, 
+            func.count(TrackGenres.genre_id).label('genre_count')
+        )
+        .join(TrackGenres, Genre.id == TrackGenres.genre_id)
+        .join(Track, Track.id == TrackGenres.track_id)
+        .join(TrackSet, Track.id == TrackSet.track_id)
+        .filter(TrackSet.set_id == set_id)
+        .group_by(Genre.name)
+        .order_by(func.count(TrackGenres.genre_id).desc())
+        .all()
+    )
+    
+    # Calculate the total count of all genres
+    total_count = sum([genre.genre_count for genre in genres_count])
+    
+    # Calculate the percentage for each genre
+    genres_percentage = [
+        {
+            'name': genre.name,
+            'percentage': int( (genre.genre_count / total_count) * 100)
+        }
+        for genre in genres_count
+    ]
+    
+    return genres_percentage
+
+
+def get_set_avg_characteristics(set_id):
+    characteristics = [
+        'acousticness', 'danceability', 'energy',
+        'liveness', 'loudness', 'instrumentalness', 'speechiness',
+        'tempo',  'valence'
+    ]
+    
+    # Building the query
+    query = db.session.query(
+        *[func.avg(getattr(Track, characteristic)).label(characteristic) for characteristic in characteristics]
+    ).join(TrackSet, Track.id == TrackSet.track_id).filter(TrackSet.set_id == set_id)
+    
+    result = query.one()
+    
+    # Converting result to a dictionary
+    avg_values = {characteristic: int(getattr(result, characteristic)) for characteristic in characteristics}
+
+    return avg_values
+
+
+def remove_track_from_playlist(playlist_id, track_id,user_id):
+
+    playlist = Playlist.query.filter_by(id=playlist_id).first()
+    if not playlist:
+        return {"error": "Playlist not found"}
+    
+    track = Track.query.filter_by(id=track_id).first()
+    if not track:
+        return {"error": "Track not found"}
+    
+    track_playlist = db.session.query(TrackPlaylist).filter_by(playlist_id=playlist_id, track_id=track_id).first()
+    if not track_playlist:
+        return {"error": "Track not in playlist"}
+    
+    track_position = track_playlist.pos
+    
+    try:
+        db.session.delete(track_playlist)
+        playlist.nb_tracks = len(playlist.tracks)
+        playlist.edit_date = datetime.now(timezone.utc)
+        
+        db.session.query(TrackPlaylist).filter(
+        TrackPlaylist.playlist_id == playlist_id,
+        TrackPlaylist.pos > track_position
+        ).update({TrackPlaylist.pos: TrackPlaylist.pos - 1}, synchronize_session='fetch')
+        db.session.commit()
+    except Exception as e:
+        return {"error": f"{str(e)} (playlist_id: {playlist_id}, track_id: {track_id})"}
+    
+    return {"message": f"Track removed from \"{playlist.title}\""}
+
+
+def update_playlist_positions_after_track_change_position( playlist_id: int, track_id: int, new_position: int):
+    # Fetch the current position of the track
+    track_playlist = db.session.query(TrackPlaylist).filter_by(playlist_id=playlist_id, track_id=track_id).first()
+    current_position = track_playlist.pos
+    
+    # Update positions of the other tracks in the playlist
+    if new_position < current_position:
+        # Shift tracks down
+        db.session.query(TrackPlaylist).filter(
+            TrackPlaylist.playlist_id == playlist_id,
+            TrackPlaylist.pos >= new_position,
+            TrackPlaylist.pos < current_position
+        ).update({TrackPlaylist.pos: TrackPlaylist.pos + 1}, synchronize_session='fetch')
+    elif new_position > current_position:
+        # Shift tracks up
+        db.session.query(TrackPlaylist).filter(
+            TrackPlaylist.playlist_id == playlist_id,
+            TrackPlaylist.pos <= new_position,
+            TrackPlaylist.pos > current_position
+        ).update({TrackPlaylist.pos: TrackPlaylist.pos - 1}, synchronize_session='fetch')
+    
+    # Update the position of the moved track
+    track_playlist.pos = new_position
+    db.session.add(track_playlist)
+    
+    # Commit the changes
+    db.session.commit()
+    
+    
+def create_playlist_from_set_tracks(set_id, user_id):
+    try:
+        set_data = get_set_with_tracks(set_id)
+        
+        if 'error' in set_data:
+            return set_data
+        
+        if 'tracks' not in set_data:
+            return {"error": "No tracks found in set"}
+        
+        playlist_name = set_data.get('title', 'Untitled Playlist')
+        new_playlist = create_playlist(user_id, playlist_name)
+        
+        if not new_playlist:
+            return {"error": "Error creating playlist"}
+        
+        track_ids = tracks_to_tracks_ids(set_data['tracks'])
+        
+        response = add_tracks_to_playlist(new_playlist.id, track_ids, user_id)
+        
+        if 'error' in response:
+            return {"error": response['error']}
+        
+    except KeyError as ke:
+        return {"error": f"KeyError - missing key: {str(ke)}"}
+    except TypeError as te:
+        return {"error": f"TypeError - type mismatch: {str(te)}"}
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {str(e)}"}
+    
+    return {"message": f"Playlist \"{playlist_name}\" created successfully with {len(set_data['tracks'])} tracks"}
+
+
+def import_playlist_from_spotify():
+    pass
+
+def export_playlist_to_spotify():
+    pass
+
+def sync_playlist_with_spotify():
+    pass
+
+
+
+
+
+# def create_spotify_playlist_and_add_tracks(playlist_name, tracks):
+    
+#     try:
+   
+#         new_playlist = create_spotify_playlist( playlist_name)
+#         if not new_playlist:
+#             return {"error": "Error creating playlist"}
+        
+#     except Exception as e:
+#         return {"error": f"Error creating playlist: {str(e)}"}
+    
+#     try:
+                   
+#         track_ids = [f"{track['key_track_spotify']}" for track in tracks if 'key_track_spotify' in track and track['key_track_spotify'] is not None]
+        
+#         logger.info(f'Adding {len(track_ids)} tracks to Spotify playlist \"{playlist_name}\"')
+        
+#         response = add_tracks_to_spotify_playlist(new_playlist['id'], track_ids)
+        
+#         print('response adding traks to spotify playlist',response)
+        
+
+        
+#         if 'error' in response:
+#             logger.error(f'Error adding tracks to playlist: {response["error"]}')
+#             return {'error': response['error']}
+#     except Exception as e:
+#         logger.error(f'Unknown error adding tracks to playlist: {str(e)}')
+#         return {"error": f"Error adding tracks to playlist: {str(e)}"}
+    
+#     logger.info(f'Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks')
+#     return {"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(tracks)} tracks"}
+
+def create_spotify_playlist_and_add_tracks(playlist_name, tracks):
+    try:
+        # Create the Spotify playlist
+        new_playlist = create_spotify_playlist(playlist_name)
+        if not new_playlist:
+            return {"error": "Error creating playlist"}
+    except Exception as e:
+        return {"error": f"Error creating playlist: {str(e)}"}
+
+    try:
+        # Extract track IDs
+        track_ids = [track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
+        if not track_ids:
+            return {"error": "No valid track IDs found in the provided tracks"}
+
+        response = add_tracks_to_spotify_playlist(new_playlist['id'], track_ids)
+        if 'error' in response:
+            return {'error': response['error']}
+    except KeyError as e:
+        return {"error": f"Missing expected key in track data: {str(e)}"}
+    except TypeError as e:
+        return {"error": f"Type error encountered: {str(e)}"}
+    except Exception as e:
+        return {"error": f"Error adding tracks to playlist: {str(e)}"}
+
+    return {"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
+

@@ -3,8 +3,7 @@
 {% block content %}
 
 <div class="flex justify-end my-6">
-  <a href="{{ url_for('users.invite_create') }}"
-    class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors duration-150 ease-in-out">{{_('Create an invite')}}</a>
+  <a href="{{ url_for('users.invite_create') }}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors duration-150 ease-in-out">{{_('Create an invite')}}</a>
 </div>
 
 
@@ -17,13 +16,12 @@
 
         -center justify-between bg-white border border-gray-300 rounded-lg p-4">
       <div>
-        <h3 class="text-lg font-semibold leading-6 text-gray-900">{{ invite.email }}</h3>
+        <h3 class="text-lg font-semibold leading-6">{{ invite.email }}</h3>
         <p class="text-sm leading-5 text-gray-500">{{ invite.created_at.strftime('%b %d, %Y') }}</p>
       </div>
       <div>
 
-        <button onclick="copyToClipboardWithPath('{{invite.url}}')"
-          class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors duration-150 ease-in-out">Copy
+        <button onclick="copyToClipboardWithPath('{{invite.url}}')" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors duration-150 ease-in-out">Copy
           URL</button>
 
 

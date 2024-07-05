@@ -1,6 +1,6 @@
 
 import string
-from flask import render_template, flash, redirect, url_for,request, current_app as app
+from flask import make_response, render_template, flash, redirect, url_for,request, current_app as app
 from flask_login import current_user, login_user, logout_user
 from .utils.db import db
 from .types import UserType, UserConnectMethod
@@ -20,9 +20,9 @@ def inject_translations():
 def user():
     return _('hello world!')
 
+
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
-
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard')) 
     
@@ -31,23 +31,21 @@ def register():
         return redirect(url_for('main.index'))
 
     form = RegistrationForm()
+    next_page = request.args.get('next')
+    
     if form.validate_on_submit():
-         # Check if email already exists
-        # user_exists = User.query.filter_by(email=form.email.data).first()
-        # if user_exists:
-        #     flash(_('An account with this email already exists.'), 'error')
-        #     return redirect(url_for('users.register'))  # Adjust to your actual registration page route
-
         hashed_pwd = generate_password_hash(form.password.data, method=app.config.get('PWD_HASH_METHOD'), salt_length=app.config.get('PWD_SALT_LENGTH'))
-        user = User(fname=form.fname.data, email=form.email.data, password=hashed_pwd,connect_method=UserConnectMethod.Site, type=UserType.User, lang='en')
+        user = User(fname=form.fname.data, email=form.email.data, password=hashed_pwd, connect_method=UserConnectMethod.Site, type=UserType.User, lang='en')
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True)
-        flash(_('Congratulations, you are now a registered user!'),'success')
+        flash(_('Congratulations, you are now a registered user!'), 'success')
         send_email(user.email, 'Welcome!', 'email/welcome', username=user.fname)
+        
+        return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
 
-        return redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
-    return render_template('register.html', title=_('Register'), form=form,SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS'))
+    return render_template('register.html', title=_('Register'), form=form, next=next_page, SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS'))
+
 
 
 @bp.route('/invite/<invite_code>', methods=['GET', 'POST'])
@@ -87,26 +85,29 @@ def register_invite(invite_code):
         return redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
     return render_template('register_invite.html', title=_('Register'), form=form,email=invite.email,invite_code=invite_code)
 
-
-
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-   
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard')) 
     
-    form = LoginForm()  # Assuming you have a LoginForm similar to RegistrationForm
+    form = LoginForm()  
+    next_page = request.args.get('next')
+
     if form.validate_on_submit():
-        # Assuming User model has an email field and a method to query by email
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)  # Log in the user
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
+            return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))
         else:
-            flash(_('Invalid email or password'),'error')
-    return render_template('login.html', title=_('Log In'), form=form,SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS'))
-
+            flash(_('Invalid email or password'), 'error')
+            
+    response = make_response(render_template('login.html', title=_('Log In'), form=form, next=next_page, SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS')))
+    if next_page:
+        response.set_cookie('next_page_after_login', next_page, max_age=600, httponly=False, samesite='Lax', path='/')
+    
+    return response
+    
+    
 @bp.route('/logout')
 def logout():
     if not current_user.is_authenticated:
@@ -187,7 +188,7 @@ def manage_invites():
 @bp.route('/admin/invite_create', methods=['GET', 'POST'])
 def invite_create():
     form = InviteForm()
-    print(f"Method: {request.method}, Form Valid: {form.validate_on_submit()}")
+
 
     if form.validate_on_submit():
         email = form.email.data

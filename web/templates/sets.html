@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex justify-end  items-start p-4">
+  <a href="{{url_for('main.add')}}" class="btn btn-primary">
+    {{_("Add a set")}}
+  </a>
+</div>
+<div class="container mx-auto py-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
+    {% for set in sets_page.items %}
+    <div class=" overflow-hidden">
+      <a href="{{ url_for('main.set', set_id=set.id) }}">
+        <div class="relative flex gap-0">
+          <img src="{{ set.thumbnail }}" alt="{{ set.title }}" class="w-full h-48 object-cover  rounded-lg">
+          <div class="absolute inset-0 "></div>
+          <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
+            <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>
+            <p>{{ set.nb_tracks }} tracks</p>
+
+          </div>
+        </div>
+      </a>
+      <div class="p-4 text-sm">
+        <a href="{{ url_for('main.set', set_id=set.id) }}" >
+          <h3 class="text-white font-semibold hover:text-primary">{{ set.title }}</h3>
+        </a>
+        <p class="text-gray-600">{{ set.channel.author }} - {{ g.utils.km_number(set.channel.channel_follower_count) }} subs</p>
+        <p class="text-gray-600">{{ g.utils.time_ago(set.publish_date) }}</p>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-8">
+    {% if sets_page.has_prev %}
+    <a href="{{ url_for('main.sets', page=sets_page.prev_num) }}" >Previous</a>
+    {% endif %}
+    {% if sets_page.has_next %}
+    <a href="{{ url_for('main.sets', page=sets_page.next_num) }}" >Next</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

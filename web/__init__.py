@@ -1,3 +1,4 @@
+import logging
 from flask import Flask
 from config import Config
 
@@ -16,8 +17,11 @@ from flask import Blueprint
 from flask_babel import Babel
 from boilersaas.utils.locale import get_locale,add_babel_translation_directory
 
+from web.lib.log_config import setup_logging
+
 bp = Blueprint('main', __name__,template_folder='templates')
 from web import routes
+
 
 
 def init_extend_app(app):
@@ -28,15 +32,22 @@ def init_extend_app(app):
 
 
 def create_app(config_class=Config):
+    setup_logging()
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    print (app.static_folder)
+
     db.init_app(app)
     #mail.init_app(app)
     init_extend_app(app)
     
     init_boilerplate_app(app)
+    
+     # Modify Jinja2 environment settings to suppress detailed template loading messages
+    app.jinja_env.globals['debug'] = False
+    app.jinja_env.loader.debug = False
+    app.jinja_env.add_extension('jinja2.ext.do')
+    app.jinja_env.add_extension('jinja2.ext.loopcontrols')
  
     #
   

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="flex flex-col items-center justify-center p-4">
+  <div class="w-full text-left mt-4 sticky top-0 bg-slate-800 z-10 rounded-xl" id="track">
+    <div class="flex flex-col">
+      {% include 'track.html' %}
+    </div>
+  </div>
+
+  <h1 class="text-xl font-semibold mt-8 mb-4">Related tracks</h1>
+
+  {% include 'tracklist.html' %}
+
+</div>
+
+
+<audio id="audio-player" controls class="fixed  bottom-2 left-1/2 transform -translate-x-1/2 z-50 hidden">
+  Your browser does not support the audio element.
+</audio>
+
+
+
+{% include 'js_tracklist_no_vid.html' %}
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,7 @@
+.active{
+  @apply text-primary bg-blue-950;
+}
+a:hover{
+  @apply text-primary;
+}
+

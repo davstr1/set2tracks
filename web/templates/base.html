@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="set2tracks">
 
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link href="{{url_for('static',filename='css/tailwind/output.css')}}" rel="stylesheet">
 </head>
 
-<body>
+<body class="bg-primary-content min-h-screen overflow-x-hidden">
     <div class="container mx-auto ">
         <header class=" border-b-2 border-slate-200">
             <nav class="mx-auto flex  items-center justify-between py-5 " aria-label="Global">
@@ -16,21 +16,30 @@
                     {% include 'logo.html' %}
                 </div>
 
+
+                <div class="hidden lg:flex lg:gap-x-12">
+                    <a href="{{url_for('main.sets')}}" class="text-sm font-semibold leading-6">{{_("DJ Sets")}}</a>
+
+
+                    <a href="{{url_for('main.my_playlists')}}" class="text-sm font-semibold leading-6">{{_("My Playlists")}}</a>
+                </div>
+
+
                 {% if current_user.is_authenticated %}
 
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-                    <a href="{{ url_for('users.logout') }}" class="text-sm font-semibold leading-6 text-gray-900">
+
+
+
+
+                    <a href="{{ url_for('users.logout') }}" class="text-sm font-semibold leading-6"> [{{current_user.fname}}]
                         Logout </a>
 
                     {% else %}
 
-                    <div class="hidden lg:flex lg:gap-x-12">
-                        <a href="{{url_for('main.add')}}" class="text-sm font-semibold leading-6">{{_("Add")}}</a>
-
-                    </div>
 
                     <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-                        <a href="{{ url_for('users.login') }}" class="text-sm font-semibold leading-6 text-gray-900">{{_("Sign in")}} </a>
+                        <a href="{{ url_for('users.login') }}" class="text-sm font-semibold leading-6">{{_("Sign in")}} </a>
 
 
                         <a class=" justify-center rounded-lg text-sm font-semibold py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-700 -my-2.5 ml-8" href="{{ url_for('users.register') }}"><span>{{_("Register")}}<span aria-hidden="true">→</span></span></a>
@@ -45,21 +54,14 @@
         </header>
 
 
-        {% if not no_flash_top %}
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="{{ category }}">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-        {% endif %}
 
 
 
 
 
-        <main>
+
+        <main class="min-h-screen">
+
             {% block content %}
             <!-- Page specific content will be inserted here -->
             {% endblock %}
@@ -69,6 +71,95 @@
             <p>&copy; 2024 {{ app_name }}</p>
         </footer>
     </div>
+    <div id="overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center transition-all duration-300">
+        <div class="select-none flex items-center bg-black p-10 rounded-lg ring-2 ring-primary">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+        </div>
+    </div>
+
+    <style>
+        /* Define the initial state and the transition */
+        #system-message {
+            bottom: -100%;
+            transition: bottom 0.3s ease-in-out;
+        }
+
+        #system-message.show {
+            bottom: 0;
+        }
+    </style>
+    {% set messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+
+    {% for category, message in messages %}
+    <div id="system-message" class="show fixed w-full  bg-{{category}} text-white p-4 text-center transition-all duration-300">
+       
+        <div class="message">{{ message }}</div>
+        
+
+        <button class="absolute top-1 right-1 text-white hover:text-gray-200 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </button>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div id="system-message" class="fixed w-full  bg-info text-white p-4 text-center transition-all duration-300">   
+        <div class="message"></div>
+        
+        <button class="absolute top-1 right-1 text-white hover:text-gray-200 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+        </button>
+    </div>
+    {% endif %}
+
+
+
+
+
+  
 </body>
+
+<script>
+    var textField = document.querySelector('form input[type="text"]');
+    if (textField) {
+        textField.focus();
+    }
+    let SystemMessagetimeoutID;
+    const systemMessage = document.getElementById('system-message');
+    const systemMessageContent = document.querySelector('#system-message .message');
+    const sytemMessageCloseButton = document.querySelector('#system-message button');
+
+    sytemMessageCloseButton.addEventListener('click', () => {
+        systemMessage.classList.remove('show');
+    });
+
+    function showSystemMessage(message, type = 'info') {
+        
+
+        // Cancel the previous timeout if it exists
+        if (SystemMessagetimeoutID) {
+            clearTimeout(SystemMessagetimeoutID);
+        }
+
+        systemMessageContent.innerText = message;
+        systemMessage.classList.remove('bg-primary', 'bg-danger', 'bg-success', 'bg-warning', 'bg-info');
+        systemMessage.classList.add('bg-' + type);
+        systemMessage.classList.add('show');
+
+        // Set a new timeout and store its ID
+        SystemMessagetimeoutID = setTimeout(() => {
+            systemMessage.classList.remove('show');
+        }, 10000);
+    }
+
+</script>
 
 </html>

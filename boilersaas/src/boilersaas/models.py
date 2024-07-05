@@ -1,9 +1,9 @@
-from flask_migrate import current
+#from flask_migrate import current
 from .utils.db import db
 from .types import UserType,UserConnectMethod
 from flask_login import UserMixin
 from flask import current_app as app
-from datetime import datetime  
+from datetime import datetime, timezone  
 from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 
@@ -16,7 +16,7 @@ class User(db.Model,UserMixin):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Store hashed passwords
     type = db.Column(db.Enum(UserType), nullable=False)
-    reg_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    reg_date = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
     last_login = db.Column(db.DateTime, nullable=True)
     lang = db.Column(db.String(2), nullable=False, default='en')
     connect_method = db.Column(db.Enum(UserConnectMethod), nullable=False)
@@ -48,7 +48,7 @@ class Invite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
     invite_code = db.Column(db.String(255), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)  
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))  
 
     def __repr__(self):
         return f'<Invite {self.email}>'

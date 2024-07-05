@@ -4,9 +4,10 @@ from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from flask_babel import _
 from .models import User
 
-input_text = "input-text"
-input_submit= "submit-button"
-
+#input_text = "appearance-none outline-none rounded-lg bg-transparent w-full ring-1 ring-current focus:ring-primary focus:ring-1   p-2 mb-2 mt-2"
+#input_submit= "appearance-none outline-none p-2 mb-2 mt-2 rounded-lg w-full bg-primary cursor-pointer  text-white ring-1 ring-primary hover:bg-transparent hover:text-primary"
+input_submit = 'btn btn-primary w-full'
+input_text = ''
 class RegistrationForm(FlaskForm):
     fname = StringField(_('First Name'), validators=[DataRequired()],render_kw={"class": input_text})
     email = StringField(_('Email'), validators=[DataRequired(), Email()],render_kw={"class": input_text})

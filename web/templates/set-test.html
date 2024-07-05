@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  #playerWrap {
+   transition: margin 0.3s;
+  }
+</style>
+
+
+<div class="flex flex-col items-center justify-center p-4">
+  <div id="playerWrap" class=" w-3/6  z-50 relative">
+    
+        <div   id="modifyLeftMargin" class=" relative ">
+          <div  class="absolute  flex items-center   -left-5 h-full">
+            <div  id="draggable" class="cursor-ew-resize opacity-30 hover:opacity-100 h-2/6 w-3 bg-gray-500 rounded-xl select-none">&nbsp;</div>
+          </div>
+          
+          <div id="videoWrap" class="relative  overflow-auto ">
+            <div id="youtube-player" class="aspect-video"></div>
+          </div>
+          
+        </div>
+      
+      
+    </div>
+    </div>
+  <h1 class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
+
+  {% if not set.has_chapters %}
+<p class="text-xs">Video with no chapters, so song starts and end are guess detected/probably not super accurate.</p>
+  {% endif %}
+
+ 
+  
+  {% set tracks = set.tracks %}
+  {% include 'tracklist.html' %}
+
+</div>
+
+
+
+
+<script>
+ const draggable = document.getElementById('draggable');
+ const modifyLeftMargin = document.getElementById('modifyLeftMargin');
+ const videoWrap = document.getElementById('videoWrap');
+
+  let isDragging = false;
+  let startX;
+  const playerFixedClasses = ['w-48', 'h-28', 'fixed', 'top-2', 'right-2']
+  const playerScrolledClasses = ['w-3/6', 'relative']
+
+  function saveWrapWidth(width) {
+      localStorage.setItem('wrapWidth', width);
+    }
+
+    // Function to load the wrap width from localStorage
+    function loadWrapWidth() {
+      const wrapWidth = localStorage.getItem('wrapWidth');
+      if (wrapWidth) {
+        modifyLeftMargin.style.marginLeft = '0px';
+        playerWrap.style.width = `${wrapWidth}px`;
+      }
+    }
+
+  //
+  
+  window.addEventListener('DOMContentLoaded', loadWrapWidth);
+
+  draggable.addEventListener('mousedown', (e) => {
+    videoWrap.classList.add('pointer-events-none')
+    isDragging = true;
+    startX = e.clientX - modifyLeftMargin.offsetLeft;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      let ml = e.clientX - startX;
+      modifyLeftMargin.style.marginLeft = ml + 'px';
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    const wrapWidth = videoWrap.offsetWidth > 65 ? videoWrap.offsetWidth : 65;
+    modifyLeftMargin.style.marginLeft = '0px';
+    playerWrap.style.width = `${wrapWidth}px`;
+    videoWrap.classList.remove('pointer-events-none')
+    saveWrapWidth(wrapWidth);
+  });
+
+  function removePlayerTransition() {
+    playerWrap.classList.remove('transition-all', 'duration-300');
+  }
+
+    window.addEventListener('scroll', function() {
+    
+    
+      const shrinkOn = 100; // Number of pixels to scroll before shrinking
+      if (window.scrollY > shrinkOn) {
+        playerWrap.classList.add(...playerFixedClasses);
+        playerWrap.classList.remove(...playerScrolledClasses);
+      } else {
+        playerWrap.classList.add(...playerScrolledClasses);
+        playerWrap.classList.remove(...playerFixedClasses);
+      }
+    });
+
+
+  function onPlayerStateChange(event) {
+    // If the player is not playing, stop the active track checking
+    if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
+      clearInterval(startActiveTrackChecking.intervalId);
+    } else if (event.data == YT.PlayerState.PLAYING) {
+      // If playing, make sure the interval is running
+      stopAndHideAudioPlayer() 
+      if (!startActiveTrackChecking.intervalId) {
+        startActiveTrackChecking();
+      }
+    }
+    // if (event.data == YT.PlayerState.PLAYING) {
+    //   checkActiveTrack();
+    // }
+  }
+
+  function startActiveTrackChecking() {
+    setInterval(checkActiveTrack, 1000); // Update every second
+  }
+  function getNewActiveTrack(currentTime) {
+  var trackList = document.querySelectorAll('#tracklist .track');
+  
+  for (let i = trackList.length- 1; i >=0; i--) {
+    let track = trackList[i];
+    var startTime = parseInt(track.getAttribute('data-start_time'), 10);
+
+    var nextTrack = trackList[i + 1];
+   
+    var nextStartTime = nextTrack ? parseInt(nextTrack.getAttribute('data-start_time'), 10) : Infinity; // Treat no next track as beyond any current time
+   
+    if (currentTime >= startTime && currentTime < nextStartTime) {
+      
+      return track;
+    }
+  }
+  return null;
+}
+
+
+  function checkActiveTrack() {
+    var currentTime = Math.round(player.getCurrentTime());
+    if (currentTime == lastCurrentTime) {
+      return
+    } 
+    lastCurrentTime = currentTime;
+
+    var activeTrack = document.querySelector('#tracklist .track.active');
+    var newActiveTrack = getNewActiveTrack(currentTime);
+    if(activeTrack !== newActiveTrack) {
+      if (activeTrack) {
+        activeTrack.classList.remove('active');
+      }
+      if (newActiveTrack) {
+        newActiveTrack.classList.add('active');
+      }
+    }
+
+  
+  }
+
+
+  function stopAndHideAudioPlayer() {
+    var audioPlayer = document.getElementById('audio-player');
+    if (audioPlayer.classList.contains('hidden')) {
+      return;
+    }
+    audioPlayer.pause();
+    audioPlayer.classList.add('hidden');
+  }
+
+  function onPlayerReady(e) {
+    startActiveTrackChecking();
+    var trackList = document.getElementById('tracklist');
+    trackList.addEventListener('click', function (event) {
+
+
+      stopAndHideAudioPlayer() 
+      var target = event.target.closest('div.track');
+      if (target) {
+        var startTime = parseFloat(target.getAttribute('data-start_time'));
+
+
+        if (e.target && e.target.seekTo) {
+          /*
+          first click won't work, will just go to where previously left, when video is freshly loaded
+          We need to first make sure the video is playing, then we can seek to the desired time
+          And play as intented
+          */
+          function checkAndSeek() {
+            audioPlayer.pause();
+            if (e.target.getPlayerState() === YT.PlayerState.PLAYING) {
+              e.target.seekTo(startTime, true);
+              player.unMute()
+              e.target.playVideo();
+            } else {
+              // Wait for 100ms and check again
+              player.mute()
+              e.target.playVideo();
+              setTimeout(checkAndSeek, 100);
+            }
+          }
+
+          // Start the check-and-seek process
+          checkAndSeek();
+
+        }
+      } else {
+        console.log('no target');
+      }
+    });
+  }
+
+
+  // This code loads the IFrame Player API code asynchronously.
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  var lastCurrentTime = 0;
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-player', {
+      height: '100%',
+      width: '100%',
+      videoId: '{{set.video_id}}',
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+        //'onStateChange': onPlayerStateChange
+      }
+    });
+  }
+
+
+
+
+</script>
+
+
+{% endblock %}

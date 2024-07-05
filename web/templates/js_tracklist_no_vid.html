@@ -1,0 +1,155 @@
+<script>
+
+  var audioUrl = '';
+  var checkTrackPlayerHead = null;
+
+
+  function getStartPercentFromMousePosition(track, mouseX) {
+
+    const trackRect = track.getBoundingClientRect();
+    const relativeMouseX = mouseX - trackRect.left;
+    const percentagePosition = relativeMouseX / trackRect.width * 100 //parseFloat((relativeMouseX / trackRect.width * 100).toFixed(2));
+    return percentagePosition;
+  }
+
+
+  var audioPlayer = document.getElementById('audio-player');
+
+  function audioPlayerPlay(track, startPercent = 0) {
+    audioUrl = track.getAttribute('data-preview-url');
+    if (!audioUrl) {
+      console.log('no audio url');
+      track.classList.remove('active', 'playing');
+      track.style.setProperty('--background-width', `0%`);
+      nextTrack = findNextTrackElement(track);
+      if (nextTrack) {
+
+        nextTrack.classList.add('active', 'playing');
+        audioPlayerPlay(nextTrack);
+        return;
+      } else {
+        console.log('no next track');
+        return;
+      }
+
+
+    }
+
+
+
+    if (audioPlayer.getAttribute('src') !== audioUrl) {
+      clearInterval(checkTrackPlayerHead);
+      audioPlayer.setAttribute('src', audioUrl);
+      audioPlayer.load(); // Load the new audio source
+      audioPlayer.addEventListener('loadedmetadata', function () {
+        console.log('Duration of the song:', audioPlayer.duration, 'seconds');
+
+        audioPlayer.play();
+        audioPlayer.removeEventListener('loadedmetadata', this);
+      });
+      checkTrackPlayerHead = setInterval(function () {
+        const percentageWidth = parseFloat((audioPlayer.currentTime / audioPlayer.duration * 100).toFixed(2));
+        track.style.setProperty('--background-width', `${percentageWidth}%`);
+        if (percentageWidth >= 100) {
+          clearInterval(checkTrackPlayerHead);
+          nextTrack = findNextTrackElement(track);
+          if (nextTrack) {
+
+            track.classList.remove('active', 'playing');
+            track.style.setProperty('--background-width', `0%`);
+            nextTrack.classList.add('active', 'playing');
+            audioPlayerPlay(nextTrack);
+          }
+        }
+
+      }, 50); // Update every second
+
+    } else {
+      if (startPercent > 0) {
+        audioPlayer.currentTime = audioPlayer.duration * startPercent / 100;
+      }
+      audioPlayer.play();
+
+    }
+
+
+
+
+  }
+
+  function findNextTrackElement(currentElement) {
+    return currentElement.nextElementSibling ? currentElement.nextElementSibling.closest('.track') : null;
+  }
+
+  function trackListEvent(event) {
+
+    var target = event.target.closest('div.track');
+
+
+    if (target) {
+      // first remove active class from all tracks
+
+
+      if (target.classList.contains('playing')) {
+        const mouseX = event.clientX;
+        var startPercent = getStartPercentFromMousePosition(target, mouseX);
+        audioPlayerPlay(target, startPercent)
+        console.log('startPercent:', startPercent);
+      } else {
+        document.querySelectorAll('.track').forEach(track => {
+          track.classList.remove('active', 'playing');
+          track.style.setProperty('--background-width', `0%`);
+        });
+        target.classList.add('active', 'playing');
+        console.log('no active target');
+        audioPlayerPlay(target);
+
+      }
+
+
+    } else {
+      console.log('no target');
+    }
+  }
+
+  var trackList = document.getElementById('tracklist');
+  var topTrack = document.getElementById('track');
+
+  trackList.addEventListener('click', trackListEvent);
+  if (topTrack) {
+    topTrack.addEventListener('click', trackListEvent);
+  }
+
+
+
+
+
+  document.querySelectorAll('.track .song-pause-button').forEach(link => {
+    link.addEventListener('click', function (event) {
+      console.log('song-pause-button clicked')
+      event.stopPropagation();
+      if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo()
+      audioPlayer.pause();
+      event.target.closest('.track').classList.remove('playing');
+
+    });
+  });
+
+
+  document.querySelectorAll('.play-track-preview').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent the default link behavior
+      event.stopPropagation(); // Prevent the event from bubbling up
+
+      audioUrl = this.getAttribute('href');
+
+      if (audioPlayer.getAttribute('src') !== audioUrl) {
+        audioPlayer.setAttribute('src', audioUrl);
+        audioPlayer.load(); // Load the new audio source
+      }
+      //audioPlayer.classList.remove('hidden'); // Make the audio player visible
+      audioPlayer.play(); // Start playing the audio
+    });
+  });
+
+</script>

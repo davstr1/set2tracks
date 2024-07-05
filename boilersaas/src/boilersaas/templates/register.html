@@ -2,11 +2,14 @@
 
 {% block content %}
 
-
-<form action="{{ url_for('users.register') }}" method="post" class="w-full max-w-sm" novalidate autocomplete="off">
+<div class="sm:border sm:border-current w-full max-w-sm rounded-lg p-4">
+<form action="{{ url_for('users.register',next=next) }}" method="post" class="w-full max-w-sm " novalidate autocomplete="off">
   {{ form.hidden_tag() }}
+  <div class="mb-6 text-center">
+    Already have an account? <a href="{{ url_for('users.login',next=next) }}" class="font-semibold leading-6">Login</a>
+  </div>
   <div class="mb-6">
-    <label for="{{ form.fname.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.fname.id }}" class="block text-sm font-semibold leading-6">
       {{form.fname.label.text }}
     </label>
     {{ form.fname(size=32) }}
@@ -15,7 +18,7 @@
     {% endfor %}
   </div>
   <div class="mb-6">
-    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6">
       {{form.email.label.text }}
     </label>
     {{ form.email(size=32) }}
@@ -24,7 +27,7 @@
     {% endfor %}
   </div>
   <div class="mb-6">
-    <label for="{{ form.password.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.password.id }}" class="block text-sm font-semibold leading-6">
       {{form.password.label.text }}
     </label>
     {{ form.password(size=32) }}
@@ -37,5 +40,6 @@
 </form>
 
 {% include "components/section_social_signin.html" %}
+</div>
 
 {% endblock %}

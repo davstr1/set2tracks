@@ -1,50 +1,12 @@
-from http import client
-import subprocess
-import json
-import shlex
 import logging
-from typing import List, Dict
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from venv import logger
 import requests
 import re
-import os
-from pytube import YouTube 
-# from pytube import exceptions
-# from pytube.innertube import InnerTube
+from yt_dlp import YoutubeDL
+# for list of options see https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312
 
-# class YouTube(OfficialYouTube):
-#     def bypass_age_gate(self):
-#         """Attempt to update the vid_info by bypassing the age gate."""
-#         innertube = InnerTube(
-#             # see https://github.com/pytube/pytube/issues/1712
-#             client='ANDROID_EMBED', # fix for fake age restricted videos bug 
-#             use_oauth=self.use_oauth,
-#             allow_cache=self.allow_oauth_cache
-#         )
-#         print('vid id:',self.video_id)
-#         innertube_response = innertube.player(self.video_id)
-        
-
-#         playability_status = innertube_response['playabilityStatus'].get('status', None)
-
-#         # If we still can't access the video, raise an exception
-#         # (tier 3 age restriction)
-#         if playability_status == 'UNPLAYABLE':
-#             raise exceptions.AgeRestrictedError(self.video_id)
-
-#         self._vid_info = innertube_response
-
-
-
-logger = logging.getLogger(__name__)
-
-def format_seconds(seconds:int)->str:
-    """Convert seconds to HH:MM:SS format."""
-    hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
-    return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
-
-
+logger = logging.getLogger('root')
 
 # Regular expressions for YouTube URL and video ID validation
 YOUTUBE_URL_PATTERN = re.compile(
@@ -53,12 +15,32 @@ YOUTUBE_URL_PATTERN = re.compile(
 VIDEO_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{11}$')
 
 
+def retain_v_parameter(url):
+    # Parse the URL into components
+    parsed_url = urlparse(url)
+    
+    # Parse the query parameters
+    query_params = parse_qs(parsed_url.query)
+    
+    # Retain only the 'v' parameter
+    filtered_params = { 'v': query_params['v'] } if 'v' in query_params else {}
+    
+    # Reconstruct the URL with only the 'v' parameter
+    new_query = urlencode(filtered_params, doseq=True)
+    new_url = urlunparse(parsed_url._replace(query=new_query))
+    
+    return new_url
+
+
+
 def youtube_video_id_from_url(input_str: str) -> str:
     """ Returns the YouTube video ID from a URL or video ID. Or None if the input is invalid."""
+    
     
     if re.match(VIDEO_ID_PATTERN, input_str):
         return input_str
 
+    input_str = retain_v_parameter(input_str)
     match = re.search(YOUTUBE_URL_PATTERN, input_str)
     if match:
         return match.group(4)
@@ -75,6 +57,8 @@ def youtube_video_input_is_valid(input_str: str) -> bool:
     Returns:
         bool: True if the input is a valid YouTube URL or video ID, False otherwise.
     """
+    
+    input_str = retain_v_parameter(input_str)
     return bool(re.match(YOUTUBE_URL_PATTERN, input_str) or re.match(VIDEO_ID_PATTERN, input_str))
 
 def youtube_video_exists(input_str: str) -> bool:
@@ -98,86 +82,43 @@ def youtube_video_exists(input_str: str) -> bool:
     except requests.RequestException:
         return False
 
-
-
-def youtube_video_to_chapters_list(video_id_or_url: str) -> List[Dict[str, str]]:
-    """
-    Extracts chapter information from a YouTube video using yt-dlp.
-    
-    Args:
-        video_id_or_url (str): The YouTube video ID or URL.
-    
-    Returns:
-        List[Dict[str, str]]: A list of dictionaries with 'title' and 'start_time' keys.
-    """
-    yt_dlp_command = f'yt-dlp --dump-json {shlex.quote(video_id_or_url)}'
-    try:
-        process = subprocess.Popen(yt_dlp_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        output, error = process.communicate()
-
-        if process.returncode == 0:
-            data = json.loads(output)
-            chapters = [{'title': chapter['title'], 'start_time': format_seconds(chapter['start_time'])} for chapter in data.get('chapters', [])]
-            return chapters
-        else:
-            logger.error("yt-dlp command failed: %s", error)
-            return []
-    except subprocess.TimeoutExpired:
-        logger.error("yt-dlp command timed out")
-        return []
-    except json.JSONDecodeError as e:
-        logger.error("Error parsing JSON: %s", e)
-        return []
-    except Exception as e:
-        logger.error("Unexpected error: %s", e)
-        return []
-    
-def youbube_video_title(video_id:str)->str:
-    #return
-    yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")  
-    properties = {attr: getattr(yt, attr) for attr in dir(yt) if not callable(getattr(yt, attr)) and not attr.startswith("__")}
-    print(properties)
-    #print(yt)  
+def youbube_video_info(video_id:str)->dict:
+    properties_to_keep = ['upload_date','thumbnail', 'title','description','channel','','channel_id','channel_url','duration','playable_in_embed','chapters','channel','channel_follower_count']
+    options = {}
+    with YoutubeDL(params=options) as ydl:
+        yt = f"https://www.youtube.com/watch?v={video_id}"
+        video_info = ydl.extract_info(yt,download=False)
+        
+        ret = {key: video_info[key] for key in properties_to_keep if key in video_info}
+        ret['video_id'] = video_id
+        return ret
+   
  
+
+
+def download_youtube_video(id:str,vid_dir)->str:
+    
+    def my_hook(d):
+        #print(d)
+        if d['status'] == 'downloading':
+            logger.debug(f"{d['downloaded_bytes'] / d['total_bytes'] * 100:.2f}% downloaded")
+
+    options = {
+        'progress_hooks':[my_hook],
+        'write-thumbnail': True,
+        'format': 'bestaudio/best',
+        'outtmpl': f'{vid_dir}/full.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+           'preferredcodec': 'opus',
+            'preferredquality': '192',
+        }],
+    }
+    with YoutubeDL(params=options) as ydl:
+        yt = f"https://www.youtube.com/watch?v={id}"
+        ydl.download([yt])
+        return f"{id}.opus"
     
 
-def download_youtube_video(url_or_id: str, output_name: str = None, output_folder: str = '.') -> str:
-    """
-    Downloads a YouTube video as audio using pytube.
-    
-    Parameters:
-        url_or_id (str): The YouTube video ID or URL.
-        output_name (str): Optional; Custom name for the downloaded file.
-        output_folder (str): Optional; Folder to save the downloaded file.
-        
-    Returns:
-        str: The path to the downloaded file.
-    """
-    
-    video_id = youtube_video_id_from_url(url_or_id)
-    if not video_id:
-        raise ValueError("Invalid YouTube video ID or URL.")
-        
-    yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
-    stream = yt.streams.filter(only_audio=True).first()
-    
-    if not stream:
-        raise ValueError("No audio stream found for this video.")
-    
-    output_name = output_name if output_name else yt.title
-    
-    # Ensure the output folder exists
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    
-    file_path = stream.download(output_path=output_folder, filename=output_name)
-    
-    return file_path  
-    
 
-if __name__ == "__main__":
-    video_id_or_url = "https://www.youtube.com/watch?v=sfUvkHH7oMA"
-    chapters = youtube_video_to_chapters_list(video_id_or_url)
-    for chapter in chapters:
-        print(f"Title: {chapter['title']}, Start Time: {chapter['start_time']}")
 

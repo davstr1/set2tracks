@@ -4,7 +4,7 @@
 <form action="{{ url_for('users.invite_create') }}" method="post" class="w-full max-w-sm" novalidate>
   {{ form.hidden_tag() }}
   <div class="mb-6">
-    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6">
       {{form.email.label.text }}
     </label>
     {{ form.email(size=32) }}

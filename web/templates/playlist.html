@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+
+<div class="flex flex-col items-center">
+  <!-- Title on top -->
+  <div class="w-full text-center my-4">
+    <h1 class="text-3xl">{{ playlist.title }} <a href="{{ url_for('main.playlist_edit', playlist_id=playlist.id) }}" class="text-sm align-super">
+        Edit
+      </a></h1>
+  </div>
+
+  <!-- Two-column layout for image and buttons -->
+  <div class="flex my-4">
+    <!-- Left column: Image -->
+    <div class="mr-8">
+      <div class="relative w-60">
+        {% include 'snippets/playlist_image.html' %}
+      </div>
+    </div>
+
+    <!-- Right column: Buttons -->
+    <div class="flex flex-col justify-start space-y-4">
+
+      <a href="{{ url_for('main.playlist_to_spotify', playlist_id=playlist.id) }}" class="btn bg-red-500 text-white hover:bg-red-600 hover:text-white py-2 px-4 text-sm font-semibold whitespace-nowrap">
+        Create playlist on Spotify
+      </a>
+    </div>
+  </div>
+</div>
+
+<h1 class="text-xl font-semibold mt-8 ">Tracks in playlist</h1>
+
+
+
+
+
+
+{% include 'tracklist.html' %}
+
+</div>
+{% include 'js_tracklist_no_vid.html' %}
+<script src="{{url_for('static',filename='js/Sortable.js')}}"></script>
+
+
+<script>
+  //var tracks = document.querySelectorAll('.track');
+  PLAYLIST_ID = '{{ playlist.id }}';
+
+
+  document.querySelectorAll('.track .add-track-to-recent-playlist').forEach((element, index) => {
+    element.classList.add('hidden');
+  });
+
+
+
+
+
+  document.querySelectorAll('.track .remove-track-from-playlist').forEach((element, index) => {
+    element.classList.remove('hidden');
+    element.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const trackId = e.target.closest('.track').getAttribute('data-track-id');
+      const payload = {
+        "playlist_id": PLAYLIST_ID,
+        "track_id": trackId
+      }
+      const onSuccess = (res) => {
+        console.log(res.message);
+        e.target.closest('.track').remove();
+        rebuildTrackPositions();
+      }
+
+      return processAjax('{{ url_for("main.jax_remove_track_from_playlist") }}', 'POST', payload, onSuccess);
+
+    })
+  });
+
+
+
+  document.querySelectorAll('.track').forEach((element, index) => {
+    element.setAttribute('data-pos', index + 1);
+  });
+  function rebuildTrackPositions() {
+    document.querySelectorAll('.track').forEach((element, index) => {
+      const pos = index + 1;
+      element.setAttribute('data-pos', pos);
+      const posDiv = element.querySelector('.track-number');
+      posDiv.innerHTML = pos;
+    });
+  }
+
+
+
+  function saveTrackOrderToServer(payload) {
+
+    return processAjax('{{ url_for("main.update_position") }}', 'POST', payload);
+
+  }
+  new Sortable(trackList, {
+    animation: 150,
+    dragClass: 'drop-shadow-lg',
+    //ghostClass: 'bg-primary',
+    onEnd: function (e) {
+      var itemEl = e.item;  // dragged HTMLElement
+      console.log('indexes:', e.oldIndex, e.newIndex);
+      if (e.oldIndex === e.newIndex) {
+        return;
+      }
+
+      rebuildTrackPositions();
+
+      const payload = {
+        "playlist_id": PLAYLIST_ID,
+        "track_id": e.item.getAttribute('data-track-id'),
+        "new_position": e.newIndex + 1
+      }
+
+      return saveTrackOrderToServer(payload)
+
+    },
+  });
+</script>
+
+
+{% endblock %}

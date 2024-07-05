@@ -154,3 +154,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Specific to SET2TRACKS
+temp_downloads/
+test.py

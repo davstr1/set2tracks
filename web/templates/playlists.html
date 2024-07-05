@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-end  items-start p-4">
+  <a href="{{url_for('main.playlist_create')}}" class="btn btn-primary">
+    {{_("Create a Playlist")}}
+  </a>
+</div>
+{% if playlists %}
+<div class="container mx-auto py-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for playlist in playlists %}
+    <div class="col overflow-hidden">
+      <a href="{{url_for('main.show_playlist',playlist_id=playlist.id)}}">
+        <div class="relative w-60">
+         {% include 'snippets/playlist_image.html' %}
+          
+          <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
+            <p>{{playlist.nb_tracks}} tracks</p>
+            <p>{{g.utils.time_ago(playlist.create_date)}}</p>
+          </div>
+        </div>
+      </a>
+      <div class="p-4 text-sm">
+        <a href="{{url_for('main.show_playlist',playlist_id=playlist.id)}}">
+          <h3 class="text-white font-semibold hover:text-primary">{{playlist.title}}</h3>
+        </a>
+      </div>
+    </div>
+  
+  {% endfor %}
+  {% else %}
+  <div class="flex pt-20 justify-center min-h-screen">
+    <p class="text-4xl">Manage and export/sync your playlists to spotify and apple music.</p>
+  </div>
+  {% endif %}
+  {% endblock %}

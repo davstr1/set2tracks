@@ -1,0 +1,67 @@
+<script>
+  const fooCallBack = (e) => '';
+
+  /**
+ * Sends an AJAX request to the specified URL with the given options.
+ *
+ * @param {string} url - The URL to send the request to.
+ * @param {string} [method='POST'] - The HTTP method to use for the request (default: 'POST').
+ * @param {Object} [payload={}] - The payload to include in the request body (default: empty object).
+ * @param {function} [onSuccess=fooCallBack] - The callback function to execute on a successful response (default: fooCallBack).
+ * @param {function} [onError=fooCallBack] - The callback function to execute on an error response (default: fooCallBack).
+ * @returns {Promise} A promise that resolves to the response data or rejects with an error.
+ */
+  function processAjax(url, method = 'POST', payload = {}, onSuccess = fooCallBack, onError = fooCallBack) {
+    console.log('processAjax', url, method, payload, onSuccess, onError)
+
+    // Define the fetch options
+    let fetchOptions = {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    // If the method is not GET, include the payload in the body
+    if (method.toUpperCase() !== 'GET') {
+      fetchOptions.body = JSON.stringify(payload);
+    }
+
+
+    return fetch(url, fetchOptions)
+      .then(response => response.json().then(result => {
+        console.log(result,response)
+        const responseData = {
+          status_code: response.status,
+          message: result.message,
+          error: result.error
+        };
+
+        if (response.ok) {
+          showSystemMessage(responseData.message);
+          onSuccess(responseData);
+          
+        } else {
+          showSystemMessage(responseData.error, 'warning');
+          onError(responseData);   
+        }
+
+        if (response.redirect) {
+          window.location.href = response.redirect;
+        }
+
+        return responseData;
+      }))
+      .catch(error => {
+        const errorData = {
+          status_code: 500,
+          error: 'Network error or server is down' + error
+        };
+        showSystemMessage(errorData.error, 'warning');
+        onError(errorData);
+
+        return errorData;
+      });
+  }
+
+</script>

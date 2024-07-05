@@ -1,10 +1,14 @@
 {% extends "blank.html" %}
 
 {% block content %}
-<form action="{{ url_for('users.login') }}" method="post" class="w-full max-w-sm" novalidate>
+<div class=" sm:border sm:border-current w-full max-w-sm rounded-lg p-4 ">
+<form action="{{ url_for('users.login',next=next) }}" method="post" class="w-full max-w-sm" novalidate>
   {{ form.hidden_tag() }}
+  <div class="mb-6 text-center">
+    Don't have an account? <a href="{{ url_for('users.register',next=next) }}" class="font-semibold leading-6">Register</a>
+  </div>
   <div class="mb-6">
-    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6">
       {{form.email.label.text }}
     </label>
     {{ form.email(size=32) }}
@@ -16,10 +20,10 @@
 
   <div class="mb-6">
     <div class="flex justify-between items-center">
-      <label for="{{ form.password.id }}" class="text-sm font-semibold leading-6 text-gray-900">
+      <label for="{{ form.password.id }}" class="text-sm font-semibold leading-6 ">
         {{form.password.label.text}}
       </label>
-      <a href="{{ url_for('users.reset_request') }}" class=" text-slate-300 hover:text-slate-400 text-xs">Forgot
+      <a href="{{ url_for('users.reset_request') }}" class=" text-slate-300 hover:text-slate-400 text-xs opacity-50">Forgot
         Password?</a>
     </div>
 
@@ -36,5 +40,6 @@
 </form>
 
 {% include "components/section_social_signin.html" %}
+</div>
 
 {% endblock %}

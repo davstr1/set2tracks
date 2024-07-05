@@ -2,18 +2,18 @@
 
 {% block content %}
 
-
+<div class="sm:border sm:border-current w-full max-w-sm rounded-lg p-4">
 <form action="{{ url_for('users.register_invite',invite_code=invite_code) }}" method="post" class="w-full max-w-sm" novalidate autocomplete="off">
   {{ form.hidden_tag() }}
   {{form.invite_code}}
   <div class="mb-6">
-    <label for="Email" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="Email" class="block text-sm font-semibold leading-6">
       Email
     </label>
-    <input class="input-text select-none  text-slate-400 ring-0 focus:ring-0" type="text" value="{{email}}" readonly />
+    <input class="input-text select-none  ring-0 focus:ring-0" type="text" value="{{email}}" readonly />
   </div>
   <div class="mb-6">
-    <label for="{{ form.fname.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.fname.id }}" class="block text-sm font-semibold leading-6">
       {{form.fname.label.text }}
     </label>
     {{ form.fname(size=32) }}
@@ -23,7 +23,7 @@
   </div>
 
   <div class="mb-6">
-    <label for="{{ form.password.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+    <label for="{{ form.password.id }}" class="block text-sm font-semibold leading-6">
       {{form.password.label.text }}
     </label>
     {{ form.password(size=32) }}
@@ -34,5 +34,6 @@
 
   {{ form.submit() }}
 </form>
+</div>
 
 {% endblock %}

@@ -1,4 +1,6 @@
-import datetime
+from datetime import datetime,timedelta,timezone # if you just directly import datetime, you will get an error on datetime.now
+from pprint import pprint
+#from time import timezone
 from flask_dance.contrib.google import make_google_blueprint,google
 # from flask_dance.contrib.facebook import make_facebook_blueprint,facebook
 from .utils.db import db
@@ -10,6 +12,7 @@ from .models import User,UserConnectMethod,UserType
 from flask_login import login_user
 from sqlalchemy import String, and_
 from flask_babel import _
+import logging
 
 
 # Setup Flask-Dance Google Blueprint
@@ -37,13 +40,18 @@ def after_authorize():
     if not google.authorized:
        return redirect(url_for('google.login'))
     
-    
-    resp = google.get("/oauth2/v2/userinfo")
+    try:
+        resp = google.get("/oauth2/v2/userinfo")
+    except Exception as e:
+        logging.error(f"An error occurred while accessing your Google account: {e}")
+        flash(_('An error occurred while accessing your Google account.'), 'error')
+        return redirect(url_for('google.login'))
 
         
     assert resp.ok, resp.text
     info = resp.json()
-  
+    info['locale'] = 'en' # default to english @TODO : get the locale from the user's browser or something
+    
     user = User.query.filter_by(email=info["email"]).first()
     if not user:
         user = User(fname=info['given_name'], email=info["email"], password='0000',connect_method=UserConnectMethod.Google, type=UserType.User, lang=info['locale'])
@@ -56,7 +64,8 @@ def after_authorize():
     # Since we must update the user id in the OAuth table, we must find the OAuth record with the token
     # the comparison is kind of intensive here.
     # So let's narrow the fook down the search for when our app gets popular and we have a lot of new users
-    five_minutes_ago_utc = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+    five_minutes_ago_utc = (datetime.now(timezone.utc) - timedelta(minutes=5)).replace(tzinfo=None)  #  UTC datetime minus the .utc info at the end
+
     access_token = google.token.get('access_token')
     id_token = google.token.get('id_token')
     oauth = OAuth.query.filter(
@@ -72,10 +81,12 @@ def after_authorize():
         oauth.user_id = user.id
         db.session.commit()
     else:
-        raise Exception(_("No matching OAuth record found."))
+        logging.error(f"No matching OAuth record found for access_token: {access_token} and id_token: {id_token}")
+        flash(_('An error occurred while accessing your Google account.'), 'error')
+        return redirect(url_for('google.login'))
 
         
-   
+   # Todo : check the cookie for the provenance page
     return redirect(url_for('main.dashboard'))  
 
 
@@ -86,7 +97,7 @@ def after_authorize():
 # Can happen since the session if often created before the user without some ACID transaction
 def cleanup_orphaned_sessions():
     
-    one_day_ago_utc = datetime.utcnow() - datetime.timedelta(days=1)
+    one_day_ago_utc = (datetime.now(timezone.utc) - timedelta(days=1)).replace(tzinfo=None) 
     
     orphaned_sessions = OAuth.query.filter(
         OAuth.user_id.is_(None),
