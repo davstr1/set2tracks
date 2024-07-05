@@ -4,15 +4,15 @@ from shazamio.user_agent import USER_AGENTS
 import asyncio
 import os
 import json
+import dotenv
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv.load_dotenv(dotenv_path)
 
 from web.lib.process_shazam_json import transform_track_data
 import logging
 logger = logging.getLogger('root')
 
-# TODO add logging capacities
-# TODO remove proxy + semaphore concurrency hardcoding
-
-PROXY_URL='http://sxbrfiav-rotate:z1rnitsp7b1x@p.webshare.io:80/'
+PROXY_URL = os.getenv('SHAZAM_PROXY_URL')
 
 def transform_shazam_data(data):
     """

@@ -4,7 +4,7 @@ from platform import release
 from re import S
 import time
 from venv import logger
-from flask import jsonify, redirect, request, session
+from flask import jsonify, redirect, request, session, url_for
 import requests
 import spotipy
 from spotipy import SpotifyException
@@ -14,11 +14,13 @@ from web.lib.log_config import setup_logging;setup_logging()
 import logging
 import dotenv,os
 from pprint import pprint
-dotenv.load_dotenv()
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv.load_dotenv(dotenv_path)
 logger = logging.getLogger('root')
 
-SPOTIPY_REDIRECT_URI = 'http://localhost:50001/spotify_callback'
-PROXY_URL='http://sxbrfiav-rotate:z1rnitsp7b1x@p.webshare.io:80/'
+SPOTIPY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI') #'http://localhost:50001/spotify_callback'
+PROXY_URL = os.getenv('SHAZAM_PROXY_URL')
 
 # Scope for the data you want to access and modify
 SCOPE = 'user-library-read playlist-read-private playlist-modify-public playlist-modify-private'
