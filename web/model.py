@@ -116,7 +116,7 @@ class Channel(db.Model):
     channel_follower_count = db.Column(db.Integer)
     sets = db.relationship('Set', backref='channel', lazy=True)  # completed this line
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    
+    hidden = db.Column(db.Boolean, default=False, index=True)
         
 
 class Set(db.Model):
@@ -151,6 +151,7 @@ class Set(db.Model):
     valence = db.Column(SmallInteger)
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     error = db.Column(db.Text, nullable=True)
+    hidden = db.Column(db.Boolean, default=False, index=True)
    # tracks = db.relationship('Track', secondary='track_sets', back_populates='sets')
    
 class SetSearch(db.Model):
