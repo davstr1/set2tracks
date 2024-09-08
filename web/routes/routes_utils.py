@@ -1,16 +1,22 @@
 
 from flask import jsonify, redirect, request, url_for
+from config import Config
 from flask_login import current_user
 
 from web.controller import get_playlists_from_user
 from web.lib.format import apple_has_track, apple_track_url, get_cover_art, key_mode, km_number, spotify_has_track, spotify_track_url, time_ago
-
+import dotenv
 
 def is_connected():
     return current_user.is_authenticated
 
-def is_admin():
-    return is_connected() and current_user.is_admin
+def is_admin():    
+    if not is_connected():
+        return False
+    
+    print( current_user.id, Config.ADMIN_UID)  # 3, 3
+    return str(current_user.id) == str(Config.ADMIN_UID) # False
+    
 
 def get_user_id():
     if is_connected():

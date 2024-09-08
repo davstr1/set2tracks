@@ -1,3 +1,4 @@
+from re import A
 from dotenv import load_dotenv
 import os,sys
 load_dotenv()
@@ -28,6 +29,7 @@ class Config:
         GOOGLE_CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
         SIGNUP_OPTIONS = SIGNUP_OPTIONS
         LOGGING_CONFIG_FILE = os.environ['LOGGING_CONFIG_FILE']
+        ADMIN_UID = os.environ['ADMIN_UID']
     except KeyError as e:
         sys.exit(f"Missing environment variable(s). Please add all the required environments variables as instructed in the README")
     
