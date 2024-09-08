@@ -396,12 +396,13 @@ def get_my_sets_in_queue(user_id):
     
     
 def get_channel_to_check():   
-    channel = Channel.query.filter(Channel.channel_id != 'None').order_by(Channel.updated_at.asc()).first() # yeah, mysterious channel with None id appears. @TODO
+    channel = Channel.query.filter(Channel.channel_id != 'None',Channel.hidden == False).order_by(Channel.updated_at.asc()).first() # yeah, mysterious channel with None id appears. @TODO
 
     return channel
 
 def get_set_to_check():   
-    set = Set.query.filter((Set.error == '') | (Set.error == None)).order_by(Set.updated_at.asc()).first()
+    set = Set.query.filter(((Set.error == '') | (Set.error == None)) & (Set.hidden == False)).order_by(Set.updated_at.asc()).first()
+
 
 
 
