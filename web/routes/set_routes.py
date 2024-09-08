@@ -14,96 +14,8 @@ from web.logger import logger
 
 set_bp = Blueprint('set', __name__)
 
-
-@set_bp.route('/add', methods=['GET', 'POST'])
-def add():
-    if not is_connected():
-        return redirect(url_for('users.login', next=url_for('set.add')))
-    
-    
-
-    if request.method == 'POST':
-        youtube_url = request.form.get('youtube_url')
-        if not youtube_url:
-            flash('No YouTube URL provided. Please enter a URL.', 'error')
-            return redirect(url_for('set.add', youtube_url=youtube_url))
-        if not youtube_video_input_is_valid(youtube_url):
-            flash('Invalid YouTube URL. Please enter a valid URL.', 'error')
-            return redirect(url_for('set.add', youtube_url=youtube_url))
-       
-        
-        # Process the YouTube URL as needed
-        # Example of successful processing redirect or message
-        #flash('URL received successfully.', 'success')
-        video_id = youtube_video_id_from_url(youtube_url)
-        return redirect(url_for('set.insert_set_route',video_id=video_id))
-    
-    youtube_url = request.args.get('youtube_url', '')
-    return render_template('add.html',youtube_url=youtube_url)
-
-
-@set_bp.route('/insert_set/<video_id>', methods=['GET'])
-def insert_set_route(video_id):
-    
-    if (is_set_exists(video_id)):
-       return redirect(url_for('set.set',set_id=get_set_id_by_video_id(video_id))) 
-    
-    result = queue_set(video_id,get_user_id()) #insert_set(video_id)
-   
-   
-    if isinstance(result, dict) and 'error' in result:
-        flash(result['error'], 'error')
-        return redirect(url_for('set.add', youtube_url=video_id))
-
-    if isinstance(result, SetQueue) and result.id:
-        flash('Set added to the queue', 'success')
-        return redirect(url_for('set.add'))
-    
-@set_bp.route('/set/<int:set_id>')
-def set(set_id):
-    set = get_set_with_tracks(set_id)
-    
-    txt = request.args.get('txt', '', type=str)
-    
-
-    
-    if 'error' in set:
-        return redirect(url_for('basic.index'))
-    
-    #genres = get_set_genres_by_occurrence(set_id)
-    #pprint(genres)
-   
-    
-
-   # avg_properties = calculate_avg_properties(set['tracks'])
- 
-    most_common_decades = calculate_decade_distribution(set['tracks'])
-    
-    pprint(most_common_decades)
-    # most_common_tempos = calculate_and_sort_tempo_distribution(set['tracks'])
-    # pprint(avg_properties)
-    # pprint('------')
-    # print(most_common_decades)
-    # print(most_common_tempos)
-    #pprint(get_set_avg_characteristics(set_id))
-    
-    if txt:
-        return render_template('set.txt', set=set)
-    
-    current_url = request.url
-    user_id = get_user_id()
-    
-    if user_id:
-        user_playlists = get_playlists_from_user(user_id, order_by='title')
-    else:
-        user_playlists = []
-
-
-    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url)
-
-
-
-
+## PAGES ##
+## Scroll down to see the ACTIONS pages ##
 
 @set_bp.route('/')
 def sets():   
@@ -149,8 +61,8 @@ def sets():
                            inspiration_searches=inspiration_searches,
                            tpl_utils=tpl_utils,
                            is_admin=is_admin()) 
-
-
+    
+    
 @set_bp.route('/sets/queue')  
 def get_sets_queue():
     if not is_connected():
@@ -158,6 +70,50 @@ def get_sets_queue():
     sets = get_sets_in_queue()
     my_sets = get_my_sets_in_queue(user_id=get_user_id())
     return render_template('sets_queue.html',sets=sets,my_sets=my_sets)
+
+
+@set_bp.route('/set/<int:set_id>')
+def set(set_id):
+    set = get_set_with_tracks(set_id)
+    
+    txt = request.args.get('txt', '', type=str)
+    
+
+    
+    if 'error' in set:
+        return redirect(url_for('basic.index'))
+    
+    #genres = get_set_genres_by_occurrence(set_id)
+    #pprint(genres)
+   
+    
+
+   # avg_properties = calculate_avg_properties(set['tracks'])
+ 
+    most_common_decades = calculate_decade_distribution(set['tracks'])
+    
+    pprint(most_common_decades)
+    # most_common_tempos = calculate_and_sort_tempo_distribution(set['tracks'])
+    # pprint(avg_properties)
+    # pprint('------')
+    # print(most_common_decades)
+    # print(most_common_tempos)
+    #pprint(get_set_avg_characteristics(set_id))
+    
+    if txt:
+        return render_template('set.txt', set=set)
+    
+    current_url = request.url
+    user_id = get_user_id()
+    
+    if user_id:
+        user_playlists = get_playlists_from_user(user_id, order_by='title')
+    else:
+        user_playlists = []
+
+
+    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url)
+
 
 
 
@@ -183,6 +139,68 @@ def related_tracks(track_id):
     else:
         logger.info('no related tracks')
         return redirect(request.referrer or url_for('basic.index'))
+    
+    
+## ACTIONS  pages ##
+
+
+
+@set_bp.route('/add', methods=['GET', 'POST'])
+def add():
+    if not is_connected():
+        return redirect(url_for('users.login', next=url_for('set.add')))
+    
+    
+
+    if request.method == 'POST':
+        youtube_url = request.form.get('youtube_url')
+        if not youtube_url:
+            flash('No YouTube URL provided. Please enter a URL.', 'error')
+            return redirect(url_for('set.add', youtube_url=youtube_url))
+        if not youtube_video_input_is_valid(youtube_url):
+            flash('Invalid YouTube URL. Please enter a valid URL.', 'error')
+            return redirect(url_for('set.add', youtube_url=youtube_url))
+       
+        
+        # Process the YouTube URL as needed
+        # Example of successful processing redirect or message
+        #flash('URL received successfully.', 'success')
+        video_id = youtube_video_id_from_url(youtube_url)
+        return redirect(url_for('set.insert_set_route',video_id=video_id))
+    
+    youtube_url = request.args.get('youtube_url', '')
+    return render_template('add.html',youtube_url=youtube_url)
+
+
+@set_bp.route('/insert_set/<video_id>', methods=['GET'])
+def insert_set_route(video_id):
+    
+    if (is_set_exists(video_id)):
+       return redirect(url_for('set.set',set_id=get_set_id_by_video_id(video_id))) 
+    
+    result = queue_set(video_id,get_user_id()) #insert_set(video_id)
+   
+   
+    if isinstance(result, dict) and 'error' in result:
+        flash(result['error'], 'error')
+        return redirect(url_for('set.add', youtube_url=video_id))
+
+    if isinstance(result, SetQueue) and result.id:
+        flash('Set added to the queue', 'success')
+        return redirect(url_for('set.add'))
+    
+
+
+
+
+
+
+
+
+
+
+
+
     
     
 @set_bp.route('/jax/check_set_status/<string:youtube_video_id>', methods=['GET','POST'])
