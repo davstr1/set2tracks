@@ -785,8 +785,9 @@ def compile_and_sort_genres(track_sets):
 
 
 def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
-    query = Set.query.filter_by(playable_in_embed=True, published=True) \
+    query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
                      .join(Set.channel) \
+                     .filter(Set.channel.has(hidden=False)) \
                      .options(joinedload(Set.channel))
                      
     if search:
