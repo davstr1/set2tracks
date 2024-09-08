@@ -1366,3 +1366,24 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
 def get_random_set_searches(min_popularity, n):
    
     return db.session.query(SetSearch).filter(SetSearch.nb_results >= min_popularity).order_by(func.random()).limit(n).all()
+
+
+def channel_toggle_visibility(channel_id):
+    channel = Channel.query.get(channel_id)
+    if not channel:
+        return {"error": "Channel not found"}
+    
+    channel.hidden = not channel.hidden
+    db.session.commit()
+    
+    return {"message": f"Channel visibility toggled to {channel.hidden}"}
+
+def set_toggle_visibility(set_id):
+    set_instance = Set.query.get(set_id)
+    if not set_instance:
+        return {"error": "Set not found"}
+    
+    set_instance.hidden = not set_instance.hidden
+    db.session.commit()
+    
+    return {"message": f"Set visibility toggled to {set_instance.hidden}"}
