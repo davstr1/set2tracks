@@ -18,8 +18,6 @@
         {% endif %}
       </div>
       <div class="w-full py-4 relative flex items-center">
-        <!-- Left Arrow -->
-
         <div class="flex overflow-x-auto space-x-2 no-scrollbar mb-8">
           {% if inspiration_searches %}
           <div class="flex space-x-2">
@@ -31,26 +29,12 @@
           </div>
           {% endif %}
         </div>
-        <div id="left-arrow" class="hidden absolute left-0 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-        </div>
-        <!-- Right Arrow -->
-        <div id="right-arrow" class="hidden absolute right-14 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </div>
         <div class="flex ml-auto flex-shrink-0 pb-8 pl-4">
           <div class="bg-gray-700 text-white px-4 py-2 rounded-md whitespace-nowrap cursor-pointer tooltip" data-tip="Check all tags">
             ...
           </div>
+
         </div>
-
-
-
-
       </div>
 
 
@@ -149,40 +133,5 @@
       document.getElementById('search_sets').submit();
     });
   });
-
-
-  document.addEventListener('DOMContentLoaded', function () {
-    const leftArrow = document.getElementById('left-arrow');
-    const rightArrow = document.getElementById('right-arrow');
-    const container = document.querySelector('.overflow-x-auto');
-
-    function updateArrows() {
-      if (container.scrollLeft > 0) {
-        leftArrow.classList.remove('hidden');
-      } else {
-        leftArrow.classList.add('hidden');
-      }
-
-      if (container.scrollWidth > container.clientWidth && container.scrollLeft + container.clientWidth < container.scrollWidth) {
-        rightArrow.classList.remove('hidden');
-      } else {
-        rightArrow.classList.add('hidden');
-      }
-    }
-
-    container.addEventListener('scroll', updateArrows);
-
-    leftArrow.addEventListener('click', function () {
-      container.scrollBy({ left: -200, behavior: 'smooth' });
-    });
-
-    rightArrow.addEventListener('click', function () {
-      container.scrollBy({ left: 200, behavior: 'smooth' });
-    });
-
-    updateArrows();
-  });
-
-
 </script>
 {% endblock %}

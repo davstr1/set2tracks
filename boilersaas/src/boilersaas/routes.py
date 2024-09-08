@@ -28,7 +28,7 @@ def register():
     
     if not app.config.get('SIGNUP_OPTIONS')['allow_site']:
         flash(_('Registration is not currently allowed.'), 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('basic.index'))
 
     form = RegistrationForm()
     next_page = request.args.get('next')
@@ -56,7 +56,7 @@ def register_invite(invite_code):
     
     if not app.config.get('SIGNUP_OPTIONS')['allow_invite']:
         flash(_('Invites are not currently allowed.'), 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('basic.index'))
 
     form = RegistrationByInviteForm()
       
@@ -67,10 +67,10 @@ def register_invite(invite_code):
         invite = Invite.query.filter_by(invite_code=invite_code).first()
         if not invite:
             flash(_('Invalid or expired invite code.'), 'error')
-            return redirect(url_for('main.index'))
+            return redirect(url_for('basic.index'))
     else:
         flash(_('No invite code provided.'), 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('basic.index'))
     
     if form.validate_on_submit():
         
@@ -111,10 +111,10 @@ def login():
 @bp.route('/logout')
 def logout():
     if not current_user.is_authenticated:
-        return redirect(url_for('main.index'))  # Adjust according to your app's structure
+        return redirect(url_for('basic.index'))  # Adjust according to your app's structure
     
     logout_user()  # Log out the current user
-    return redirect(url_for('main.index'))  # Redirect to homepage or login page
+    return redirect(url_for('basic.index'))  # Redirect to homepage or login page
 
 
 @bp.route('/reset_password', methods=['GET', 'POST'])

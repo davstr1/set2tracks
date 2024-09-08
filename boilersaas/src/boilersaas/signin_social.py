@@ -33,7 +33,7 @@ google_blueprint.storage = SQLAlchemyStorage(OAuth, db.session, user=current_use
 def after_authorize():
     if not app.config.get('SIGNUP_OPTIONS')['allow_google']:
         flash(_('Google registration is not currently allowed.'), 'error')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('basic.index'))
     
 
 

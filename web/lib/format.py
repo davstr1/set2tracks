@@ -17,7 +17,7 @@ from web.model import Genre, Track
 import logging
 logger = logging.getLogger('root')
 
-def time_ago(value):
+def time_ago(value,less_than_a_day=True):
     now = datetime.now()
     diff = relativedelta(now, value)
 
@@ -27,6 +27,8 @@ def time_ago(value):
         return f"{diff.months} month{'s' if diff.months > 1 else ''} ago"
     elif diff.days > 0:
         return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
+    elif not less_than_a_day:
+        return 'today'
     elif diff.hours > 0:
         return f"{diff.hours} hour{'s' if diff.hours > 1 else ''} ago"
     elif diff.minutes > 0:
@@ -35,6 +37,8 @@ def time_ago(value):
         return "just now"
     
 def km_number(value):
+    if value is None:
+        return '0'
     if value >= 1_000_000:
         formatted = value / 1_000_000
         return f"{formatted:.1f}m" if formatted % 1 != 0 else f"{int(formatted)}m"
@@ -229,6 +233,8 @@ def format_db_track_for_template(track):
             'loudness': track.loudness,
             'speechiness': track.speechiness,
             'time_signature': track.time_signature,
+            'genres':track.genres,
+            'has_related_tracks': track.has_related_tracks(),
             #'pos': track_set.pos
             }
     except Exception as e:

@@ -243,6 +243,8 @@ import concurrent.futures
 
 def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
     
+    json.dump(tracks_json, open('tracks.json', 'w'), indent=4)
+    
     def first_match(tracks,title,artist):
         first_match = None
         for track in tracks:
@@ -291,11 +293,16 @@ def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
                         if updated_info:
                             # keep the start_time and end_time
                             # Otherwise, repeated songs would get the same start_time and end_time
-                            start_time = original_track['start_time']
-                            end_time = original_track['end_time']
+                            # Need this check because this also runs on the related tracks, which don't have start_time and end_time
+                            if 'start_time' in original_track and 'end_time' in original_track:
+                                start_time = original_track['start_time']
+                                end_time = original_track['end_time']
+                                
                             original_track.update(updated_info)
-                            original_track['start_time'] = start_time
-                            original_track['end_time'] = end_time
+                            
+                            if 'start_time' in original_track and 'end_time' in original_track:
+                                original_track['start_time'] = start_time
+                                original_track['end_time'] = end_time
         except Exception as e:
             logger.error(f'Error updating original tracks: {e}')
             

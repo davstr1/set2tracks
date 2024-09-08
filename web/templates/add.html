@@ -6,17 +6,11 @@
   <div class="form-wrapper">
     <h1 class="text-xl text-center font-semibold leading-7 mb-12">Add DJ set → Get tracks.</h1>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="{{ category }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
+   
 
     <form action="/add" method="POST" class="mt-4">
       <div class="mt-1">
-        <input type="text" id="youtube_url" name="youtube_url" placeholder="{{_('Paste YouTube Video URL or ID')}}">
+        <input type="text" id="youtube_url" name="youtube_url" placeholder="{{_('Paste YouTube Video URL or ID')}}" value="{{youtube_url}}"/>
       </div>
       <button type="submit" class="btn btn-primary w-full">{{_('Add Set')}}</button>
     </form>

@@ -1,6 +1,8 @@
+from pprint import pp, pprint
 from aiohttp_retry import ExponentialRetry
 from shazamio import HTTPClient, Shazam
 from shazamio.user_agent import USER_AGENTS
+from shazamio.exceptions import FailedDecodeJson, BadParseData,BadMethod
 import asyncio
 import os
 import json
@@ -32,15 +34,61 @@ def transform_shazam_data(data):
     return result
 
 
-async def shazam_related_tracks(track_id,limit=20):
-   
+# async def shazam_related_tracks(track_id,limit=20):
+#     print (f'shazam_related_tracks for {track_id}')
+#     try:
+#         shazam = Shazam()
+#         related = await shazam.related_tracks(track_id=track_id, limit=limit,proxy=PROXY_URL)
+#         transformed = transform_shazam_data(related)
+#         return transformed
+#     except Exception as e:
+#         logger.error(f"Error in shazam_related_tracks: {e}")
+#         return []
+
+async def shazam_related_tracks(track_id, limit=20):
+    """
+    Retrieves related tracks from Shazam for a given track ID.
+
+    Args:
+        track_id (str): The ID of the track for which related tracks are to be retrieved.
+        limit (int, optional): The maximum number of related tracks to retrieve. Defaults to 20.
+
+    Returns:
+        list: A list of transformed related tracks data.
+        Or an empty list if there is an error. (but errors are logged)
+        In general, an error means shazam API just returned a blank page. which means no related tracks fro him
+        @TODO : watch for shazam errors that are not FailedDecodeJson error.
+    Logs:
+        FailedDecodeJson: If there is an error decoding the JSON response from Shazam.
+        BadMethod: If there is an HTTP error while making the request to Shazam.
+        BadParseData: If there is an error parsing the data from Shazam.
+        Exception: If there is an unknown error.
+
+    """
+    logger.info(f'Starting shazam_related_tracks for {track_id} with limit {limit}')
     try:
         shazam = Shazam()
-        related = await shazam.related_tracks(track_id=track_id, limit=limit,proxy=PROXY_URL)
+        logger.info('Initialized Shazam client')
+        
+        related = await shazam.related_tracks(track_id=track_id, limit=limit, proxy=PROXY_URL)
+        logger.info(f'Received related tracks from Shazam {related}')
+        
         transformed = transform_shazam_data(related)
+        logger.info('Transformed related tracks data')
+        
         return transformed
+    
+    except FailedDecodeJson as json_error:
+        logger.error(f"FailedDecodeJson error in shazam_related_tracks for track id {track_id} : {json_error}")
+        return []
+    except BadMethod as http_error:
+        logger.error(f"BadMethod error in shazam_related_tracks for track id {track_id} : {http_error}")
+        return []
+    except BadParseData as shazam_error:
+        logger.error(f"BadParseData error in shazam_related_tracks for track id {track_id} : {shazam_error}")
+        return []
     except Exception as e:
-        logger.error(f"Error in shazam_related_tracks: {e}")
+        logger.error(f"Unknown error in shazam_related_tracks for track id {track_id} : {e}")
         return []
         
 
@@ -59,7 +107,7 @@ async def recognize_song(file_path, proxy, retries=1):
     while attempt < retries:
         try:
             file_name = os.path.basename(file_path)
-            logger.debug(f"Shazaming song from ... {file_name}...")
+            logger.debug(f"Shazaming song from ... {file_name}... at proxy {proxy}")
             result = await shazam.recognize(file_path, proxy=proxy)
             return result
         except Exception as e:

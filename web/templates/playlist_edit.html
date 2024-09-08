@@ -2,14 +2,13 @@
 
 {% block content %}
 <div class="flex justify-end items-start p-4">
-  <a href="{{ url_for('main.show_playlist',playlist_id=playlist.id) }}" class="btn">
-    < {{ _("Back to Playlist") }}
-  </a>
+  <a href="{{ url_for('playlist.show_playlist',playlist_id=playlist.id) }}" class="btn">
+    < {{ _("Back to Playlist") }} </a>
 </div>
 <div class="flex pt-20 justify-center min-h-screen">
   <div class="w-full max-w-md">
     <h2 class="text-4xl mb-6 text-center">{{ _("Edit Playlist") }}</h2>
-    <form action="{{ url_for('main.playlist_edit',playlist_id=playlist.id) }}" method="post">
+    <form action="{{ url_for('playlist.playlist_edit',playlist_id=playlist.id) }}" method="post">
       <input type="hidden" name="id" value={{playlist.id}}>
       <input type="hidden" name="title_old" value="{{ playlist.title}}">
       <div class="mb-4">

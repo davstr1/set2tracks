@@ -7,7 +7,7 @@
 <div class="flex flex-col items-center">
   <!-- Title on top -->
   <div class="w-full text-center my-4">
-    <h1 class="text-3xl">{{ playlist.title }} <a href="{{ url_for('main.playlist_edit', playlist_id=playlist.id) }}" class="text-sm align-super">
+    <h1 class="text-3xl">{{ playlist.title }} <a href="{{ url_for('playlist.playlist_edit', playlist_id=playlist.id) }}" class="text-sm align-super">
         Edit
       </a></h1>
   </div>
@@ -15,18 +15,35 @@
   <!-- Two-column layout for image and buttons -->
   <div class="flex my-4">
     <!-- Left column: Image -->
-    <div class="mr-8">
+    <div class="mr-8 relative">
       <div class="relative w-60">
         {% include 'snippets/playlist_image.html' %}
+      </div>
+      <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black  rounded-lg text-xs text-right">
+        <p>{{playlist.nb_tracks}} tracks</p>
+        <p>~{{ playlist.duration // 60 }} min <span class="tooltip" data-tip="Indicative value. We don't have all songs duration.">*</span></p>
       </div>
     </div>
 
     <!-- Right column: Buttons -->
     <div class="flex flex-col justify-start space-y-4">
 
-      <a href="{{ url_for('main.playlist_to_spotify', playlist_id=playlist.id) }}" class="btn bg-red-500 text-white hover:bg-red-600 hover:text-white py-2 px-4 text-sm font-semibold whitespace-nowrap">
+      <a data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" id="playlist_to_spotify" class="btn btn-primary{% if playlist.playlist_id_spotify %} hidden{% endif %}">
         Create playlist on Spotify
       </a>
+
+      <a data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" id="playlist_sync_spotify" class="hidden btn{% if not playlist.playlist_id_spotify %} hidden{% endif %}">
+        Sync with Spotify
+      </a>
+
+      {% if playlist.set_id %}
+
+      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="btn">
+        View set from playlist </a>
+
+      {% endif %}
+
+
     </div>
   </div>
 </div>
@@ -55,7 +72,25 @@
   });
 
 
+  document.querySelector('#playlist_to_spotify').addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.target.setAttribute('disabled', true);
+    const uri = e.target.getAttribute('data-href');
 
+    return processAjax(uri, 'GET', {}, (res) => {
+      if (res?.error) {
+        console.log(res.message);
+        e.target.removeAttribute('disabled');
+        return;
+      }
+      e.target.removeAttribute('disabled');
+      const syncToSpotify = document.querySelector('#playlist_sync_spotify');
+      syncToSpotify.classList.remove('hidden');
+      console.log(res.message);
+      e.target.classList.add('hidden');
+    });
+  });
 
 
   document.querySelectorAll('.track .remove-track-from-playlist').forEach((element, index) => {
@@ -74,7 +109,7 @@
         rebuildTrackPositions();
       }
 
-      return processAjax('{{ url_for("main.jax_remove_track_from_playlist") }}', 'POST', payload, onSuccess);
+      return processAjax('{{ url_for("playlist.jax_remove_track_from_playlist") }}', 'POST', payload, onSuccess);
 
     })
   });
@@ -97,7 +132,7 @@
 
   function saveTrackOrderToServer(payload) {
 
-    return processAjax('{{ url_for("main.update_position") }}', 'POST', payload);
+    return processAjax('{{ url_for("playlist.update_position") }}', 'POST', payload);
 
   }
   new Sortable(trackList, {

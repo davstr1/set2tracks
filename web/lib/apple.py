@@ -1,5 +1,5 @@
 import json
-from math import log
+import sys
 import applemusicpy
 from web.lib.utils import safe_get
 import os
@@ -12,18 +12,40 @@ logger = logging.getLogger('root')
 
 APPLE_KEY_ID = os.getenv('APPLE_KEY_ID')
 APPLE_TEAM_ID = os.getenv('APPLE_TEAM_ID')
-APPLE_PRIVATE_KEY = os.getenv('APPLE_PRIVATE_KEY')
+APPLE_PRIVATE_KEY = os.getenv('APPLE_PRIVATE_KEY').replace("\\n", "\n")
+
+os.environ.pop("APPLE_PRIVATE_KEY", None)
+
+if not all([APPLE_KEY_ID, APPLE_TEAM_ID, APPLE_PRIVATE_KEY]):
+    logger.error("Error: One or more environment variables are not set.")
+    sys.exit(1)
 
 
+logger.info(f'APPLE_KEY_ID: {APPLE_KEY_ID}')
+logger.info(f'APPLE_PRIVATE_KEY: {APPLE_PRIVATE_KEY}')
+logger.info('Apple API keys loaded from environment variables.')
+
+# print(APPLE_PRIVATE_KEY)
+# sys.exit(1)
 
 def am_songs(song_ids_list: list) -> dict:
     def convert_and_check(value, multiplier=100): # conver from 0 to 1 to 0 to 100
         return int(value * multiplier) if value is not None else None
+
     
+
+    keys = {
+            'APPLE_KEY_ID': APPLE_KEY_ID,
+            'APPLE_TEAM_ID': APPLE_TEAM_ID,
+            'APPLE_PRIVATE_KEY': APPLE_PRIVATE_KEY
+        }
+    
+        
     try:
+       
         am = applemusicpy.AppleMusic(APPLE_PRIVATE_KEY, APPLE_KEY_ID, APPLE_TEAM_ID )
     except Exception as e:
-        logger.error(f'error connecting to AppleMusic : {e}')
+        logger.error(f'error connecting to AppleMusic : {e}, {APPLE_KEY_ID}, {APPLE_TEAM_ID}, {APPLE_PRIVATE_KEY}')
         return {}
         
     
@@ -72,9 +94,12 @@ def am_songs(song_ids_list: list) -> dict:
 def add_apple_track_data_from_json(tracks):
     key_apple_tracks = [song["key_track_apple"] for song in tracks]
     key_apple_tracks = list(set(filter(None, key_apple_tracks)))
+    
+    json.dump(key_apple_tracks, open('apple_tracks.json', 'w'), indent=4)
    
     apple_tracks_info = am_songs(key_apple_tracks)
     
+    json.dump(apple_tracks_info, open('apple_tracks_info.json', 'w'), indent=4)
   
     for song in tracks:
         song.update(apple_tracks_info.get(song["key_track_apple"], {}))       

@@ -12,7 +12,7 @@ def dashboard():
     if current_user.is_authenticated:
         return render_template('dashboard.html')
     
-    return redirect(url_for('main.index'))
+    return redirect(url_for('basic.index'))
 
 
 # Define your own routes here

@@ -10,6 +10,8 @@ from web.model import RelatedTracks
 
 def save_related_tracks(track):
     
+    error_msg = False
+    
     try:
         track_id_shazam = track.key_track_shazam
         tracks = asyncio.run(shazam_related_tracks(track_id_shazam, limit=20))
@@ -23,12 +25,17 @@ def save_related_tracks(track):
             message = f"Related tracks saved for track ID {track.id}"
             
         else:
-            message = f"No related tracks found for track ID {track.id}"
+            message = f"No related tracks found for this track"
+            error_msg = True
                
         track.related_tracks_checked = True
         db.session.commit()    
+        
+        if error_msg:
+            return {'error': message}
+        
         return {'message': message}  
     
     except Exception as e:
 
-        return({'error':f"Error saving related tracks: {e}"})
+        return({'error':f"Exception Error saving related tracks : {e}"})

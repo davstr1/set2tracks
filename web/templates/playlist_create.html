@@ -2,28 +2,29 @@
 
 {% block content %}
 <div class="flex justify-end items-start p-4">
-  <a href="{{ url_for('main.index') }}" class="text-sm font-semibold leading-6 bg-primary text-white hover:text-white py-2 px-4 rounded">
+  <a href="{{ url_for('basic.index') }}" class="text-sm font-semibold leading-6 bg-primary text-white hover:text-white py-2 px-4 rounded">
     {{ _("Back to Playlists") }}
   </a>
 </div>
 <div class="flex items-center justify-center">
-<div class="form-wrapper">
-  <div class="flex justify-center ">
-    <div class="w-full max-w-md">
-      <h2 class="text-xl text-center font-bold leading-7 mb-12">{{ _("Create a Playlist") }}</h2>
-      <form action="{{ url_for('main.playlist_create') }}" method="post">
-        <div class="mb-4">
-          <label for="name" class="block text-sm font-medium">{{ _("Playlist Name") }}</label>
-          <input type="text" name="title" id="title" required>
-        </div>
-        <div class="flex justify-center">
-          <button type="submit" class="btn btn-primary w-full">
-            {{ _("Create Playlist") }}
-          </button>
-        </div>
-      </form>
+  <div class="form-wrapper">
+    <div class="flex justify-center ">
+      <div class="w-full max-w-md">
+        <h2 class="text-xl text-center font-bold leading-7 mb-12">{{ _("Create a Playlist") }}</h2>
+        <form action="{{ url_for('playlist.playlist_create') }}" method="post">
+          <div class="mb-4">
+            <label for="name" class="block text-sm font-medium">{{ _("Playlist Name") }}</label>
+            <input type="text" name="title" id="title" required>
+            <input type="hidden" name="next" value="{{ next }}">
+          </div>
+          <div class="flex justify-center">
+            <button type="submit" class="btn btn-primary w-full">
+              {{ _("Create Playlist") }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</div>
 </div>
 {% endblock %}

@@ -156,12 +156,12 @@
   <div class="overflow-y-auto max-h-40 mb-4">
 
     <ul class="space-y-1">
-      {% if g.user_playlists|length == 0 %}
+      {% if user_playlists|length == 0 %}
       <div class="justify-center content-center">
-        <a href="{{url_for('main.playlist_create')}}" class="block p-2 rounded-xl hover:bg-blue-950">Create Your First Playlist...</a>
+        <a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2 rounded-xl hover:bg-blue-950">Create Your First Playlist...</a>
       </div>
       {% else %}
-      {% for playlist in g.user_playlists %}
+      {% for playlist in user_playlists %}
       <li><a data-playlist-id="{{playlist.id}}" href="#" class="add-track-to-playlist block p-2 rounded-xl hover:bg-blue-950">{{playlist.title}}</a></li>
       {% endfor %}
       {% endif %}
@@ -173,7 +173,7 @@
   <!-- Second Section -->
   <div class="overflow-y-auto max-h-40">
     <ul class="space-y-1">
-      <li><a href="#" class="block p-2 rounded-xl hover:bg-blue-950">Option 1</a></li>
+      <li><a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2 rounded-xl hover:bg-blue-950">Create a Playlist</a></li>
 
     </ul>
   </div>
@@ -236,7 +236,7 @@
       const relatedTracksUrl = this.getAttribute('data-related-tracks-url');
       const relatedTracksCheckUrl = this.getAttribute('data-related_tracks-check-url');
 
-      const onSuccess = (response) => { 
+      const onSuccess = (response) => {
         window.location.href = relatedTracksUrl;
       }
       const onError = (error) => {
@@ -245,7 +245,7 @@
 
 
 
-      return processAjax(relatedTracksCheckUrl, 'GET', null, onSuccess, onError)
+      return processAjax(relatedTracksCheckUrl, 'POST', { 'caller_url': window.location.href }, onSuccess, onError)
 
 
     });
@@ -265,18 +265,6 @@
       event.preventDefault();
       const trackId = this.closest('.track').getAttribute('data-track-id');
       return addTrackToPlaylistLastUsed({ track_id: trackId })
-        // .then(response => {
-        //   if (response.status_code === 200) {
-        //     console.log(response.message);
-        //     showSystemMessage(response.message);
-        //   } else { // Error handling
-        //     if (response.redirect) {
-        //       window.location.href = response.redirect;
-        //     }
-        //     console.log(response.error);
-        //     showSystemMessage(response.error, 'warning');
-        //   }
-        // });
 
     });
   });
@@ -431,49 +419,16 @@
 
   function addTrackToPlaylist(payload) {
 
-    return processAjax('{{ url_for("main.jax_add_track_to_playlist") }}', 'POST', payload)
-    // return fetch('{{ url_for("main.jax_add_track_to_playlist") }}', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(payload)
-    // })
-    //   .then(response => response.json()
-    //     .then(result => ({
-    //       status_code: response.status,
-    //       message: result.message,
-    //       error: result.error
-    //     })))
-    //   .catch(error => ({
-    //     status_code: 500,
-    //     error: 'Network error or server is down'
-    //   }));
+    return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
+
   }
 
   function addTrackToPlaylistLastUsed(payload) {
 
     payload.caller_url = window.location.href;
-    return processAjax('{{ url_for("main.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
+    return processAjax('{{ url_for("playlist.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
 
-    // return fetch('{{ url_for("main.jax_add_track_to_playlist_last_used") }}', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(payload)
-    // })
-    //   .then(response => response.json()
-    //     .then(result => ({
-    //       status_code: response.status,
-    //       message: result.message,
-    //       error: result.error,
-    //       redirect: result.redirect
-    //     })))
-    //   .catch(error => ({
-    //     status_code: 500,
-    //     error: 'Network error or server is down'
-    //   }));
+
   }
 
 

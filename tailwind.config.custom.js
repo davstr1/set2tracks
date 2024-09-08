@@ -41,6 +41,9 @@ const customConfig = {
         '.hypotetic': {
           '@apply opacity-40': {}, // border  border-dashed border-slate-400
         },
+        '.discreet': {
+          '@apply opacity-40': {}, // border  border-dashed border-slate-400
+        },
       });
     }),
   ],

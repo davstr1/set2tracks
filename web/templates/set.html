@@ -17,15 +17,32 @@ even where the player is not behind*/
 
 
 
-<div class="flex justify-end  items-start p-4">
-  <a href="#"  id="create-playlist-from-set-tracks" class=" btn btn-primary flex justify-center items-center">
+<div class="flex justify-between items-start p-4 pl-0 pr-0">
+  <div class=" pl-2">
+    <!-- Insert your text here -->
+    <h1 class="text-2xl"><span class="discreet block">Tracklist from</span> <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}} <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+          <use xlink:href="#icon-link-external"></use>
+        </svg></a></h1>
 
-    Create Playlist from tracks
-  </a>
+    <p class="text-gray-600"><a href="{{url_for('set.sets',s=set.channel.author)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
+    <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
+  </div>
+  <div>
+    {% if not set.playlist_id %}
+    <a href="#" id="create-playlist-from-set-tracks" class="btn btn-primary flex justify-center items-center">
+      Create Playlist from set tracks
+    </a>
+    {% else %}
+    <a href="{{url_for('playlist.show_playlist',playlist_id=set.playlist_id)}}" class="btn flex justify-center items-center">
+      View playlist created from set tracks
+    </a>
+    {% endif %}
+  </div>
 </div>
 
 
 <div id="playerMetaWrap" class="flex flex-col items-center  p-4 sticky top-0 z-50 ">
+
   <div id="playerWrap" class=" w-3/6  z-50 relative">
 
     <div id="modifyLeftMargin" class=" relative ">
@@ -42,11 +59,16 @@ even where the player is not behind*/
 
   </div>
 </div>
+
+<p class="p-4 pt-0 text-center discreet"><a target="_blank" href="https://youtu.be/{{set.video_id}}">❤ Support your DJ ! Like, comment and subscribe on Youtube <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+      <use xlink:href="#icon-link-external"></use>
+    </svg></a>.</p>
 <h1 class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
 
 {% if not set.has_chapters %}
-<p class="text-xs italic">(No chapter markers found in this video. Track timestamps are approximate, based on auto detection.)</p>
+<p class="discreet text-xs italic">(No chapter markers found in this video. Track timestamps are approximate, based on auto detection.)</p>
 {% endif %}
+<p class="discreet text-xs italic">Accuracy may vary between genres. Please relax & enjoy (sometimes) unexpected discoveries. Can't blame the robot :)</p>
 
 
 
@@ -394,7 +416,7 @@ even where the player is not behind*/
       "set_id": setId
     }
 
-    return processAjax('{{ url_for("main.jax_create_playlist_from_set_tracks") }}','POST',payload)
+    return processAjax('{{ url_for("playlist.jax_create_playlist_from_set_tracks") }}', 'POST', payload);
 
   });
 

@@ -2,7 +2,7 @@ from ast import In
 #from boilersaas.routes import User
 from boilersaas.utils.db import db
 from datetime import datetime, timezone
-from sqlalchemy import DDL,  Index, JSON,  Integer,SmallInteger, func
+from sqlalchemy import DDL, Boolean, Date,  Index, JSON,  Integer,SmallInteger, func
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils.types import TSVectorType
@@ -65,7 +65,7 @@ class Track(db.Model):
     nb_sets = db.Column(db.Integer, default=0, index=True)
     nb_playlists = db.Column(db.Integer, default=0, index=True)
     #sets = db.relationship('Set', secondary='track_sets', back_populates='tracks')
-    playlists = db.relationship('Playlist', secondary='track_playlists', back_populates='tracks')
+    playlists = db.relationship('Playlist', secondary='track_playlists', back_populates='tracks',overlaps="playlists,tracks")
     genres = db.relationship('Genre', secondary='track_genres', back_populates='tracks')
     related_tracks_checked = db.Column(db.Boolean, default=False)
     related_tracks = db.relationship(
@@ -94,6 +94,9 @@ class Track(db.Model):
     valence = db.Column(SmallInteger)
     
     search_vector = db.Column(TSVectorType('title', 'artist_name'))
+    
+    def has_related_tracks(self):
+        return bool(self.related_tracks)
 
     __table_args__ = (
         Index('ix_tracks_search_vector', 'search_vector', postgresql_using='gin'),
@@ -126,12 +129,16 @@ class Set(db.Model):
     title_tsv = db.Column(TSVectorType)
 
     duration = db.Column(db.Integer, index=True)  # in seconds
-    publish_date = db.Column(db.DateTime, index=True)  # Assuming this maps to 'upload_date'
+    #publish_date = db.Column(db.DateTime, index=True)  # Assuming this maps to 'upload_date'
+    publish_date = db.Column(db.Date, index=True)
     published = db.Column(db.Boolean, default=False, index=True)
     thumbnail = db.Column(db.String(255))  # URL to the thumbnail image
     playable_in_embed = db.Column(db.Boolean)
     chapters = db.Column(db.JSON)  # JSON object for chapters if not None
     nb_tracks = db.Column(db.Integer, default=0, index=True)
+    like_count = db.Column(db.Integer, default=0,nullable=False, index=True)
+    view_count = db.Column(db.Integer, default=0,nullable=False, index=True)
+    decades = db.Column(db.ARRAY(db.Integer), nullable=True)
     
     artist_popularity_spotify = db.Column(SmallInteger)
     acousticness = db.Column(SmallInteger)
@@ -142,8 +149,19 @@ class Set(db.Model):
     instrumentalness = db.Column(SmallInteger)
     speechiness = db.Column(SmallInteger)
     valence = db.Column(SmallInteger)
-    
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    error = db.Column(db.Text, nullable=True)
    # tracks = db.relationship('Track', secondary='track_sets', back_populates='sets')
+   
+class SetSearch(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    query = db.Column(db.String(255), nullable=False)
+    nb_results = db.Column(db.Integer, nullable=False)
+    featured = db.Column(db.Boolean, default=False)
+
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
     
 
 class SetQueue(db.Model):
@@ -169,6 +187,7 @@ class Playlist(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # completed this line 
     playlist_id_spotify = db.Column(db.String(255),  unique=True, index=True)
     playlist_id_apple = db.Column(db.String(255),  unique=True, index=True)
+    set_id = db.Column(db.Integer, db.ForeignKey('sets.id'), nullable=True,index=True)  # completed this line
     title = db.Column(db.String(255), nullable=False, index=True)
     search_vector = db.Column(TSVectorType('title'))
     
@@ -191,8 +210,8 @@ class Playlist(db.Model):
         Index('ix_playlists_search_vector', 'search_vector', postgresql_using='gin'),
     )
     
-    track_associations = db.relationship('TrackPlaylist', back_populates='playlist', cascade="all, delete-orphan")
-    tracks = db.relationship('Track', secondary='track_playlists', back_populates='playlists')
+    track_associations = db.relationship('TrackPlaylist', back_populates='playlist', cascade="all, delete-orphan",overlaps='playlists')
+    tracks = db.relationship('Track', secondary='track_playlists', back_populates='playlists',overlaps="track_associations")
     
 
 
@@ -214,8 +233,8 @@ class TrackPlaylist(db.Model):
     added_date = db.Column(db.DateTime, index=True)  
     pos = db.Column(db.Integer, primary_key=True)  
     
-    track = db.relationship('Track', backref='track_playlists')
-    playlist = db.relationship('Playlist', back_populates='track_associations')
+    track = db.relationship('Track', backref='track_playlists',overlaps="playlists,tracks")
+    playlist = db.relationship('Playlist', back_populates='track_associations',overlaps="playlists,tracks")
     
     
 

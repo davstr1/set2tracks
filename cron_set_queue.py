@@ -8,7 +8,7 @@ def worker_set_queue():
     app = create_app()
     with app.app_context():
         logger = logging.getLogger('root')
-        logger.error('Worker started')  # Log that the worker has started
+        logger.info('Queue Worker started')  # Log that the worker has started
         once = True
         while once == True:
             result = insert_set_from_queue()

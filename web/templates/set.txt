@@ -1,0 +1,22 @@
+
+
+{% block content %}
+
+
+
+
+{% set tracks = set.tracks %}
+{% for track in tracks %}
+{% set loop_index = loop.index %}
+{{ track.title if track.title != "Unknown Track" else '' }} - {{ track.artist_name if track.artist_name !="Unknown Artist" else '' }}
+{% endfor %}
+
+</div>
+
+
+
+
+
+
+
+{% endblock %}

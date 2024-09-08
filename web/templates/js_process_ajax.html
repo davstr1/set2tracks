@@ -12,8 +12,7 @@
  * @returns {Promise} A promise that resolves to the response data or rejects with an error.
  */
   function processAjax(url, method = 'POST', payload = {}, onSuccess = fooCallBack, onError = fooCallBack) {
-    console.log('processAjax', url, method, payload, onSuccess, onError)
-
+   
     // Define the fetch options
     let fetchOptions = {
       method: method,
@@ -30,12 +29,15 @@
 
     return fetch(url, fetchOptions)
       .then(response => response.json().then(result => {
-        console.log(result,response)
+        console.log(result)
         const responseData = {
           status_code: response.status,
-          message: result.message,
-          error: result.error
+          message: result?.message,
+          error: result?.error,
+          redirect: result?.redirect
         };
+
+        console.log(responseData);
 
         if (response.ok) {
           showSystemMessage(responseData.message);
@@ -46,8 +48,16 @@
           onError(responseData);   
         }
 
-        if (response.redirect) {
+        if (response?.redirect) { // @TODO check if this is necessary
+          console.log('redirecting to', response.redirect)
           window.location.href = response.redirect;
+          return;
+        }
+
+        if (result?.redirect) {
+          console.log('redirecting to', result.redirect)
+          window.location.href = result.redirect;
+          return;
         }
 
         return responseData;

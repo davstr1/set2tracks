@@ -1,24 +1,24 @@
 
 
 import json
-import logging
 import os
+import re
 import shutil
-from venv import logger
 from flask_login import current_user
 from numpy import full
-from sqlalchemy import func, null
+from sqlalchemy import INTEGER, cast, func, null
 from sqlalchemy.orm.exc import NoResultFound
 
 from web.lib.apple import add_apple_track_data_from_json
 from web.lib.audio import cut_audio
 #from web.lib.insert_set import insert_set
+from web.lib.count_unique_tracks import count_unique_tracks
 from web.lib.process_shazam_json import write_deduplicated_segments, write_segments_from_chapter
 from web.lib.shazam import sync_process_segments
 from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
-from web.lib.utils import calculate_avg_properties
+from web.lib.utils import as_dict, calculate_avg_properties
 from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
-from web.model import Genre, Playlist, RelatedTracks, Set, SetQueue, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
+from web.model import Genre, Playlist, RelatedTracks, Set, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
 from datetime import datetime, timezone
 from boilersaas.utils.db import db
 
@@ -28,7 +28,7 @@ from pprint import pp, pprint
 from collections import OrderedDict, defaultdict
 from web.lib.format import cut_to_if_needed, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
 
-logger = logging.getLogger('root')
+from web.logger import logger
 
 
     
@@ -43,16 +43,17 @@ def get_track_by_id(id):
 
 
 def get_or_create_channel(data):
-    print(data)
+    
     try:
-        existing_channel = Channel.query.filter_by(channel_id=data['channel_id']).first()
+        channel_id = str(data.get('channel_id'))
+        existing_channel = Channel.query.filter_by(channel_id=channel_id).first()
         if existing_channel is not None:
             logger.info("Channel already exists.")
             return existing_channel
         
         logger.info("Creating new channel.")    
         new_channel = Channel(
-            channel_id=data['channel_id'],
+            channel_id=channel_id,
             author=data.get('channel'),
             channel_url=data.get('channel_url'),
             channel_follower_count=data.get('channel_follower_count'),
@@ -81,9 +82,9 @@ def validate_set_data(data):
 
     if 'publish_date' in data:
         try:
-            datetime.strptime(data['publish_date'], '%Y%m%d')
-        except ValueError:
-            logger.error(f"Invalid date format for publish_date: {data['publish_date']}")
+            datetime.strptime(str(data['publish_date']), '%Y-%m-%d')
+        except ValueError as e:
+            logger.error(f"Invalid date format for publish_date: {data['publish_date']} : {str(e)}")
             return False
 
     return True
@@ -95,12 +96,14 @@ def get_set_id_by_video_id(video_id):
 def is_set_in_queue(video_id):
     # Check if the video is already in the queue
     existing_entry = SetQueue.query.filter_by(video_id=video_id).first()
-    return existing_entry is not None
+    return existing_entry or False
 
 def is_set_exists(video_id):
     # Check if the video is already in the queue
     existing_entry = Set.query.filter_by(video_id=video_id,published=True).first()
     return existing_entry is not None
+
+
 
 def queue_set_discarted(video_id,reason):
     discarded_entry = SetQueue(
@@ -112,34 +115,85 @@ def queue_set_discarted(video_id,reason):
     db.session.add(discarded_entry)
     db.session.commit()
     discarded_entry.error = reason
-    return discarded_entry
+    #return discarded_entry
+    return {'error':reason}
 
-   
+
+def is_set_exists_or_in_queue(video_id):   
+    return is_set_exists(video_id) or is_set_in_queue(video_id)
+
+def get_set_status(youtube_video_id:str) -> dict:
+    """
+    Get the status of a set based on the provided video_id.
+
+    Args:
+        youtube_video_id (str): The ID of the video.
+
+    Returns:
+        dict: A dictionary containing the status of the set. If the set exists, the status is returned. If the set is in the queue, the status of the queue entry is returned. If the set is not found, 'not_found' is returned.
+    """
+    existing_set = Set.query.filter_by(video_id=youtube_video_id).first()
+    if existing_set:
+        return {'status': 'published' if existing_set.published else 'unpublished'}
+    existing_queue_entry = is_set_in_queue(youtube_video_id)
+    if existing_queue_entry:
+        return {'status': existing_queue_entry.status}
+    return {'status': 'not_found'}
+
+def filter_out_existing_sets(video_ids):
+    """
+    Filters out video IDs that already exist in the queue or in the database.
+
+    Args:
+        video_ids (list): A list of video IDs to check.
+
+    Returns:
+        list: A list of video IDs that are neither in the queue nor in the database.
+    """
+    return [video_id for video_id in video_ids if not is_set_exists_or_in_queue(video_id)]
+
 
 def queue_set(video_id,user_id=None):
     
     if is_set_exists(video_id): # todo : the published stuff
         return {'error': 'Set was already here.','video_id':video_id}
     
-    if is_set_in_queue(video_id):
+    existing_queue_entry = is_set_in_queue(video_id)
+    
+    if existing_queue_entry:
+        print('boookya')
+        existing_queue_entry = as_dict(existing_queue_entry)
+        if existing_queue_entry['status'] == 'discarded' or existing_queue_entry['status'] == 'failed':
+            return {'error': f"Set was discarted from queue for the following reason : {existing_queue_entry['discarded_reason']}. Please let us know if you thing that's a mistake."}
         return {'error':'Set already in queue.'} # do not queue it again
     
     if not youtube_video_exists(video_id):
-        return queue_set_discarted('Youtube Video doesn\t exist.')
+        return queue_set_discarted(video_id,'Youtube Video doesn\t exist.')
     
-    video_info = youbube_video_info(video_id)
+    try :
+        video_info = youbube_video_info(video_id)
+    except Exception as e:
+        return queue_set_discarted(video_id,f'Error getting video info : "{str(e)}"')
+    
+    if 'error' in video_info:
+        return queue_set_discarted(video_id,video_info['error'])
+   
     if video_info is None:        
-        return queue_set_discarted('Error getting video info.')
+        return queue_set_discarted(video_id,'Error getting video info.')
     
     chapters = video_info.get('chapters',[]) or []
     if len(chapters) and len(chapters) < 5:
-        return queue_set_discarted(f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.')
+        return queue_set_discarted(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.')
     
-    if not len(chapters) and video_info.get('duration',0) < 900:
-        return queue_set_discarted('Video shorter than 15m. Only sets longer than 15m are accepted.')
+    if video_info.get('duration',0) < 900:
+        return queue_set_discarted(video_id,'Video shorter than 15m. Only sets longer than 15m are accepted.')
+    
+    if video_info.get('duration',0) > 14400:
+        return queue_set_discarted(video_id,'Video longer than 4h. Only sets shorter than 4h are accepted for now.')
+
     
     if not video_info.get('playable_in_embed',False):
-        return queue_set_discarted('Video is not embeddable. (Set by the uploader)')
+        return queue_set_discarted(video_id,'Video is not embeddable. (Set by the uploader)')
     
 
 
@@ -155,7 +209,9 @@ def queue_set(video_id,user_id=None):
        'duration': video_info.get('duration'),
        'playable_in_embed': video_info.get('playable_in_embed'),
        'chapters': video_info.get('chapters'),
-       'channel_follower_count': video_info.get('channel_follower_count')
+       'channel_follower_count': video_info.get('channel_follower_count'),
+       "like_count": video_info.get('like_count'),
+        "view_count": video_info.get('view_count'),
        }
     
     queued_entry = SetQueue(
@@ -171,7 +227,8 @@ def queue_set(video_id,user_id=None):
     db.session.commit()
     return queued_entry
 
-def create_set_if_not_exists(data):
+
+def upsert_set(data):
     
     try:
         # Ensure the channel exists
@@ -180,58 +237,99 @@ def create_set_if_not_exists(data):
             logger.error("Channel could not be created or retrieved.")
             return None
 
-        # Log that channel retrieval/creation was successful
         logger.info("Channel retrieved/created successfully.")
 
-        # Validate set data
-        if not validate_set_data(data):
-            logger.error("Set data validation failed.")
-            return None
+       
 
         # Query using video_id to ensure uniqueness
         existing_set = Set.query.filter_by(video_id=data['video_id']).first()
-        if existing_set:
-            logger.info("Set already exists.")
-            return existing_set
-
-        logger.info("Creating new set.")
-
+        
         publish_date = None
         if data.get('upload_date'):
             try:
-                publish_date = datetime.strptime(data['upload_date'], '%Y%m%d')
+                publish_date = datetime.strptime(data['upload_date'], '%Y%m%d').date()
                 logger.info(f"Parsed publish_date: {publish_date}")
             except ValueError as ve:
                 logger.error(f"Invalid upload_date format: {data['upload_date']}")
                 return None
 
         try:
-            new_set = Set(
-                video_id=data['video_id'],
-                channel_id=channel.id,
-                title=data['title'],
-                duration=data.get('duration'),
-                publish_date=publish_date,
-                thumbnail=data.get('thumbnail'),
-                playable_in_embed=data.get('playable_in_embed', False),
-                chapters=data.get('chapters')
-            )
-            logger.info("New set instance created.")
-            db.session.add(new_set)
-            logger.info("New set added to session.")
-            channel.nb_sets = db.session.query(Set).filter_by(channel_id=channel.id).count()
-           
+            
+            
+            
+            if 'error' in data:
+                # Upsert the error for the video_id
+                logger.info("Error found. Upserting error for the video_id.")
+                if existing_set:
+                    existing_set.error = data['error']
+                    existing_set.channel_id=channel.id
+                    existing_set.updated_at = datetime.now(timezone.utc)
+                   # existing_set.playable_in_embed = False
+                else:
+                    new_set = Set(
+                        video_id=data['video_id'],
+                        channel_id=channel.id,
+                       # playable_in_embed=False,
+                        error=data['error']
+                    )
+            else:
+                
+                  # Validate set data
+                if not validate_set_data(data):
+                    logger.error("Set data validation failed.")
+                    return None
+                
+                # update everything about the channel. all this can change
+                channel.channel_follower_count = data.get('channel_follower_count') or 0
+                channel.author = data.get('channel')
+                channel.channel_id = data.get('channel_id')
+                channel.channel_url = data.get('channel_url')
+                
+                if existing_set:
+                    logger.info("Set already exists. Updating existing set.")
+                    existing_set.channel_id = channel.id
+                    existing_set.title = data['title']
+                    existing_set.duration = data.get('duration')
+                    existing_set.publish_date = publish_date
+                    existing_set.thumbnail = data.get('thumbnail')
+                    existing_set.playable_in_embed = data.get('playable_in_embed', False)
+                    existing_set.chapters = data.get('chapters')
+                    existing_set.like_count = data.get('like_count') or 0
+                    existing_set.view_count = data.get('view_count') or 0
+                    existing_set.updated_at = datetime.now(timezone.utc) # needed if nothing else has changed
+                    existing_set.error = '' # remove the error if it was there
+                else:
+                    logger.info("Creating new set.")
+                    new_set = Set(
+                        video_id=data['video_id'],
+                        channel_id=channel.id,
+                        title=data['title'],
+                        duration=data.get('duration'),
+                        publish_date=publish_date,
+                        thumbnail=data.get('thumbnail'),
+                        playable_in_embed=data.get('playable_in_embed', False),
+                        chapters=data.get('chapters'),
+                        like_count=data.get('like_count') or 0,
+                        view_count=data.get('view_count') or 0
+                    )
+
+                    logger.info("New set instance created.")
+                    db.session.add(new_set)
+                    logger.info("New set added to session.")
+
+            channel.nb_sets = db.session.query(Set).filter_by(channel_id=channel.id).filter(Set.error.is_(None), Set.playable_in_embed.is_(True)).count()
+
             db.session.commit()
-            logger.info("New set committed to database.")
-            return new_set
+            logger.info("Changes committed to database.")
+            return existing_set or new_set
         except SQLAlchemyError as e:
-            logger.error(f"SQLAlchemyError during set creation: {e}")
+            logger.error(f"SQLAlchemyError during set upsert: {e}")
             import traceback
             traceback.print_exc()
             db.session.rollback()
             return None
         except Exception as e:
-            logger.error(f"Unexpected error during set creation: {e}")
+            logger.error(f"Unexpected error during set upsert: {e}")
             import traceback
             traceback.print_exc()
             db.session.rollback()
@@ -239,31 +337,82 @@ def create_set_if_not_exists(data):
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Error in create_set_if_not_exists: {e}")
+        logger.error(f"Error in upsert_set: {e}")
         import traceback
         traceback.print_exc()
         return None
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Unexpected error in create_set_if_not_exists: {e}")
+        logger.error(f"Unexpected error in upsert_set: {e}")
         import traceback
         traceback.print_exc()
         return None
 
-#def insert_set_from_queue():
-    # fetch the first pending entry queued_at ASC (FIFO)
-    # if not found return None
-    # update the time_in_queue to now - queued_at (in minutes)
-    # update the status to 'processing' and commit
-    # start a timer (start_time_processing)
-    # call insert_set with the video_info_json.
-    # this should return a dict with the 'set_id' or 'error'
-    # if successful update the status to 'done' 
-    # else update the status to 'failed' 
-    # update the time_processed to now - start_time_processing
-    # and update the time_processed_and_queued to now - queued_at
-    # commit
-    # return the Set instance or None
+
+    
+
+def sanitize_query(query):
+    # Trim whitespace, remove any non-alphanumeric characters (excluding spaces), and convert to lowercase
+    sanitized_query = re.sub(r'[^a-zA-Z0-9 &]+', '', query).strip().lower()
+    return sanitized_query
+
+def upsert_setsearch(query, nb_results):
+    sanitized_query = sanitize_query(query)
+    
+    # Check if the entry already exists
+    existing_entry = db.session.query(SetSearch).filter(SetSearch.query == sanitized_query).first()
+    
+    if existing_entry:
+        # Update the existing entry
+        existing_entry.nb_results = nb_results
+       # existing_entry.featured = featured
+        existing_entry.updated_at = datetime.now(timezone.utc)
+    else:
+        # Create a new entry
+        new_entry = SetSearch(
+            query=sanitized_query,
+            nb_results=nb_results,
+            #featured=featured,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
+        )
+        db.session.add(new_entry)
+    
+    # Commit the transaction
+    try:
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise
+    
+def get_sets_in_queue():
+    return SetQueue.query.filter(SetQueue.status.in_(['pending', 'processing'])).order_by(SetQueue.id.asc()).all()
+
+
+def get_my_sets_in_queue(user_id):
+    return SetQueue.query.filter_by(user_id=user_id).order_by(SetQueue.id.desc()).limit(10).all()
+
+
+    
+    
+def get_channel_to_check():   
+    channel = Channel.query.filter(Channel.channel_id != 'None').order_by(Channel.updated_at.asc()).first() # yeah, mysterious channel with None id appears. @TODO
+
+    return channel
+
+def get_set_to_check():   
+    set = Set.query.filter((Set.error == '') | (Set.error == None)).order_by(Set.updated_at.asc()).first()
+
+
+
+    return set
+
+def get_set_to_check_with_error():   
+    set = Set.query.filter(Set.error != '').order_by(Set.updated_at.asc()).first()
+
+
+    return set
+        
     
 def insert_set_from_queue():
     
@@ -273,7 +422,11 @@ def insert_set_from_queue():
     try:
         pending_entry = SetQueue.query.filter_by(status='pending').order_by(SetQueue.queued_at.asc()).first()
         #pending_entry = SetQueue.query.filter_by(id='23').first()
-    except NoResultFound:
+    except Exception as e:
+        logger.error(f'Error fetching pending entry : {e}')
+        return None
+    
+    if pending_entry is None:
         logger.info('No pending entry found')
         return None
     
@@ -302,6 +455,7 @@ def insert_set_from_queue():
 
     # Call insert_set with the video_info_json
     video_info = pending_entry.video_info_json
+    
     result = insert_set(video_info)
     logger.debug(f'insert_set result: {result}')
 
@@ -432,6 +586,7 @@ def remove_small_unidentified_segments(tracks, min_duration_s):
 
 def insert_set(video_info,delete_temp_files=True):
     try:
+        pprint(video_info)
         dl_dir = 'temp_downloads'
         video_id = video_info['video_id']
         chapters = video_info.get('chapters',[])
@@ -439,7 +594,7 @@ def insert_set(video_info,delete_temp_files=True):
             chapters = []
        
 
-        set = create_set_if_not_exists(video_info)  
+        set = upsert_set(video_info)  
         if set is None:
             return error_out("Error creating Set.")
 
@@ -479,7 +634,10 @@ def insert_set(video_info,delete_temp_files=True):
             
             songs = remove_small_unidentified_segments(songs, 90)
            
-           
+            nb_unique_tracks = count_unique_tracks(songs)
+            logger.debug(f'Found {nb_unique_tracks} unique tracks.')
+            if nb_unique_tracks < 5:
+                raise Exception(f'{nb_unique_tracks} unique tracks found. Min 5')
             
             songs = add_tracks_spotify_data_from_json(songs)
            
@@ -496,6 +654,8 @@ def insert_set(video_info,delete_temp_files=True):
 
         return {'set_id':set.id}
     except Exception as e:
+        if delete_temp_files:
+            shutil.rmtree(vid_dir)
         return error_out(str(e)) 
     
 
@@ -586,7 +746,7 @@ def add_tracks_from_json(tracks_json, set_instance=None, add_to_set=False,relate
         
         # Set related_tracks if related_track_id is provided
         if related_track_id and not add_to_set:
-            logger.info('Related track ID provided.', related_track_id)
+            logger.info(f'Related track ID provided: {related_track_id}')
             related_track_entries = []
 
            
@@ -623,37 +783,59 @@ def compile_and_sort_genres(track_sets):
     
     return sorted_genre_counts
 
-# def get_tracks_from_set(set_id):
-#     # Retrieve the set with the given ID along with its details
-#     set_instance:Set = Set.query.filter_by(id=set_id).first()
-#     if not set_instance:
-#         return []  # Return None and an empty list if the set does not exist
+
+def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
+    query = Set.query.filter_by(playable_in_embed=True, published=True) \
+                     .join(Set.channel) \
+                     .options(joinedload(Set.channel))
+                     
+    if search:
+        search_filter = (Set.title_tsv.match(search)) | (Channel.author.match(search))
+        query = query.filter(search_filter)
     
-#         # Fetch all TrackSet entries for this set
-#     track_sets = db.session.query(TrackSet).filter(TrackSet.set_id == set_id).all()
     
-#     #tracks = db.session.query(Track).filter(Track.set)
-
-#     # Create a dictionary mapping track_id to TrackSet details
-#     track_set_dict = {ts.track_id: {'start_time': ts.start_time, 'end_time': ts.end_time,'pos':ts.pos} for ts in track_sets}
-
+    if order_by == 'recent':
+        query = query.order_by(Set.publish_date.desc())
+    elif order_by == 'old':
+        query = query.order_by(Set.publish_date.asc())
+    elif order_by == 'likes':
+        query = query.order_by(Set.like_count.desc())
+    elif order_by == 'views':
+        query = query.order_by(Set.view_count.desc())
+    elif order_by == 'views_minus':
+        query = query.order_by(Set.view_count.asc())
+    elif order_by == 'likes_minus':
+        query = query.order_by(Set.like_count.asc())
+    elif order_by == 'popular':
+        query = query.order_by(Channel.channel_follower_count.desc())
+    elif order_by == 'outsider':
+        query = query.order_by(Channel.channel_follower_count.asc())
     
-#     tracks = format_db_tracks_for_template(set_instance.tracks)
-#     tracks = format_tracks_with_times(tracks, track_set_dict)
+    results_count = query.count()
+    results = query.paginate(page=page, per_page=per_page, error_out=False)
+    if search:
+        upsert_setsearch(search, results_count)
+    return results,results_count
 
-#     return tracks
-  
+                    
+def get_playable_sets_number():
+    return Set.query.filter_by(playable_in_embed=True,published=True).count()
+                    
 
-
-def get_playable_sets(page=1, per_page=20):
-    return Set.query.filter_by(playable_in_embed=True,published=True) \
-                    .order_by(Set.id.desc()) \
-                    .options(joinedload(Set.channel)) \
-                    .paginate(page=page, per_page=per_page, error_out=False)
 
 def get_set_with_tracks(set_id):
+    
+    
+    
     # Retrieve the set with the given ID along with its details
     set_instance:Set = Set.query.filter_by(id=set_id).first()
+    if current_user.is_authenticated:
+        playlist_from_set = db.session.query(Playlist).filter_by(set_id=set_id,user_id=current_user.id).first()
+    else:
+        playlist_from_set = None
+    
+    playlist_id = playlist_from_set.id if playlist_from_set else None
+    
     if not set_instance:
         return {'error', 'Set not found'}
     
@@ -670,6 +852,8 @@ def get_set_with_tracks(set_id):
     tracks = format_db_tracks_for_template(tracks)
    
     tracks = format_tracks_with_times(tracks, track_set_dict)  
+    
+    channel = Channel.query.get(set_instance.channel_id)
 
     set_details = {
         'id': set_instance.id,
@@ -677,19 +861,21 @@ def get_set_with_tracks(set_id):
         'title': set_instance.title,
         'has_chapters':  set_instance.chapters is not None,
         #'description': set_instance.description,
-        'channel_id': set_instance.channel_id,
         'duration': set_instance.duration,
         'publish_date': set_instance.publish_date,
         'thumbnail': set_instance.thumbnail,
         'channel_id': set_instance.channel_id,
-       
+        'channel': channel,
+        'playlist_id':playlist_id,
         'playable_in_embed': set_instance.playable_in_embed,
         'nb_tracks': set_instance.nb_tracks,
         'tracks': tracks,
+        'view_count': set_instance.view_count,
+        'like_count': set_instance.like_count,
     }
     return set_details
 
-def create_playlist(user_id, playlist_name):
+def create_playlist(user_id, playlist_name,set_id=None):
     
     # Check for existing playlists with the same name
     existing_playlists = Playlist.query.filter(
@@ -716,6 +902,9 @@ def create_playlist(user_id, playlist_name):
           edit_date=date_now,
           nb_tracks=0
       )
+    if set_id:
+        new_playlist.set_id = set_id
+        
     db.session.add(new_playlist)
     db.session.commit()
     return new_playlist
@@ -765,6 +954,9 @@ def get_playlist_with_tracks(playlist_id):
         'create_date': playlist.create_date,
         'edit_date': playlist.edit_date,
         'nb_tracks': playlist.nb_tracks,
+        'playlist_id_spotify': playlist.playlist_id_spotify,
+        'playlist_id_apple': playlist.playlist_id_apple,
+        'set_id': playlist.set_id,
         #'tracks': playlist.tracks
     }
     
@@ -806,9 +998,14 @@ def add_track_to_playlist(playlist_id, track_id):
 
         db.session.add(new_track_playlist_entry)
         playlist.nb_tracks = len(playlist.tracks)
+        
         playlist.edit_date = datetime.now(timezone.utc)
+        playlist.duration = sum(track.duration_s or 0 for track in playlist.tracks)
+        
         db.session.commit()
-
+        
+        #
+        
         
     except Exception as e:
         return {"error": f"{str(e)} (playlist_id: {playlist_id}, track_id: {track_id})"}
@@ -934,6 +1131,7 @@ def add_tracks_to_playlist(playlist_id, track_ids, user_id):
         if new_entries:
             db.session.bulk_save_objects(new_entries)
             playlist.nb_tracks += len(new_entries)
+            playlist.duration = sum(track.duration_s or 0 for track in playlist.tracks)
             playlist.edit_date = datetime.now(timezone.utc)
             db.session.commit()
             return {"message": f"{len(new_entries)} tracks added to \"{playlist.title}\""}
@@ -975,6 +1173,7 @@ def get_set_genres_by_occurrence(set_id):
         .join(TrackSet, Track.id == TrackSet.track_id)
         .filter(TrackSet.set_id == set_id)
         .group_by(Genre.name)
+        .having(func.count(TrackGenres.genre_id) > 0)
         .order_by(func.count(TrackGenres.genre_id).desc())
         .all()
     )
@@ -1033,6 +1232,7 @@ def remove_track_from_playlist(playlist_id, track_id,user_id):
     try:
         db.session.delete(track_playlist)
         playlist.nb_tracks = len(playlist.tracks)
+        playlist.duration = sum(track.duration_s or 0 for track in playlist.tracks)
         playlist.edit_date = datetime.now(timezone.utc)
         
         db.session.query(TrackPlaylist).filter(
@@ -1086,7 +1286,7 @@ def create_playlist_from_set_tracks(set_id, user_id):
             return {"error": "No tracks found in set"}
         
         playlist_name = set_data.get('title', 'Untitled Playlist')
-        new_playlist = create_playlist(user_id, playlist_name)
+        new_playlist = create_playlist(user_id, playlist_name,set_id)
         
         if not new_playlist:
             return {"error": "Error creating playlist"}
@@ -1105,7 +1305,7 @@ def create_playlist_from_set_tracks(set_id, user_id):
     except Exception as e:
         return {"error": f"An unexpected error occurred: {str(e)}"}
     
-    return {"message": f"Playlist \"{playlist_name}\" created successfully with {len(set_data['tracks'])} tracks"}
+    return {"message": f"Playlist \"{playlist_name}\" created successfully with {len(set_data['tracks'])} tracks", "playlist_id": new_playlist.id}
 
 
 def import_playlist_from_spotify():
@@ -1121,40 +1321,15 @@ def sync_playlist_with_spotify():
 
 
 
-# def create_spotify_playlist_and_add_tracks(playlist_name, tracks):
+def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
     
-#     try:
-   
-#         new_playlist = create_spotify_playlist( playlist_name)
-#         if not new_playlist:
-#             return {"error": "Error creating playlist"}
-        
-#     except Exception as e:
-#         return {"error": f"Error creating playlist: {str(e)}"}
     
-#     try:
-                   
-#         track_ids = [f"{track['key_track_spotify']}" for track in tracks if 'key_track_spotify' in track and track['key_track_spotify'] is not None]
-        
-#         logger.info(f'Adding {len(track_ids)} tracks to Spotify playlist \"{playlist_name}\"')
-        
-#         response = add_tracks_to_spotify_playlist(new_playlist['id'], track_ids)
-        
-#         print('response adding traks to spotify playlist',response)
-        
-
-        
-#         if 'error' in response:
-#             logger.error(f'Error adding tracks to playlist: {response["error"]}')
-#             return {'error': response['error']}
-#     except Exception as e:
-#         logger.error(f'Unknown error adding tracks to playlist: {str(e)}')
-#         return {"error": f"Error adding tracks to playlist: {str(e)}"}
+    # check if playlist exists
+    playlist = db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).first()
+    if not playlist:
+        return {"error": "Playlist not found"}
     
-#     logger.info(f'Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks')
-#     return {"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(tracks)} tracks"}
-
-def create_spotify_playlist_and_add_tracks(playlist_name, tracks):
+    
     try:
         # Create the Spotify playlist
         new_playlist = create_spotify_playlist(playlist_name)
@@ -1162,7 +1337,11 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks):
             return {"error": "Error creating playlist"}
     except Exception as e:
         return {"error": f"Error creating playlist: {str(e)}"}
-
+    
+    
+    playlist_id_spotify = new_playlist['id']
+    db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).update({Playlist.playlist_id_spotify: playlist_id_spotify})
+    db.session.commit()
     try:
         # Extract track IDs
         track_ids = [track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
@@ -1179,5 +1358,10 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks):
     except Exception as e:
         return {"error": f"Error adding tracks to playlist: {str(e)}"}
 
-    return {"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
+    return {"playlist_id":playlist_id,"spotify_playlist_id": new_playlist['id'],"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
 
+
+
+def get_random_set_searches(min_popularity, n):
+   
+    return db.session.query(SetSearch).filter(SetSearch.nb_results >= min_popularity).order_by(func.random()).limit(n).all()

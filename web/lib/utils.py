@@ -1,9 +1,28 @@
 
 from collections import Counter
+import contextlib
+import io
 from pprint import pprint
 from typing import Union
 
 import numpy as np
+
+
+
+
+
+from sqlalchemy.inspection import inspect
+
+# Define a function to suppress stdout
+def silent_function(func, *args, **kwargs):
+    with contextlib.redirect_stdout(io.StringIO()):
+        return func(*args, **kwargs)
+
+def as_dict(model_instance):
+    """Convert SQLAlchemy model instance to dictionary."""
+    return {c.key: getattr(model_instance, c.key) for c in inspect(model_instance).mapper.column_attrs}
+
+
 
         
 def safe_get(data, path, default=None):
