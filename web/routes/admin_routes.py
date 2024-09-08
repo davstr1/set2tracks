@@ -12,7 +12,7 @@ admin_bp = Blueprint('admin', __name__)
 
 
 @admin_bp.route('/admin/set/hide/<int:set_id>', methods=['GET'])  
-def set_hide(set_id):
+def set_visibility_toggle(set_id):
     # admin check
     # do the action
         
@@ -20,7 +20,7 @@ def set_hide(set_id):
 
 
 @admin_bp.route('/admin/channel/hide/<int:channel_id>', methods=['GET'])  
-def channel_hide(channel_id):
+def channel_visibility_toggle(channel_id):
     # admin check
     # do the action
     
