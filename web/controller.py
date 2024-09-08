@@ -1387,3 +1387,11 @@ def set_toggle_visibility(set_id):
     db.session.commit()
     
     return {"message": f"Set visibility toggled to {set_instance.hidden}"}
+
+
+
+def get_hidden_channels():
+    return Channel.query.filter_by(hidden=True).all()
+
+def get_hidden_sets():
+    return Set.query.filter_by(hidden=True).all()

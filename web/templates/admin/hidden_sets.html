@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl block mb-5">Admin</h1>
+<div class="container mx-auto py-8">
+
+
+
+<ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
+  <li class="me-2">
+      <a href="{{ url_for('admin.hidden_sets') }}" aria-current="page" class="inline-block p-4 text-blue-600 bg-gray-100 rounded-t-lg active dark:bg-gray-800 dark:text-blue-500">Hidden Sets</a>
+  </li>
+  <li class="me-2">
+      <a href="{{ url_for('admin.hidden_channels') }}" class="inline-block p-4 text-gray-500 bg-gray-100 rounded-t-lg dark:bg-gray-800 dark:text-gray-400">Hidden Channels</a>
+</ul>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <div class="mt-20">
+    {% if sets|length == 0 %}
+  No hidden sets
+    {% endif %}
+
+   
+    {% for set in sets %}
+    <div class=" overflow-hidden">
+      <a href="{{ url_for('set.set', set_id=set.id) }}">
+        <div class="relative flex gap-0">
+          <img src="{{ set.thumbnail }}" alt="{{ set.title }}" class="w-full h-48 object-cover  rounded-lg">
+          <div class="absolute inset-0 "></div>
+          <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
+            <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>
+            <p>{{ set.nb_tracks }} tracks</p>
+
+          </div>
+        </div>
+      </a>
+      <div class="p-4 text-sm">
+        <a href="{{ url_for('set.set', set_id=set.id) }}">
+          <h3 class="text-white font-semibold hover:text-primary">{{ set.title }}</h3>
+        </a>
+        <p class="text-gray-600"><a href="{{url_for('set.sets',s=set.channel.author)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
+        <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600">[show]</a></p>
+        <p><a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}">[Make visible]</a></p>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  </div>
+
+  <!-- Pagination -->
+  <!-- Pagination -->
+  <div class="mt-8 flex justify-center space-x-4">
+    {% if is_paginated %}
+    {% if pagination.prev_url %}
+    <a href="{{ pagination.prev_url }}" class="px-4 py-2 btn-primary btn rounded-full">Previous</a>
+    {% endif %}
+    {% if pagination.next_url %}
+    <a href="{{ pagination.next_url }}" class="px-4 py-2 btn-primary btn rounded-full">Next</a>
+    {% endif %}
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

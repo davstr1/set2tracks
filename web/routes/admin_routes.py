@@ -3,10 +3,11 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user
 
 
-from web.controller import channel_toggle_visibility, set_toggle_visibility
+from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, set_toggle_visibility
 from web.logger import logger
 from web.routes.routes_utils import is_admin
-
+from web.routes.set_routes import sets
+from web.routes.routes_utils import tpl_utils
 
 
 admin_bp = Blueprint('admin', __name__)
@@ -46,3 +47,25 @@ def channel_visibility_toggle(channel_id):
     return redirect(url_for('set.sets'))
         
     #return render_template(url_for('set',set_id=set_id))
+    
+    
+@admin_bp.route('/admin/hidden_sets')
+def hidden_sets():
+    if not is_admin():
+        flash('You are not an admin', 'error')      
+        return redirect(url_for('set.sets'))
+    
+    sets = get_hidden_sets()
+    
+    return render_template('admin/hidden_sets.html', sets=sets,tpl_utils=tpl_utils)
+
+
+@admin_bp.route('/admin/hidden_channels')
+def hidden_channels():
+    if not is_admin():
+        flash('You are not an admin', 'error')      
+        return redirect(url_for('set.sets'))
+    
+    channels = get_hidden_channels()
+    
+    return render_template('admin/hidden_channels.html', channels=channels,tpl_utils=tpl_utils)

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl block mb-5">Admin</h1>
+<div class="container mx-auto py-8">
+
+
+
+  <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
+    <li class="me-2">
+      <a href="{{ url_for('admin.hidden_sets') }}" aria-current="page" class="inline-block p-4 text-blue-600 bg-gray-100 rounded-t-lg dark:bg-gray-800 dark:text-blue-500">Hidden Sets</a>
+    </li>
+    <li class="me-2">
+      <a href="{{ url_for('admin.hidden_channels') }}" class="inline-block p-4 text-gray-500 bg-gray-100 rounded-t-lg active dark:bg-gray-800 dark:text-gray-400">Hidden Channels</a>
+  </ul>
+
+  <div>
+
+    <div class="mt-20">
+      {% if channels|length == 0 %}
+      No hidden Channels
+      {% endif %}
+
+
+
+      {% for chan in channels %}
+      <div class="border border-gray-300 rounded-md p-4 mb-4">
+ 
+        
+        <p><a target="_blank" href="{{ chan.channel_url }}" class="underline text-xl"> {{ chan.author }}</a></p>
+        <p>{{ chan.channel_follower_count }} followers</p>
+        <p>{{ chan.nb_sets }} sets</p>
+        <p>Updated {{ tpl_utils.time_ago(chan.updated_at) }}</p>
+        <p><a href="{{url_for('admin.channel_visibility_toggle',channel_id=chan.id)}}">[Make Visible]</a></p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <!-- Pagination -->
+  <div class="mt-8 flex justify-center space-x-4">
+    {% if is_paginated %}
+    {% if pagination.prev_url %}
+    <a href="{{ pagination.prev_url }}" class="px-4 py-2 btn-primary btn rounded-full">Previous</a>
+    {% endif %}
+    {% if pagination.next_url %}
+    <a href="{{ pagination.next_url }}" class="px-4 py-2 btn-primary btn rounded-full">Next</a>
+    {% endif %}
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
