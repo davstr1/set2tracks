@@ -1396,3 +1396,13 @@ def get_hidden_channels():
 
 def get_hidden_sets():
     return Set.query.filter_by(hidden=True).all()
+
+
+def get_set_searches(featured,sort_by="nb_results",page=1,per_page=20):
+    
+    results = SetSearch.query \
+    .filter(SetSearch.featured == featured) \
+    .order_by(getattr(SetSearch, sort_by).desc()) \
+    .paginate(page=page, per_page=per_page, error_out=False)
+    
+    return results
