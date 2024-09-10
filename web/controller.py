@@ -1400,7 +1400,7 @@ def get_hidden_sets():
 
 def get_set_searches(featured,sort_by="nb_results",page=1,per_page=20):
     
-    results = SetSearch.query \
+    results = db.session.query(SetSearch) \
     .filter(SetSearch.featured == featured) \
     .order_by(getattr(SetSearch, sort_by).desc()) \
     .paginate(page=page, per_page=per_page, error_out=False)
