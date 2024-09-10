@@ -3,7 +3,7 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user
 
 
-from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, set_toggle_visibility
+from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, set_toggle_visibility
 from web.logger import logger
 from web.routes.routes_utils import is_admin
 from web.routes.set_routes import sets
@@ -69,3 +69,15 @@ def hidden_channels():
     channels = get_hidden_channels()
     
     return render_template('admin/hidden_channels.html', channels=channels,tpl_utils=tpl_utils)
+
+
+@admin_bp.route('/admin/tags')
+def tags(featured=False,sort_by='nb_results'):
+    if not is_admin():
+        flash('You are not an admin', 'error')      
+        return redirect(url_for('set.sets'))
+    
+    tags = get_set_searches(sort_by=sort_by,featured=featured)
+
+    
+    return render_template('admin/tags.html',tpl_utils=tpl_utils)
