@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl block mb-5">Admin</h1>
+<div class="container mx-auto py-8">
+
+  {% include 'admin/snippet_admin_nav.html' %}
+
+
+
+    <div class="flex flex-wrap gap-4">
+      {% for tag in tags %}
+      <div class=" {% if tag.featured %} bg-gray-700 {% else %} bg-primary-content {% endif %} text-gray-400 px-4 py-2 rounded-md whitespace-nowrap cursor-pointer">
+          {{tag.query}} ({{tag.nb_results}}) 
+          <a href="{{url_for('admin.tag_toggle', tag_id=tag.id)}}">
+              {% if tag.featured %}
+                  -
+              {% else %}
+                  +
+              {% endif %}
+          </a>
+      </div>
+ {% endfor %}
+ 
+  </div>
+  
+  </div>
+
+  <!-- Pagination -->
+  <!-- Pagination -->
+  <div class="mt-8 flex justify-center space-x-4">
+    {% if is_paginated %}
+    {% if pagination.prev_url %}
+    <a href="{{ pagination.prev_url }}" class="px-4 py-2 btn-primary btn rounded-full">Previous</a>
+    {% endif %}
+    {% if pagination.next_url %}
+    <a href="{{ pagination.next_url }}" class="px-4 py-2 btn-primary btn rounded-full">Next</a>
+    {% endif %}
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

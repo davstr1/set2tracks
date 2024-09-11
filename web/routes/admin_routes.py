@@ -3,7 +3,7 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user
 
 
-from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, set_toggle_visibility
+from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, search_toggle_featured, set_toggle_visibility
 from web.logger import logger
 from web.routes.routes_utils import is_admin
 from web.routes.set_routes import sets
@@ -49,6 +49,15 @@ def channel_visibility_toggle(channel_id):
     #return render_template(url_for('set',set_id=set_id))
     
     
+@admin_bp.route('/admin')
+def admin():
+    if not is_admin():
+        flash('You are not an admin', 'error')
+        return redirect(url_for('set.sets'))
+    
+    return render_template('admin/index.html',tpl_utils=tpl_utils)
+    
+    
 @admin_bp.route('/admin/hidden_sets')
 def hidden_sets():
     if not is_admin():
@@ -72,7 +81,7 @@ def hidden_channels():
 
 
 @admin_bp.route('/admin/tags')
-def tags(featured=False,sort_by='nb_results'):
+def tags(featured=None,sort_by='nb_results'):
     if not is_admin():
         flash('You are not an admin', 'error')      
         return redirect(url_for('set.sets'))
@@ -80,4 +89,15 @@ def tags(featured=False,sort_by='nb_results'):
     tags = get_set_searches(sort_by=sort_by,featured=featured)
 
     
-    return render_template('admin/tags.html',tpl_utils=tpl_utils)
+    return render_template('admin/tags.html',tags=tags,tpl_utils=tpl_utils)
+
+
+@admin_bp.route('/admin/tag_toggle/<int:tag_id>', methods=['GET'])
+def tag_toggle(tag_id):
+    if not is_admin():
+        flash('You are not an admin', 'error')      
+        return redirect(url_for('set.sets'))
+    
+    result = search_toggle_featured(tag_id)
+        
+    return redirect(url_for('admin.tags'))

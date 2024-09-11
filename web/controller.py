@@ -1366,7 +1366,10 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
 
 def get_random_set_searches(min_popularity, n):
    
-    return db.session.query(SetSearch).filter(SetSearch.nb_results >= min_popularity).order_by(func.random()).limit(n).all()
+    return db.session.query(SetSearch) \
+        .filter(SetSearch.nb_results >= min_popularity) \
+        .filter(SetSearch.featured == True) \
+        .order_by(func.random()).limit(n).all()
 
 
 def channel_toggle_visibility(channel_id):
@@ -1398,11 +1401,30 @@ def get_hidden_sets():
     return Set.query.filter_by(hidden=True).all()
 
 
-def get_set_searches(featured,sort_by="nb_results",page=1,per_page=20):
+def get_set_searches(featured=None, sort_by="nb_results", page=1, per_page=200):
     
-    results = db.session.query(SetSearch) \
-    .filter(SetSearch.featured == featured) \
-    .order_by(getattr(SetSearch, sort_by).desc()) \
-    .paginate(page=page, per_page=per_page, error_out=False)
+    # Start with the base query
+    query = db.session.query(SetSearch)
+    
+    # Add a filter if 'featured' is not None
+    if featured is not None:
+        query = query.filter(SetSearch.featured == featured)
+    
+    # Apply ordering and pagination
+    results = query.order_by(getattr(SetSearch, sort_by).desc()) \
+                   .paginate(page=page, per_page=per_page, error_out=False)
     
     return results
+
+    
+    return results
+
+def search_toggle_featured(set_search_id):
+    set_search = db.session.query(SetSearch).get(set_search_id)
+    if not set_search:
+        return {"error": "Set search not found"}
+    
+    set_search.featured = not set_search.featured
+    db.session.commit()
+    
+    return {"message": f"Set search featured status toggled to {set_search.featured}"}
