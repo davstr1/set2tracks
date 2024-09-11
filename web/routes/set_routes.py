@@ -2,6 +2,7 @@ from pprint import pprint
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_cors import CORS, cross_origin
+from lang import Lang
 from web.controller import get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_status, get_set_with_tracks, get_sets_in_queue, get_track_by_id, is_set_exists, queue_set
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template
 from web.lib.related_tracks import save_related_tracks
@@ -50,6 +51,10 @@ def sets():
     
     is_paginated = sets_page.has_next or sets_page.has_prev
     
+    l = {
+        'page_title': Lang.APP_NAME + ' - ' + 'Find tracks from your favorite DJ sets',
+    }  
+    
     #playlists_user = get_playlists_from_user(1)
     return render_template('sets.html', 
                            sets_page=sets_page,
@@ -59,7 +64,8 @@ def sets():
                            pagination=pagination,
                            is_paginated=is_paginated,
                            inspiration_searches=inspiration_searches,
-                           tpl_utils=tpl_utils) 
+                           tpl_utils=tpl_utils,
+                           l=l) 
     
     
 @set_bp.route('/sets/queue')  
@@ -68,7 +74,12 @@ def get_sets_queue():
         return redirect(url_for('users.login', next=url_for('set.get_sets_queue')))
     sets = get_sets_in_queue()
     my_sets = get_my_sets_in_queue(user_id=get_user_id())
-    return render_template('sets_queue.html',sets=sets,my_sets=my_sets)
+    
+    l = {
+        'page_title': 'Sets in Queue' + ' - ' + Lang.APP_NAME,
+    }      
+        
+    return render_template('sets_queue.html',sets=sets,my_sets=my_sets,l=l)
 
 
 @set_bp.route('/set/<int:set_id>')
@@ -109,9 +120,12 @@ def set(set_id):
         user_playlists = get_playlists_from_user(user_id, order_by='title')
     else:
         user_playlists = []
+        
+    l = {
+        'page_title': set.get('title') + 'Tracklist  '  + Lang.APP_NAME,
+    }      
 
-
-    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,is_admin=is_admin())
+    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,is_admin=is_admin(),l=l)
 
 
 
@@ -134,7 +148,11 @@ def related_tracks(track_id):
         else:
             user_playlists = []
             
-        return render_template('related_tracks.html',track=track_formated,tracks=related_tracks,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url)
+        l = {
+        'page_title': track.title + ' : Related tracks - ' + Lang.APP_NAME,
+        }  
+            
+        return render_template('related_tracks.html',track=track_formated,tracks=related_tracks,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l)
     else:
         logger.info('no related tracks')
         return redirect(request.referrer or url_for('basic.index'))
@@ -168,7 +186,12 @@ def add():
         return redirect(url_for('set.insert_set_route',video_id=video_id))
     
     youtube_url = request.args.get('youtube_url', '')
-    return render_template('add.html',youtube_url=youtube_url)
+    
+    l = {
+        'page_title': 'Add a set' + ' - ' + Lang.APP_NAME,
+    }      
+    
+    return render_template('add.html',youtube_url=youtube_url,l=l)
 
 
 @set_bp.route('/insert_set/<video_id>', methods=['GET'])

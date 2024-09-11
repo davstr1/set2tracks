@@ -15,7 +15,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }}</title>
+    <title>{{ l.page_title if l is defined and l.page_title is defined else 'no title' }}</title>
+
     <link href="{{url_for('static',filename='css/tailwind/output.css')}}" rel="stylesheet">
 </head>
 

@@ -1,6 +1,7 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 
+from lang import Lang
 from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_playlist_with_tracks, get_playlists_from_user, remove_track_from_playlist, update_playlist_positions_after_track_change_position
 from web.lib.spotify import ensure_valid_token
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected
@@ -19,7 +20,11 @@ def my_playlists():
     if user_id:
         playlists = get_playlists_from_user(user_id)
         
-    return render_template('playlists.html',user_id=user_id,playlists=playlists,tpl_utils=tpl_utils)
+    l = {
+        'page_title': 'My Playlists' + ' - ' + Lang.APP_NAME, 
+    }
+        
+    return render_template('playlists.html',user_id=user_id,playlists=playlists,tpl_utils=tpl_utils,l=l)
 
 
 # @playlist_bp.route('/playlist/create', methods=['GET', 'POST'])
@@ -101,7 +106,12 @@ def playlist_create():
         return redirect(next) if len(next) else redirect(url_for('playlist.my_playlists'))
     
     next = request.args.get('next') or ''
-    return render_template('playlist_create.html', next=next)
+    
+    l = {
+        'page_title': 'Create a Playlist' + ' - ' + Lang.APP_NAME, 
+    }
+    
+    return render_template('playlist_create.html', next=next, l=l)
 
 
 @playlist_bp.route('/playlist/<int:playlist_id>', methods=['GET', 'POST'])
@@ -115,8 +125,12 @@ def show_playlist(playlist_id):
         user_playlists = get_playlists_from_user(user_id, order_by='title')
     else:
         user_playlists = []
+        
+    l = {
+        'page_title': res['playlist'].get('title') + ' - ' 'playlist' + ' ' + Lang.APP_NAME, 
+    }
 
-    return render_template('playlist.html',playlist=res['playlist'],tracks=res['tracks'],tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url)
+    return render_template('playlist.html',playlist=res['playlist'],tracks=res['tracks'],tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l)
 
 
 
@@ -156,7 +170,12 @@ def playlist_edit(playlist_id):
             logger.error(f'error in playlist edit {e}')
             flash(str(e), 'error')
             res = get_playlist_with_tracks(playlist_id)
-            return render_template('playlist_edit.html',playlist=res['playlist'])
+            
+            l = {
+             'page_title': 'Edit a playlist' + ' - ' + Lang.APP_NAME, 
+    }    
+            
+            return render_template('playlist_edit.html',playlist=res['playlist'],l=l)
     
     
 @playlist_bp.route('/playlist/<int:playlist_id>/delete')

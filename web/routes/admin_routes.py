@@ -3,6 +3,7 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user
 
 
+from lang import Lang
 from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, search_toggle_featured, set_toggle_visibility
 from web.logger import logger
 from web.routes.routes_utils import is_admin
@@ -55,7 +56,11 @@ def admin():
         flash('You are not an admin', 'error')
         return redirect(url_for('set.sets'))
     
-    return render_template('admin/index.html',tpl_utils=tpl_utils)
+    l = {
+        'page_title': Lang.ADMIN + ' - ' + 'Dashboard', 
+    }
+    
+    return render_template('admin/index.html',tpl_utils=tpl_utils,l=l)
     
     
 @admin_bp.route('/admin/hidden_sets')
@@ -66,7 +71,11 @@ def hidden_sets():
     
     sets = get_hidden_sets()
     
-    return render_template('admin/hidden_sets.html', sets=sets,tpl_utils=tpl_utils)
+    l = {
+        'page_title': Lang.ADMIN + ' - ' + 'Hidden Sets', 
+    }
+    
+    return render_template('admin/hidden_sets.html', sets=sets,tpl_utils=tpl_utils,l=l)
 
 
 @admin_bp.route('/admin/hidden_channels')
@@ -77,7 +86,11 @@ def hidden_channels():
     
     channels = get_hidden_channels()
     
-    return render_template('admin/hidden_channels.html', channels=channels,tpl_utils=tpl_utils)
+    l = {
+        'page_title': Lang.ADMIN + ' - ' + 'Hidden Channels', 
+    }
+    
+    return render_template('admin/hidden_channels.html', channels=channels,tpl_utils=tpl_utils,l=l)
 
 
 @admin_bp.route('/admin/tags')
@@ -87,9 +100,12 @@ def tags(featured=None,sort_by='nb_results'):
         return redirect(url_for('set.sets'))
     
     tags = get_set_searches(sort_by=sort_by,featured=featured)
-
     
-    return render_template('admin/tags.html',tags=tags,tpl_utils=tpl_utils)
+    l = {
+        'page_title': Lang.ADMIN + ' - ' + 'Tags', 
+    }
+    
+    return render_template('admin/tags.html',tags=tags,tpl_utils=tpl_utils,l=l)
 
 
 @admin_bp.route('/admin/tag_toggle/<int:tag_id>', methods=['GET'])
