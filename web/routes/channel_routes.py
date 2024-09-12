@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, redirect, render_template, request, url_for
 from flask.cli import F
 from flask_login import current_user
@@ -18,6 +19,13 @@ def channels(page=1):
 
     channels = get_channels(page, order_by, int(per_page), False)
     
+    # Filter each channel's sets to only include ones where set.hidden is False
+    for channel in channels:
+        channel.sets_visible = sorted(
+            [set_item for set_item in channel.sets if not set_item.hidden],
+            key=lambda set_item: set_item.publish_date,
+            reverse=True
+        )
     
     def get_pagination_url(page):
         params = {}

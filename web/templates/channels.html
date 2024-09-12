@@ -8,7 +8,7 @@
     <h2 class="text-xl mb-5"><a href="{{url_for('set.sets',s=channel.author)}}">{{ channel.author }}</a> - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs</h2>
     <p>{{ channel.description }}</p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {% for set in channel.sets[:3] %}
+      {% for set in channel.sets_visible[:3] %}
 
 
       <div class=" overflow-hidden">
