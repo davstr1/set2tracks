@@ -6,7 +6,7 @@ import re
 import shutil
 from flask_login import current_user
 from numpy import full
-from sqlalchemy import INTEGER, cast, func, null, text
+from sqlalchemy import INTEGER, cast, func, null, or_, text
 from sqlalchemy.orm.exc import NoResultFound
 
 from web.lib.apple import add_apple_track_data_from_json
@@ -794,14 +794,13 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
     
 
     if search:
-        # Define the raw SQL using text() to manually handle the OR condition
-        search_query = text("""
-            sets.title_tsv @@ plainto_tsquery(:language, :query) 
-            OR channel.author @@ plainto_tsquery(:language, :query)
-        """)
-        
-        # Apply the filter using the raw SQL
-        query = query.filter(search_query).params(language='english', query=search)
+          # Use SQLAlchemy's or_ to create an OR condition
+          search_filter = or_(
+              Set.title_tsv.match(search),  # Assuming title_tsv is a full-text search vector
+              Channel.author.match(search)  # Assuming author is also a searchable field
+          )
+          
+          query = query.filter(search_filter)
 
         # Print the generated SQL query for debugging
         # print(str(query.statement))

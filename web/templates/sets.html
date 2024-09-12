@@ -105,7 +105,7 @@
             <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
               <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>
               <p>{{ set.nb_tracks }} tracks</p>
-
+         
             </div>
           </div>
         </a>
@@ -115,7 +115,6 @@
           </a>
           <p class="text-gray-600"><a href="{{url_for('set.sets',s=set.channel.author)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
           <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
-
 
         </div>
       </div>
