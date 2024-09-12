@@ -28,7 +28,7 @@ def set_visibility_toggle(set_id):
     elif isinstance(result, dict) and 'message' in result:
         flash(result['message'], 'success')
         
-    return redirect(url_for('set.sets'))
+    return redirect(url_for('set.set',set_id=set_id))
 
 
 @admin_bp.route('/admin/channel/hide/<int:channel_id>', methods=['GET'])  
