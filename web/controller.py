@@ -6,7 +6,7 @@ import re
 import shutil
 from flask_login import current_user
 from numpy import full
-from sqlalchemy import INTEGER, cast, func, null
+from sqlalchemy import INTEGER, cast, func, null, text
 from sqlalchemy.orm.exc import NoResultFound
 
 from web.lib.apple import add_apple_track_data_from_json
@@ -791,10 +791,22 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
                      .filter(Set.channel.has(hidden=False)) \
                      .options(joinedload(Set.channel))
                      
-    if search:
-        search_filter = (Set.title_tsv.match(search)) | (Channel.author.match(search))
-        query = query.filter(search_filter)
     
+
+    if search:
+        # Define the raw SQL using text() to manually handle the OR condition
+        search_query = text("""
+            sets.title_tsv @@ plainto_tsquery(:language, :query) 
+            OR channel.author @@ plainto_tsquery(:language, :query)
+        """)
+        
+        # Apply the filter using the raw SQL
+        query = query.filter(search_query).params(language='english', query=search)
+
+        # Print the generated SQL query for debugging
+        # print(str(query.statement))
+
+
     
     if order_by == 'recent':
         query = query.order_by(Set.publish_date.desc())
@@ -874,6 +886,7 @@ def get_set_with_tracks(set_id):
         'tracks': tracks,
         'view_count': set_instance.view_count,
         'like_count': set_instance.like_count,
+        'hidden': set_instance.hidden,
     }
     return set_details
 
@@ -1386,10 +1399,10 @@ def set_toggle_visibility(set_id):
     set_instance = Set.query.get(set_id)
     if not set_instance:
         return {"error": "Set not found"}
-    
+    print(set_instance.hidden)
     set_instance.hidden = not set_instance.hidden
     db.session.commit()
-    
+    print(set_instance.hidden)
     return {"message": f"Set visibility toggled to {set_instance.hidden}"}
 
 
