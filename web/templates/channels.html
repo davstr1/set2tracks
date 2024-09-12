@@ -1,5 +1,57 @@
 {% extends "base.html" %}
 
 {% block content %}
-Content goes here
+<div class="container mx-auto py-8">
+  <h1 class="text-3xl mb-10">DJ channels</h1>
+  {% for channel in channels %}
+  <div class="mb-20">
+    <h2 class="text-xl mb-5"><a href="{{url_for('set.sets',s=channel.author)}}">{{ channel.author }}</a> - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs</h2>
+    <p>{{ channel.description }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for set in channel.sets[:3] %}
+
+
+      <div class=" overflow-hidden">
+        <a href="{{ url_for('set.set', set_id=set.id) }}">
+          <div class="relative flex gap-0">
+            <img src="{{ set.thumbnail }}" alt="{{ set.title }}" class="w-full h-48 object-cover  rounded-lg">
+            <div class="absolute inset-0 "></div>
+            <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
+              <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>
+              <p>{{ set.nb_tracks }} tracks</p>
+
+            </div>
+          </div>
+        </a>
+        <div class="p-4 text-sm">
+          <a href="{{ url_for('set.set', set_id=set.id) }}">
+            <h3 class="text-white font-semibold hover:text-primary">{{ set.title }}</h3>
+          </a>
+
+          <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
+
+
+        </div>
+      </div>
+
+
+
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Pagination -->
+  <div class="mt-8 flex justify-center space-x-4">
+    {% if is_paginated %}
+    {% if pagination.prev_url %}
+    <a href="{{ pagination.prev_url }}" class="px-4 py-2 btn-primary btn rounded-full">Previous</a>
+    {% endif %}
+    {% if pagination.next_url %}
+    <a href="{{ pagination.next_url }}" class="px-4 py-2 btn-primary btn rounded-full">Next</a>
+    {% endif %}
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}

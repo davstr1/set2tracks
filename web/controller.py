@@ -1393,6 +1393,43 @@ def set_toggle_visibility(set_id):
     return {"message": f"Set visibility toggled to {set_instance.hidden}"}
 
 
+def get_channels(page=1, order_by='recent', per_page=20, hiddens=None):
+    """
+    Retrieves a paginated list of channels with customizable sorting and filtering options.
+
+    Parameters:
+    - page (int, optional): The page number of results to return. Defaults to 1.
+    - order_by (str, optional): The order in which to return the channels. 
+        - 'recent' (default): Orders by most recently created channels first (descending by creation date).
+        - 'old': Orders by oldest channels first (ascending by creation date).
+        - 'popular': Orders by channels with the most followers first (descending by follower count).
+        - 'outsider': Orders by channels with the fewest followers first (ascending by follower count).
+    - per_page (int, optional): The number of results per page. Defaults to 20.
+    - hiddens (bool, optional): If provided, filters channels by their hidden status (True for hidden, False for visible).
+
+    Returns:
+    - A paginated list of channels based on the specified criteria.
+
+    Note:
+    - The 'error_out=False' ensures that invalid page requests will return an empty result set rather than throwing an error.
+    """
+
+    
+    query = Channel.query
+    if order_by == 'recent':
+        query = query.order_by(Channel.create_date.desc())
+    elif order_by == 'old':
+        query = query.order_by(Channel.create_date.asc())
+    elif order_by == 'popular':
+        query = query.order_by(Channel.channel_follower_count.desc())
+    elif order_by == 'outsider':
+        query = query.order_by(Channel.channel_follower_count.asc())
+        
+    if hiddens is not None:
+        query = query.filter_by(hidden=hiddens)
+    
+    results = query.paginate(page=page, per_page=per_page, error_out=False)
+    return results
 
 def get_hidden_channels():
     return Channel.query.filter_by(hidden=True).all()
