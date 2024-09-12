@@ -25,14 +25,16 @@ even where the player is not behind*/
           <use xlink:href="#icon-link-external"></use>
         </svg></a>
       {%if is_admin%}
-      <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600">[Hide]</a>
+      <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600">[{{ "Show" if set.hidden else "Hide" }}]
+      </a>
       {%endif%}
     </h1>
 
     <p class="text-gray-600">
       <a href="{{url_for('set.sets',s=set.channel.author)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
       {%if is_admin%}
-      <a href="{{url_for('admin.channel_visibility_toggle',channel_id=set.channel.id)}}" class="text-gray-600">[Hide]</a>
+      <a href="{{url_for('admin.channel_visibility_toggle',channel_id=set.channel.id)}}" class="text-gray-600">[{{ "Show" if set.channel.hidden else "Hide" }}
+        ]</a>
       {%endif%}
 
     <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
