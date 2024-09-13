@@ -26,6 +26,9 @@ def channels(page=1):
             key=lambda set_item: set_item.publish_date,
             reverse=True
         )
+        channel.nb_sets_visible = len(channel.sets_visible)
+        
+    
     
     def get_pagination_url(page):
         params = {}

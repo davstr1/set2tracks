@@ -5,12 +5,19 @@
   <h1 class="text-3xl mb-10">DJ channels</h1>
   {% for channel in channels %}
   <div class="mb-20">
-    <h2 class="text-xl mb-5"><a href="{{url_for('set.sets',s=channel.author)}}">{{ channel.author }}</a> - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs</h2>
-    <p>{{ channel.description }}</p>
+    <h2 class="text-xl mb-5">
+      <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s=channel.author)}}">
+        {{ channel.author }}
+      </a>
+      - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs 
+      <a target="_blank" class="tooltip" data-tip="Check {{channel.author}}'s Channel on Youtube" href="{{channel.channel_url}}">
+        <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+          <use xlink:href="#icon-link-external"></use>
+        </svg>
+      </a>
+    </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for set in channel.sets_visible[:3] %}
-
-
       <div class=" overflow-hidden">
         <a href="{{ url_for('set.set', set_id=set.id) }}">
           <div class="relative flex gap-0">
@@ -27,17 +34,20 @@
           <a href="{{ url_for('set.set', set_id=set.id) }}">
             <h3 class="text-white font-semibold hover:text-primary">{{ set.title }}</h3>
           </a>
-
-          <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
-
-
+          <p class="text-gray-600">
+            {{ tpl_utils.time_ago(set.publish_date,False) }}
+            - {{ tpl_utils.km_number(set.view_count) }} views
+            - {{ tpl_utils.km_number(set.like_count) }} likes
+          </p>
         </div>
       </div>
-
-
-
       {% endfor %}
     </div>
+    <p class="text-right">
+      <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s=channel.author)}}">
+        See all ({{channel.nb_sets_visible}})
+      </a>
+    </p>
   </div>
   {% endfor %}
 
