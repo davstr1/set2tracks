@@ -3,6 +3,7 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from flask.cli import F
 from flask_login import current_user
 
+from lang import Lang
 from web.controller import get_channels
 from web.routes.routes_utils import tpl_utils
 
@@ -48,4 +49,14 @@ def channels(page=1):
     is_paginated = channels.has_next or channels.has_prev
     
     
-    return render_template('channels.html', channels=channels, tpl_utils=tpl_utils, pagination=pagination, is_paginated=is_paginated)
+    l = {
+        'page_title' : 'Top 1000 DJ Channels - ' + Lang.APP_NAME
+    }
+    
+    
+    return render_template('channels.html', 
+                           channels=channels, 
+                           tpl_utils=tpl_utils, 
+                           pagination=pagination, 
+                           is_paginated=is_paginated, 
+                           l=l)
