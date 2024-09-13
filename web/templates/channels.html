@@ -44,7 +44,7 @@
       {% endfor %}
     </div>
     <p class="text-right">
-      <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s=channel.author)}}">
+      <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s='channelid:'~channel.id)}}">
         See all ({{channel.nb_sets_visible}})
       </a>
     </p>

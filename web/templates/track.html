@@ -1,5 +1,4 @@
-<div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" 
-class="track flex flex-wrap items-center hover:bg-blue-950 rounded-lg mb-2 cursor-pointer relative group  sm:border-b-2  sm:pb-4">
+<div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="track flex flex-wrap items-center hover:bg-blue-950 rounded-lg mb-2 cursor-pointer relative group  sm:border-b-2  sm:pb-4">
 
   <div class="action-pause p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12 relative flex items-center justify-center">
     <div class="track-number">
@@ -36,7 +35,9 @@ class="track flex flex-wrap items-center hover:bg-blue-950 rounded-lg mb-2 curso
   </div>
   <div class="p-2 lg:flex-1 w-full sm:w-4/6 lg:w-auto text-center sm:text-left">
 
-    <div class="font-bold text-lg line-clamp-1 tooltip text-left" data-tip="{{ track.title if track.title != "Track not found" else '-' }}">{{ track.title if track.title != "Track not found" else '-' }}</div>
+    <div class="font-bold text-lg line-clamp-1 tooltip text-left" data-tip="{{ track.title if track.title != " Track not found" else '-' }}">{{ track.title if track.title != "Track not found" else '' }}
+      
+    </div>
     {% if track.id != 1 %}
     <div class="italic line-clamp-1">{{ track.artist_name if track.artist_name else '-' }}</div>
     {% endif %}
@@ -85,6 +86,16 @@ class="track flex flex-wrap items-center hover:bg-blue-950 rounded-lg mb-2 curso
           <use xlink:href="#icon-minus-circle"></use>
         </svg>
       </a>
+
+      
+      {% if track.nb_sets > 1 %}
+      <a class="relative h-6 w-6 tooltip openTrackOnPlatform " data-tip="Check sets with this track" href="{{url_for('set.sets',s='trackid:'~ track.id)}}">
+      
+        <div class="w-6 h-6 rounded-full bg-base-content hover:bg-primary absolute z-0 text-primary-content text-xs flex items-center justify-center">{{ track.nb_sets}}</div>
+      </a>
+      {% else %}
+      <div class="relative inline-block w-6 h-6 bg-base-content bg-transparent "></div>
+      {% endif %}
 
       <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="w-6 h-6 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
 

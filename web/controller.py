@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shutil
+from sys import prefix
 from flask_login import current_user
 from numpy import full
 from sqlalchemy import INTEGER, cast, func, null, or_, text
@@ -786,21 +787,44 @@ def compile_and_sort_genres(track_sets):
 
 
 def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
-    query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
+    
+    prefixed_search = False
+    
+    if search and search.startswith('trackid:'):
+        track_id = search[len('trackid:'):]
+        #TODO check for numeric value
+        # check for existence of track
+        prefixed_search = True
+        query = (
+        Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
+        .join(TrackSet, Set.id == TrackSet.set_id)
+        .filter(TrackSet.track_id == track_id)
+        )
+        
+    elif search and search.startswith('channelid:'):
+        channel_id = search[len('channelid:'):]
+        # TODO check for numberic value
+        # check for existence of channel
+        prefixed_search = True
+        query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False,channel_id=channel_id)
+        
+    else: 
+        query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
                      .join(Set.channel) \
                      .filter(Set.channel.has(hidden=False)) \
                      .options(joinedload(Set.channel))
                      
     
 
-    if search:
+    if search and not prefixed_search:
+                 
           # Use SQLAlchemy's or_ to create an OR condition
-          search_filter = or_(
+        search_filter = or_(
               Set.title_tsv.match(search),  # Assuming title_tsv is a full-text search vector
               Channel.author.match(search)  # Assuming author is also a searchable field
           )
           
-          query = query.filter(search_filter)
+        query = query.filter(search_filter)
 
         # Print the generated SQL query for debugging
         # print(str(query.statement))

@@ -235,6 +235,7 @@ def format_db_track_for_template(track):
             'time_signature': track.time_signature,
             'genres':track.genres,
             'has_related_tracks': track.has_related_tracks(),
+            'nb_sets': track.nb_sets,
             #'pos': track_set.pos
             }
     except Exception as e:
