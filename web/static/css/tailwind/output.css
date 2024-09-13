@@ -2781,6 +2781,10 @@ input[type=password]:focus {
   z-index: 50;
 }
 
+.z-auto {
+  z-index: auto;
+}
+
 .m-2 {
   margin: 0.5rem;
 }
@@ -3537,6 +3541,10 @@ input[type=password]:focus {
 
 .fill-base-content {
   fill: var(--fallback-bc,oklch(var(--bc)/1));
+}
+
+.fill-current {
+  fill: currentColor;
 }
 
 .stroke-base-content {

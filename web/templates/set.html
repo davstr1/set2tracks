@@ -72,9 +72,7 @@ even where the player is not behind*/
   </div>
 </div>
 
-<p class="p-4 pt-0 text-center discreet"><a target="_blank" href="https://youtu.be/{{set.video_id}}">❤ Support your DJ ! Like, comment and subscribe on Youtube <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
-      <use xlink:href="#icon-link-external"></use>
-    </svg></a>.</p>
+
 <h1 class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
 
 {% if not set.has_chapters %}
@@ -90,6 +88,14 @@ even where the player is not behind*/
 </div>
 
 
+<div class="fixed bottom-0 w-full p-4 text-center bg-primary-content z-50 border-t-2">
+  <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
+    ❤ Support your DJ! Like, comment, and subscribe on YouTube 
+    <svg class="w-6 h-6 fill-current inline hover:fill-primary">
+      <use xlink:href="#icon-link-external"></use>
+    </svg>
+  </a>
+</div>
 
 
 <script>
