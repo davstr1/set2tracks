@@ -798,6 +798,9 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
         query = (
         Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
         .join(TrackSet, Set.id == TrackSet.set_id)
+        .join(Set.channel) \
+        .filter(Set.channel.has(hidden=False)) \
+        .options(joinedload(Set.channel))
         .filter(TrackSet.track_id == track_id)
         )
         
@@ -806,7 +809,8 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
         # TODO check for numberic value
         # check for existence of channel
         prefixed_search = True
-        query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False,channel_id=channel_id)
+        query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False,channel_id=channel_id) 
+        
         
     else: 
         query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
