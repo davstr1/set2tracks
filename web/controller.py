@@ -1375,6 +1375,12 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
     return {"playlist_id":playlist_id,"spotify_playlist_id": new_playlist['id'],"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
 
 
+def get_all_featured_set_searches():
+    return db.session.query(SetSearch) \
+        .filter(SetSearch.featured == True) \
+            .order_by(SetSearch.query.asc()) \
+            .all()
+
 
 def get_random_set_searches(min_popularity, n):
    

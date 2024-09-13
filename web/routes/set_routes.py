@@ -3,7 +3,7 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user
 from flask_cors import CORS, cross_origin
 from lang import Lang
-from web.controller import get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_status, get_set_with_tracks, get_sets_in_queue, get_track_by_id, is_set_exists, queue_set
+from web.controller import get_all_featured_set_searches, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_status, get_set_with_tracks, get_sets_in_queue, get_track_by_id, is_set_exists, queue_set
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -30,7 +30,8 @@ def sets():
     nb_sets_total = get_playable_sets_number()
     
     
-    inspiration_searches = get_random_set_searches(20,20)
+    #inspiration_searches = get_random_set_searches(20,20)
+    inspiration_searches = get_all_featured_set_searches()
     
     
     def get_pagination_url(page):
