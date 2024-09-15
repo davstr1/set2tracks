@@ -11,16 +11,35 @@ from math import e
 from pprint import pprint
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
+from datetime import datetime, date
+
+import pytz
 
 from web.model import Genre, Track
 import logging
 logger = logging.getLogger('root')
 
-def time_ago(value,less_than_a_day=True):
-    now = datetime.now()
-    diff = relativedelta(now, value)
+def ensure_datetime_with_timezone(value):
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            value = pytz.UTC.localize(value)
+        return value
+    elif isinstance(value, date):
+        # Convert date to datetime (assuming midnight as time)
+        value = datetime.combine(value, datetime.min.time())
+        return pytz.UTC.localize(value)
 
+def time_ago(value,less_than_a_day=True):
+  
+    now = datetime.now(pytz.UTC)  
+    print(type(value))
+    # If 'value' is naive, make it timezone-aware (assuming UTC or you can set your desired timezone)
+    # if  value.tzinfo is None:
+    #     value = pytz.UTC.localize(value)
+    value = ensure_datetime_with_timezone(value)
+    
+    diff = relativedelta(now, value)
+    
     if diff.years > 0:
         return f"{diff.years} year{'s' if diff.years > 1 else ''} ago"
     elif diff.months > 0:
@@ -438,3 +457,27 @@ def parse_date(date_str):
     except ValueError:
         # If the date format is incorrect, return None or handle as needed
         return None
+    
+    
+    
+def format_set_queue_error(error, video_id = None):
+    """
+    Format an error message for the set queue.
+    Args:
+        error (str): The error message to be formatted.
+    Returns:
+        str: The formatted error message.
+    """
+    if not error:
+        return ''
+    if not video_id:
+        return error
+
+    # return all the text after video_id
+    parts = error.split(video_id + ':')
+
+    if len(parts) > 1:
+        return parts[1].strip()
+   
+    return error
+    

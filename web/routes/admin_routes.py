@@ -4,8 +4,9 @@ from flask_login import current_user
 
 
 from lang import Lang
-from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, search_toggle_featured, set_toggle_visibility
+from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, queue_discard_set, queue_reset_set, remove_set_temp_files, search_toggle_featured, set_toggle_visibility
 from web.logger import logger
+from web.model import SetQueue
 from web.routes.routes_utils import is_admin
 from web.routes.set_routes import sets
 from web.routes.routes_utils import tpl_utils
@@ -117,3 +118,50 @@ def tag_toggle(tag_id):
     result = search_toggle_featured(tag_id)
         
     return redirect(url_for('admin.tags'))
+
+
+
+@admin_bp.route('/sets/queue/<int:queue_id>/discard', methods=['GET'])
+def queue_discard(queue_id):
+    if not is_admin():
+        return redirect(url_for('users.login', next=url_for('set.sets_queue')))
+    
+    set_queue_item = SetQueue.query.get(queue_id)
+    if not set_queue_item:
+        flash('Set not found in queue.', 'error')
+        return redirect(request.referrer or url_for('set.sets_queue'))
+
+    if set_queue_item.status != 'failed' and set_queue_item.status != 'processing':
+        flash('Only failed or processing sets can be discarded.', 'error')
+        return redirect(request.referrer or url_for('set.sets_queue'))
+    
+    
+    queue_discard_set(set_queue_item)
+    
+    flash('Set discarded.', 'success')
+    return redirect(request.referrer or url_for('set.sets_queue'))
+
+
+@admin_bp.route('/sets/queue/<int:queue_id>/reset', methods=['GET'])
+def queue_reset(queue_id):
+    if not is_admin():
+        return redirect(url_for('users.login', next=url_for('set.sets_queue')))
+    
+    set_queue_item = SetQueue.query.get(queue_id)
+    if not set_queue_item:
+        flash('Set not found in queue.', 'error')
+        return redirect(request.referrer or url_for('set.sets_queue'))
+
+    if set_queue_item.status == 'pending':
+        flash('Pending sets can not be discarded.', 'error')
+        return redirect(request.referrer or url_for('set.sets_queue'))
+    
+    
+    result = queue_reset_set(set_queue_item)
+    
+    if isinstance(result, dict) and 'error' in result:
+        flash(result['error'], 'error')
+    else:
+        flash('Set reset.', 'success')
+        
+    return redirect(request.referrer or url_for('set.sets_queue'))

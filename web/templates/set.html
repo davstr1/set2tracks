@@ -21,9 +21,11 @@ even where the player is not behind*/
   <div class=" pl-2">
     <!-- Insert your text here -->
     <h1 class="text-2xl"><span class="discreet block">Tracklist from</span>
-      <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}} <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+      <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
+        <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
           <use xlink:href="#icon-link-external"></use>
-        </svg></a>
+        </svg>
+      </a>
       {%if is_admin%}
       <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600">[{{ "Show" if set.hidden else "Hide" }}]
       </a>
@@ -90,7 +92,7 @@ even where the player is not behind*/
 
 <div class="fixed bottom-0 w-full p-4 text-center bg-primary-content z-50 border-t-2">
   <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
-    ❤ Support your DJ! Like, comment, and subscribe on YouTube 
+    ❤ Support your DJ! Like, comment, and subscribe on YouTube
     <svg class="w-6 h-6 fill-current inline hover:fill-primary">
       <use xlink:href="#icon-link-external"></use>
     </svg>
@@ -121,8 +123,8 @@ even where the player is not behind*/
 
   let isDragging = false;
   let startX;
-  const playerFixedClasses = ['items-end'] // ,'animate-center-to-end'k'w-48', 'h-28', 'fixed', 'top-2', 'right-2'
-  const playerScrolledClasses = ['items-center'] // ,'animate-end-to-center' ''right-2'','w-3/6', 'relative'
+  const playerFixedClasses = ['items-end', 'fixed', 'right-0'] // ,'animate-center-to-end'k'w-48', 'h-28', 'fixed', 'top-2', 'right-2'
+  const playerScrolledClasses = ['items-center', 'sticky'] // ,'animate-end-to-center' ''right-2'','w-3/6', 'relative'
 
 
   var trackList = document.querySelectorAll('#tracklist .track');
@@ -150,8 +152,10 @@ even where the player is not behind*/
   //
 
   window.addEventListener('load', function () {
-    playerTopWrapHeight = playerTopWrap.offsetHeight;
-    shrinkOn = metaWrap.getBoundingClientRect().top;;
+    playerTopWrapHeight = playerTopWrap.offsetTop;
+    shrinkOn = playerTopWrapHeight; // metaWrap.getBoundingClientRect().top +
+    console.log('shrinkOn', shrinkOn)
+    console.log('playerTopWrapHeight', playerTopWrapHeight)
 
   });
 

@@ -125,7 +125,7 @@ def youbube_video_info(video_id: str, retry_count: int = 5) -> dict:
         'is_live', 'availability', 'error'
     ]
     options = {'quiet': True, 'no_warnings': True, 'proxy': PROXY_URL}
-
+    print('startinc youtube video info with options',options)
     attempt = 0
     while attempt < retry_count:
         with YoutubeDL(params=options) as ydl:

@@ -1,5 +1,8 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+from re import L
+from flask import Blueprint, Config, redirect, render_template, request, url_for
 from flask_login import current_user
+
+from lang import Lang
 
 
 
@@ -37,3 +40,12 @@ def quickstart():
 def help():
     return 'yo help'
     return render_template('help.html')
+
+
+@basic_bp.route('/plans')
+def plans():
+    # TODO: Add useer integration
+    l = {
+        'page_title': 'Plans - ' + Lang.APP_NAME,
+    }
+    return render_template('plans.html', l=l)

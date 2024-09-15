@@ -37,7 +37,7 @@
           </svg>
         </div>
         <!-- Right Arrow -->
-         <!--  when implementing tag page link, change to right-14 -->
+        <!--  when implementing tag page link, change to right-14 -->
         <div id="right-arrow" class="hidden absolute right-0 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -67,7 +67,7 @@
         </a>
       </div>
       <div class="flex items-center">
-        <a href="{{url_for('set.get_sets_queue')}}" class="btn btn-link text-xs discreet">
+        <a href="{{url_for('set.sets_queue')}}" class="btn btn-link text-xs discreet">
           {{_("See Queue")}}
         </a>
       </div>
@@ -105,7 +105,7 @@
             <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
               <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>
               <p>{{ set.nb_tracks }} tracks</p>
-         
+
             </div>
           </div>
         </a>

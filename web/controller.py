@@ -4,7 +4,9 @@ import json
 import os
 import re
 import shutil
+import stat
 from sys import prefix
+from unittest import result
 from flask_login import current_user
 from numpy import full
 from sqlalchemy import INTEGER, cast, func, null, or_, text
@@ -154,7 +156,7 @@ def filter_out_existing_sets(video_ids):
     return [video_id for video_id in video_ids if not is_set_exists_or_in_queue(video_id)]
 
 
-def queue_set(video_id,user_id=None):
+def queue_set(video_id,user_id=None,discard_if_exists=False):
     
     if is_set_exists(video_id): # todo : the published stuff
         return {'error': 'Set was already here.','video_id':video_id}
@@ -162,11 +164,15 @@ def queue_set(video_id,user_id=None):
     existing_queue_entry = is_set_in_queue(video_id)
     
     if existing_queue_entry:
-        print('boookya')
-        existing_queue_entry = as_dict(existing_queue_entry)
-        if existing_queue_entry['status'] == 'discarded' or existing_queue_entry['status'] == 'failed':
-            return {'error': f"Set was discarted from queue for the following reason : {existing_queue_entry['discarded_reason']}. Please let us know if you thing that's a mistake."}
-        return {'error':'Set already in queue.'} # do not queue it again
+        
+        if not discard_if_exists:
+            existing_queue_entry = as_dict(existing_queue_entry)
+            if existing_queue_entry['status'] == 'discarded' or existing_queue_entry['status'] == 'failed':
+                return {'error': f"Set was discarted from queue for the following reason : {existing_queue_entry['discarded_reason']}. Please let us know if you thing that's a mistake."}
+            return {'error':'Set already in queue.'} # do not queue it again
+        else:
+            db.session.delete(existing_queue_entry)
+            db.session.commit()
     
     if not youtube_video_exists(video_id):
         return queue_set_discarted(video_id,'Youtube Video doesn\t exist.')
@@ -386,8 +392,83 @@ def upsert_setsearch(query, nb_results):
         db.session.rollback()
         raise
     
-def get_sets_in_queue():
-    return SetQueue.query.filter(SetQueue.status.in_(['pending', 'processing'])).order_by(SetQueue.id.asc()).all()
+def get_sets_in_queue(page=1, status=None,include_15min_error=True):
+    #query = SetQueue.query
+    query = SetQueue.query.outerjoin(Set, SetQueue.video_id == Set.video_id)
+    query = query.with_entities(
+    Set.id.label('set_id'),  
+    SetQueue.id,
+    SetQueue.video_id,                # Standard field names from SetQueue model
+    SetQueue.user_id,
+    SetQueue.user_premium,
+    SetQueue.status,
+    SetQueue.queued_at,
+    SetQueue.time_in_queue,
+    SetQueue.time_processed,
+    SetQueue.time_processed_and_queued,
+    SetQueue.discarded_reason,
+    SetQueue.video_info_json,
+    SetQueue.duration,
+    SetQueue.nb_chapters
+)
+
+    # Filter by status if provided
+    if status:
+        query = query.filter(SetQueue.status == status)
+    else:
+        # Default filter when no specific status is provided
+        ##query = query.filter(SetQueue.status.in_(['pending', 'processing']))
+        nothing = None
+        
+    if not include_15min_error:
+        
+        query = query.filter(
+        or_(
+        SetQueue.discarded_reason == None,           # Handle NULL values
+        SetQueue.discarded_reason == '',             # Handle empty strings
+        ~SetQueue.discarded_reason.like('%Video shorter than 15m%')   # Exclude '15min'
+        )
+    )
+
+       #~SetQueue.discarded_reason.like('%Video shorter than 15m%') | (SetQueue.discarded_reason == None)
+
+    # Get the total count before pagination
+    total_count = query.count()
+
+    # Order by SetQueue.id ascending
+    query = query.order_by(SetQueue.id.desc())
+
+    # Paginate the results
+    sets_per_page = 10  # Adjust this number based on how many sets you want per page
+    paginated_sets = query.paginate(page=page, per_page=sets_per_page, error_out=False)
+
+    # Return the paginated items and the total count as a tuple
+    return paginated_sets, total_count
+
+def count_sets_with_status(status):
+    return SetQueue.query.filter_by(status=status).count()
+
+def count_sets_with_all_statuses():
+    distinct_statuses = SetQueue.query.with_entities(SetQueue.status).distinct().all()
+    result = {'all': SetQueue.query.count()}
+    for status in distinct_statuses:
+        result[status[0]] = count_sets_with_status(status[0])
+    return result
+    
+
+def queue_change_set_status(set_queue_item, new_status):
+    remove_set_temp_files(set_queue_item.video_id)
+    set_queue_item.status = new_status
+    db.session.commit()
+    return True
+
+
+def queue_discard_set(set_queue_item):
+    return queue_change_set_status(set_queue_item, 'discarded')
+
+def queue_reset_set(set_queue_item):
+    
+    return queue_set(set_queue_item.video_id, user_id=set_queue_item.user_id, discard_if_exists=True)
 
 
 def get_my_sets_in_queue(user_id):
@@ -583,13 +664,13 @@ def remove_small_unidentified_segments(tracks, min_duration_s):
 
     return cleaned_tracks
 
-
+dl_dir = 'temp_downloads'
 
 
 def insert_set(video_info,delete_temp_files=True):
     try:
         pprint(video_info)
-        dl_dir = 'temp_downloads'
+        
         video_id = video_info['video_id']
         chapters = video_info.get('chapters',[])
         if chapters is None:
@@ -659,6 +740,14 @@ def insert_set(video_info,delete_temp_files=True):
         if delete_temp_files:
             shutil.rmtree(vid_dir)
         return error_out(str(e)) 
+    
+    
+def remove_set_temp_files(video_id):
+    vid_dir = f"{dl_dir}/{video_id}"
+    if os.path.exists(vid_dir):
+        shutil.rmtree(vid_dir)
+        return True
+    return False
     
 
 def add_tracks_from_json(tracks_json, set_instance=None, add_to_set=False,related_track_id=None):
