@@ -1,9 +1,10 @@
+
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 
 from lang import Lang
-from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_playlist_with_tracks, get_playlists_from_user, remove_track_from_playlist, update_playlist_positions_after_track_change_position
-from web.lib.spotify import ensure_valid_token
+from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_playlist_with_tracks, get_playlists_from_user, remove_track_from_playlist, update_playlist_edit_date, update_playlist_positions_after_track_change_position
+from web.lib.spotify import add_tracks_to_spotify_playlist, ensure_valid_token, get_spotify_playlist_tracks_ids
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected
 from web.logger import logger
 
@@ -118,8 +119,15 @@ def playlist_create():
 def show_playlist(playlist_id):
     res = get_playlist_with_tracks(playlist_id)
     
-    current_url = request.url
+    playlist_author_id = res['playlist'].get('user_id')
     user_id = get_user_id()
+    
+    if playlist_author_id == user_id:
+        print('updating edit date')
+        update_playlist_edit_date(playlist_id)
+    
+    current_url = request.url
+   
     
     if user_id:
         user_playlists = get_playlists_from_user(user_id, order_by='title')
@@ -209,10 +217,42 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         
         
         res = get_playlist_with_tracks(playlist_id)
+        print('till fuvkn here')
         playlist = res['playlist']
         tracks = res['tracks']
+        print('playlist',playlist)
         
-        res = create_spotify_playlist_and_add_tracks(playlist.get('title'), tracks,playlist_id)
+        if not isinstance(playlist, dict):
+            return jsonify({'error': 'Playlist object is not valid'}), 400
+        
+        if playlist is None:
+            return jsonify({'error': 'Playlist is None'}), 400
+        
+        if not tracks or len(tracks) == 0:
+            return jsonify({'error': 'No tracks in the playlist'}), 400
+        
+        
+        playlist_id_spotify = playlist.get('playlist_id_spotify',None)
+        
+        
+        
+        if playlist_id_spotify is None:
+            print('creating new spotify playlist')
+            return create_spotify_playlist_and_add_tracks(playlist.get('title'), tracks,playlist_id)
+            
+        else:
+            print('updating existing spotify playlist')
+            spotify_playlist_tracks_ids = get_spotify_playlist_tracks_ids(playlist_id_spotify)
+            local_tracks_ids = [track['key_track_spotify'] for track in tracks]
+            tracks_to_add = list(set(local_tracks_ids) - set(spotify_playlist_tracks_ids))
+            tracks_to_add = [item for item in tracks_to_add if item not in (None, '')]
+            if not len(tracks_to_add):
+                return jsonify({'error': 'No new tracks to add to Spotify playlist'}), 400
+
+            
+            return add_tracks_to_spotify_playlist(playlist_id_spotify, tracks_to_add)
+            
+           
         
         if non_ajax:
             return redirect(url_for('playlist.playlist',playlist_id=playlist_id))
@@ -220,6 +260,8 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         return jsonify(res)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
 
 ### JAx routes
 

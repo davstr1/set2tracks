@@ -1041,7 +1041,7 @@ def create_playlist(user_id, playlist_name,set_id=None):
     return new_playlist
 
 
-def get_playlists_from_user(user_id, order_by='create_date'):
+def get_playlists_from_user(user_id, order_by='edit_date'):
     # Define the valid columns for ordering
     valid_order_by_columns = {
         'create_date': Playlist.create_date,
@@ -1094,6 +1094,14 @@ def get_playlist_with_tracks(playlist_id):
     #return playlist
 
     return {'playlist': playlist, 'tracks': tracks}
+
+def update_playlist_edit_date(playlist_id):
+    playlist = Playlist.query.get(playlist_id)
+    if playlist:
+        playlist.edit_date = datetime.now(timezone.utc)
+        db.session.commit()
+        return True
+    return False
 
 
 def add_track_to_playlist(playlist_id, track_id):
@@ -1457,8 +1465,17 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
     
     # check if playlist exists
     playlist = db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).first()
+   
     if not playlist:
         return {"error": "Playlist not found"}
+    
+    # does this playlist belong to user ?
+    if playlist.user_id != current_user.id:
+        return {"error": "Unauthorized access to this playlist"}
+    
+    print(playlist)
+    
+    # does this playlist exist on spotify ?
     
     
     try:

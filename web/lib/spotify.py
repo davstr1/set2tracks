@@ -396,6 +396,9 @@ def ensure_valid_token():
 
     return token_info['access_token']
 
+
+
+
 def create_spotify_playlist(playlist_name, playlist_description=''):
     
     token_info = session.get('token_info', None)
@@ -438,8 +441,45 @@ def add_tracks_to_spotify_playlist(playlist_id, track_uris_list):
         user_id = sp.me()['id']
 
         response = sp.user_playlist_add_tracks(user_id, playlist_id, track_uris_list)
+        
+      
        
-        return jsonify(response), 200
+        return jsonify({'message':f'{len(track_uris_list)} tracks added to spotify playlist'})
+
+    except spotipy.exceptions.SpotifyException as e:
+        return jsonify({'error': f'Spotify API error: {e}'}), 500
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': f'Network error: {e}'}), 503
+
+    except KeyError as e:
+        return jsonify({'error': f'Missing key in response: {e}'}), 500
+
+    except Exception as e:
+        return jsonify({'error': f'Unexpected error: {e}'}), 500
+
+
+def get_spotify_playlist_tracks_ids(playlist_id):
+    token_info = session.get('token_info')
+    if not token_info:
+        return jsonify({'error': 'No Spotify token information found in session'}), 400
+
+    try:
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+        user = sp.me()
+        playlist = sp.user_playlist(user,playlist_id, fields='id')
+        print ('playlist')
+        print(playlist)
+        if 'id' not in playlist:
+            return jsonify({'error': 'Playlist not found'}), 404
+        
+        #print(f"Playlist: {playlist}")  # Debugging line
+        #return jsonify({'error': 'wtf'})
+        results = sp.playlist_tracks(playlist_id, fields='items(track(id,))')
+        #print(f"Results: {results}")  # Debugging line
+        return [item["track"]["id"] for item in results["items"]]
+        
+        return jsonify(results), 200
 
     except spotipy.exceptions.SpotifyException as e:
         return jsonify({'error': f'Spotify API error: {e}'}), 500

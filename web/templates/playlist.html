@@ -32,13 +32,13 @@
         Create playlist on Spotify
       </a>
 
-      <a data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" id="playlist_sync_spotify" class="hidden btn{% if not playlist.playlist_id_spotify %} hidden{% endif %}">
-        Sync with Spotify
+      <a data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" id="playlist_sync_spotify" class=" tooltip {% if not playlist.playlist_id_spotify %} hidden{% endif %}" data-tip="Add new tracks to spotify playlist">
+        Sync to Spotify
       </a>
 
       {% if playlist.set_id %}
 
-      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="btn">
+      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class=" tooltip" data-tip="The set from which playlist was created">
         View set from playlist </a>
 
       {% endif %}
@@ -89,6 +89,22 @@
       syncToSpotify.classList.remove('hidden');
       console.log(res.message);
       e.target.classList.add('hidden');
+    });
+  });
+
+  document.querySelector('#playlist_sync_spotify').addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.target.setAttribute('disabled', true);
+    const uri = e.target.getAttribute('data-href');
+    return processAjax(uri, 'GET', {}, (res) => {
+      e.target.removeAttribute('disabled');
+      if (res?.error) {
+        console.log(res.message);
+        
+        return;
+      }
+      console.log(res.message);
     });
   });
 
