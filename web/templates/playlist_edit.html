@@ -22,7 +22,7 @@
       </div>
     </form>
     <div class="mt-6 text-right">
-      <a href="{{ url_for('main.playlist_delete', playlist_id=playlist.id) }}" class="text-sm text-red-500 hover:text-red-700">
+      <a href="{{ url_for('playlist.playlist_delete', playlist_id=playlist.id) }}" class="text-sm text-red-500 hover:text-red-700">
         {{ _("Delete Playlist ?") }}
       </a>
     </div>
