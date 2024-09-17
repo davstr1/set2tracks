@@ -164,7 +164,7 @@ def playlist_edit(playlist_id):
 
 
             flash(response['message'], 'success')
-            return redirect(url_for('playlist.my_playlists'))
+            return redirect(url_for('playlist.show_playlist', playlist_id=playlist_id))
 
         except Exception as e:
             logger.error(f'error in playlist edit {e}')
