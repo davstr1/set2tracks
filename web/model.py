@@ -238,7 +238,11 @@ class TrackPlaylist(db.Model):
     playlist = db.relationship('Playlist', back_populates='track_associations',overlaps="playlists,tracks")
     
     
-
+class AppConfig(db.Model):
+    __tablename__ = 'app_config'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    key = db.Column(db.String(255), nullable=False, unique=True)
+    value = db.Column(db.String(1024), nullable=False)
 
 @listens_for(Track.genres, 'append')
 def receive_after_insert(target, value, initiator):

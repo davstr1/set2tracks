@@ -1,16 +1,19 @@
 
 
+
 import json
+from nis import cat
 import os
 import re
 import shutil
-import stat
-from sys import prefix
-from unittest import result
+import time
+
+
 from flask_login import current_user
-from numpy import full
-from sqlalchemy import INTEGER, cast, func, null, or_, text
-from sqlalchemy.orm.exc import NoResultFound
+import jwt
+import requests
+from sqlalchemy import  func,  or_
+from sqlalchemy.ext.mutable import MutableDict
 
 from web.lib.apple import add_apple_track_data_from_json
 from web.lib.audio import cut_audio
@@ -21,19 +24,28 @@ from web.lib.shazam import sync_process_segments
 from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
 from web.lib.utils import as_dict, calculate_avg_properties
 from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
-from web.model import Genre, Playlist, RelatedTracks, Set, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
+from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
 from datetime import datetime, timezone
 from boilersaas.utils.db import db
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
-from pprint import pp, pprint
+from pprint import pprint
 from collections import OrderedDict, defaultdict
 from web.lib.format import cut_to_if_needed, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
 
 from web.logger import logger
 
+import dotenv
 
+#from web.routes.routes_utils import is_admin
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+dotenv.load_dotenv(dotenv_path)
+
+APPLE_KEY_ID = os.getenv('APPLE_KEY_ID')
+APPLE_TEAM_ID = os.getenv('APPLE_TEAM_ID')
+APPLE_PRIVATE_KEY = os.getenv('APPLE_PRIVATE_KEY').replace("\\n", "\n")
+APPLE_TOKEN_EXPIRY_LENGTH = int(os.getenv('APPLE_TOKEN_EXPIRY_LENGTH'))  # 6 months
     
     
 def get_track_by_shazam_key(key_track_shazam):
@@ -1088,6 +1100,7 @@ def get_playlist_with_tracks(playlist_id):
         'playlist_id_spotify': playlist.playlist_id_spotify,
         'playlist_id_apple': playlist.playlist_id_apple,
         'set_id': playlist.set_id,
+        'user_id': playlist.user_id,
         #'tracks': playlist.tracks
     }
     
@@ -1275,7 +1288,7 @@ def add_tracks_to_playlist(playlist_id, track_ids, user_id):
             db.session.commit()
             return {"message": f"{len(new_entries)} tracks added to \"{playlist.title}\""}
         else:
-            return {"error": "All tracks were already in the playlist"}
+            return {"error": "No new tracks to add to the playlist"}
 
     except Exception as e:
         db.session.rollback()  # Rollback the session in case of an error
@@ -1509,6 +1522,7 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
     return {"playlist_id":playlist_id,"spotify_playlist_id": new_playlist['id'],"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
 
 
+
 def get_all_featured_set_searches():
     return db.session.query(SetSearch) \
         .filter(SetSearch.featured == True) \
@@ -1617,3 +1631,367 @@ def search_toggle_featured(set_search_id):
     db.session.commit()
     
     return {"message": f"Set search featured status toggled to {set_search.featured}"}
+
+
+
+def get_app_config_key(key):
+    key = key.lower().strip()
+    config = AppConfig.query.filter_by(key=key).first()
+    if config:
+        return config.value
+    return None
+
+def set_app_config_key(key, value):
+    key = key.lower().strip()
+    app_config = AppConfig.query.filter_by(key=key).first()
+    if app_config:
+        app_config.value = value
+    else:
+        app_config = AppConfig(key=key, value=value)
+        db.session.add(app_config)
+    db.session.commit()
+    return app_config
+
+def remove_app_config_key(key):
+    key = key.upper().strip()
+    app_config = AppConfig.query.filter_by(key=key).first()
+    if app_config:
+        db.session.delete(app_config)
+        db.session.commit()
+        return True
+    return False
+
+
+# Function to generate Apple Music Developer Token
+def _generate_apple_music_dev_token():
+    headers = {
+        'alg': 'ES256',
+        'kid': APPLE_KEY_ID
+    }
+    payload = {
+        'iss': APPLE_TEAM_ID,
+        'iat': int(time.time()),
+        'exp': int(time.time()) + APPLE_TOKEN_EXPIRY_LENGTH,
+        'aud': 'appstoreconnect-v1'
+    }
+    token = jwt.encode(payload, APPLE_PRIVATE_KEY, algorithm='ES256', headers=headers)
+    set_app_config_key('apple_music_dev_token', token)
+    set_app_config_key('apple_music_dev_token_expiry', int(time.time()) + APPLE_TOKEN_EXPIRY_LENGTH)
+    return token
+
+def get_apple_music_dev_token():
+    # Get the current token
+    token_value = get_app_config_key('apple_music_dev_token')
+    if token_value:
+        token_expiry = get_app_config_key('apple_music_dev_token_expiry')
+        print(token_expiry)
+        # Check if the token is expired
+        if token_expiry and int(token_expiry) + APPLE_TOKEN_EXPIRY_LENGTH - 3600 < time.time():
+            return token_value
+   
+    # token expired or not set, generate a new one
+    new_token = _generate_apple_music_dev_token()
+    return new_token
+
+
+
+def get_user_extra_field(user, field):
+    if not user.is_authenticated:
+        print('not authenticated')
+        return None 
+   
+    print('getting extra field')   
+    if user.extra_fields:
+        return user.extra_fields.get(field, None)
+    return None
+
+def set_user_extra_field(user,field, value):
+    
+    if not user.is_authenticated:
+        return False
+    
+    if not user.extra_fields or user.extra_fields is None:
+        #user.extra_fields = {}  # Initialize as empty dictionary if None
+        user.extra_fields = MutableDict()
+    user.extra_fields[field] = value  # Set or update the field with the provided value
+    
+   
+    try:
+        
+        db.session.commit()  # Commit the change to the database
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f'Error during commit: {e}')
+        return False
+  
+   
+   
+def get_apple_music_user_token():
+    token = get_user_extra_field(current_user, 'apple_music_user_token')
+    if not token:
+        return None
+    return token
+
+
+def set_apple_music_user_token(user,token):
+    return set_user_extra_field(user, 'apple_music_user_token', token)
+
+def remove_user_extra_field(user, field):
+    if not user.is_authenticated:
+        return None 
+    
+    if user.extra_fields and field in user.extra_fields:
+        user.extra_fields.pop(field)  # Remove the field from the JSON
+        db.session.commit()  # Commit the change to the database
+        return True
+    
+    return False
+
+
+def update_playlist_field(playlist,field,value):
+    db.session.query(Playlist).filter_by(id=playlist['id']).update({field: value})
+    db.session.commit()
+    return True
+
+
+
+def apple_playlist_exists(dev_token, user_token, playlist_id):
+    url = f'https://api.music.apple.com/v1/me/library/playlists/{playlist_id}'
+
+    headers = {
+        'Authorization': f'Bearer {dev_token}',
+        'Music-User-Token': user_token,
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.get(url, headers=headers)
+
+    # Check if playlist exists
+    if response.status_code == 200:
+        playlist_data = response.json()
+
+        # Check if 'data' is present and has at least one item
+        if 'data' in playlist_data and len(playlist_data['data']) > 0:
+            attributes = playlist_data['data'][0]['attributes']
+            
+            # Check if playlist has been deleted based on 'canEdit' and 'lastModifiedDate' values
+            if attributes.get('canEdit') == False and attributes.get('lastModifiedDate') == '1970-01-01T00:00:00Z':
+                print("Playlist has been deleted.")
+                return False
+            else:
+                print("Playlist exists and is accessible!")
+                return True
+        else:
+            print("Playlist data not accessible, possibly deleted or unavailable.")
+            return False
+
+    # Handle 404 not found
+    elif response.status_code == 404:
+        print("Playlist does not exist or has been deleted.")
+        return False
+
+    # Handle other errors
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)
+        return None
+
+
+# Function to create a playlist for the user
+def create_apple_playlist(dev_token, user_token, playlist_name, playlist_description=""):
+    
+
+    url = 'https://api.music.apple.com/v1/me/library/playlists'
+    playlist_data = {
+        "attributes": {
+            "name": playlist_name,
+            "description": playlist_description,
+        }
+    }
+
+    headers = {
+        'Authorization': f'Bearer {dev_token}',
+        'Music-User-Token': user_token,
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, headers=headers, data=json.dumps(playlist_data))
+    
+    if response.status_code == 201:
+        print("Playlist created successfully!")
+        playlist = response.json()
+        playlist_data = playlist['data'][0]
+        return playlist_data  # Playlist details
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)
+        return None
+    
+    
+def get_track_ids_from_apple_playlist(dev_token,user_token,playlist_id):
+    
+    url = f'https://api.music.apple.com/v1/me/library/playlists/{playlist_id}/tracks'
+    headers = {
+        'Authorization': f'Bearer {dev_token}',
+        'Music-User-Token': user_token,
+        'Content-Type': 'application/json'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            print("Tracks fetched successfully!")
+            tracks_data = response.json()
+
+            try:
+                track_ids = [track['attributes']['playParams']['catalogId'] for track in tracks_data['data']]
+            except Exception as e:
+                logger.error(f"Error extracting track IDs: {str(e)}")
+                track_ids = []
+
+            
+        else:
+            print(f"Error: {response.status_code} (in get_track_ids_from_apple_playlist)")
+            print(response.text)
+            track_ids = []
+        
+    except Exception as e:
+        return(f"Error: {str(e)} (in get_track_ids_from_apple_playlist)")
+        
+    return track_ids
+
+def add_tracks_to_apple_playlist(dev_token,user_token,playlist_id, track_ids):
+    """
+    Adds tracks to a specified Apple Music playlist.
+
+    Parameters:
+    - dev_token: str, Developer Token for Apple Music API.
+    - user_token: str, User Token obtained from MusicKit JS or similar.
+    - playlist_id: str, The ID of the playlist to which tracks should be added.
+    - track_ids: list of str, A list of track IDs to be added to the playlist.
+
+    Returns:
+    - response: dict, Response from the Apple Music API.
+    """
+    # Apple Music API endpoint for adding tracks to a playlist
+    url = f'https://api.music.apple.com/v1/me/library/playlists/{playlist_id}/tracks'
+    
+    # Create the data payload for the request
+    track_data = {
+        "data": [{"id": track_id, "type": "songs"} for track_id in track_ids]
+    }
+    
+
+    
+    # Headers for the API request
+    headers = {
+        'Authorization': f'Bearer {dev_token}',
+        'Music-User-Token': user_token,
+        'Content-Type': 'application/json'
+    }
+    
+    # Make the POST request to add tracks to the playlist
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(track_data))
+    except Exception as e:
+        return {"error": f"Error adding tracks: {str(e)}"}
+    
+    
+    
+    # Check if the request was successful
+    if response.status_code == 204:
+        print('successfully added tracks')
+        return {"message": f"{len(track_ids)} tracks added to playlist"}
+    elif response.status_code == 404:
+        return []
+    else: 
+        response_json = response.json()
+        if 'errors' in response_json:
+            error_details = response_json['errors'][0]
+            return {"error": f'{error_details["title"]} - {error_details["detail"]}'}
+        
+        return {"error": response.text}
+    
+def create_apple_playlist_and_add_tracks(dev_token,user_token,playlist_name, tracks,playlist):
+    
+    
+    # check if playlist exists
+    
+   
+    if not playlist:
+        return {"error": "Playlist not found"}
+    
+    # does this playlist belong to user ?
+    if playlist.get('user_id') != current_user.id:
+        print(playlist)
+        return {"error": "Unauthorized access to this playlist"}
+    
+    track_ids = [track['key_track_apple'] for track in tracks if 'key_track_apple' in track and track['key_track_apple']]
+    if not track_ids:
+        return {"error": "No valid Apple track IDs found in the provided tracks"}
+    
+    is_new_playlist = False
+    # does this playlist exist on apple ?
+    if not playlist.get('playlist_id_apple'):
+        print('playlist does not exist on apple - building new one')
+        is_new_playlist = True
+        try:
+            # Create the Spotify playlist
+            new_playlist = create_apple_playlist(dev_token,user_token,playlist_name,'Created from Set2Tracks')
+            
+            if not new_playlist:
+                return {"error": "Error creating playlist"}
+        except Exception as e:
+            return {"error": f"Error creating playlist: {str(e)}"}
+        
+        playlist_id_apple = new_playlist['id']
+        existing_tracks_ids = []
+    else:
+        playlist_id_apple = playlist.get('playlist_id_apple')
+        playlist_still_exists = apple_playlist_exists(dev_token,user_token,playlist_id_apple)
+        if not playlist_still_exists:
+            update_playlist_field(playlist, 'playlist_id_apple',None)
+            playlist['playlist_id_apple'] = None # update the playlist object as well
+            return create_apple_playlist_and_add_tracks(dev_token,user_token,playlist_name, tracks,playlist)
+        
+        existing_tracks_ids = get_track_ids_from_apple_playlist(dev_token,user_token,playlist_id_apple)    
+    
+    
+    print('Cleaned and deduplicated track_ids:', track_ids)
+    print('Cleaned and deduplicated existing_tracks_ids:', existing_tracks_ids)
+    
+    
+    
+    
+    if len(existing_tracks_ids) > 0:
+        track_ids_to_add = list(set(track_ids) - set(existing_tracks_ids))
+    else:
+        track_ids_to_add = track_ids
+        
+    print('actual playlist track ids',existing_tracks_ids)
+    print('track_ids_to_add',track_ids_to_add)
+            
+    if len(track_ids_to_add) == 0:
+        return {"error": "No new tracks to add to the playlist"}
+    
+    update_playlist_field(playlist, 'playlist_id_apple',playlist_id_apple)
+    try:
+
+        response = add_tracks_to_apple_playlist(dev_token,user_token,playlist_id_apple, track_ids_to_add)
+        print(response)
+        
+        
+        if 'error' in response:
+            return {'error': response['error'],'track_ids':track_ids}
+    except KeyError as e:
+        return {"error": f"Missing expected key in track data: {str(e)}"}
+    except TypeError as e:
+        return {"error": f"Type error encountered: {str(e)}"}
+    except Exception as e:
+        return {"error": f"Error adding tracks to playlist: {str(e)}"}
+
+    if is_new_playlist:
+        return {"playlist_id":playlist['id'],"apple_playlist_id": playlist_id_apple,"message": f"Apple playlist \"{playlist_name}\" created successfully with {len(track_ids_to_add)} tracks"}
+    else:
+        return {"playlist_id":playlist['id'],"apple_playlist_id": playlist_id_apple,"message": f"Apple playlist \"{playlist_name}\" updated successfully with {len(track_ids_to_add)} tracks"}

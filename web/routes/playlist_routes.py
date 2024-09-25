@@ -1,9 +1,16 @@
 
+import json
+import re
+
+from boilersaas.utils import db
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 
+
+
 from lang import Lang
-from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_playlist_with_tracks, get_playlists_from_user, remove_track_from_playlist, update_playlist_edit_date, update_playlist_positions_after_track_change_position
+from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_apple_playlist_and_add_tracks, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_apple_music_dev_token, get_apple_music_user_token, get_playlist_with_tracks, get_playlists_from_user,  remove_track_from_playlist, set_apple_music_user_token, update_playlist_edit_date, update_playlist_positions_after_track_change_position ,get_user_extra_field, set_user_extra_field
+
 from web.lib.spotify import add_tracks_to_spotify_playlist, ensure_valid_token, get_spotify_playlist_tracks_ids
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected
 from web.logger import logger
@@ -27,45 +34,6 @@ def my_playlists():
         
     return render_template('playlists.html',user_id=user_id,playlists=playlists,tpl_utils=tpl_utils,l=l)
 
-
-# @playlist_bp.route('/playlist/create', methods=['GET', 'POST'])
-# def playlist_create():
-#     if not is_connected():
-#         return redirect(url_for('users.login', next=url_for('playlist.playlist_create')))
-
-#     if request.method == 'POST':
-#         playlist_title = request.form.get('title').strip()
-
-#         # Validate the playlist name
-#         if not playlist_title:
-#             flash('Playlist name cannot be empty', 'error')
-#             return redirect(url_for('playlist.playlist_create'))
-        
-#         if len(playlist_title) > 255:
-#             flash('Playlist name cannot be longer than 255 characters', 'error')
-#             return redirect(url_for('playlist.playlist_create'))
-        
-#         user_id = get_user_id()
-
-#         # Check for duplicate playlist name for the user
-#         # existing_playlist = Playlist.query.filter_by(user_id=user_id, title=playlist_title).first()
-#         # if existing_playlist:
-#         #     flash('You already have a playlist with this name', 'error')
-#         #     return redirect(url_for('playlist.playlist_create'))
-
-#         new_playlist = create_playlist(user_id, playlist_title)
-
-#         if not new_playlist:
-#             flash('Failed to create playlist', 'error')
-#             return redirect(url_for('playlist.playlist_create'))
-        
-#         flash('Playlist created successfully', 'success')
-#         #return redirect(url_for('playlist.my_playlists'))
-#         next_url = request.args.get('next')
-        
-#         return redirect(next_url) if next_url else redirect(url_for('playlist.my_playlists'))
-
-#     return render_template('playlist_create.html')
 
 @playlist_bp.route('/playlist/create', methods=['GET', 'POST'])
 def playlist_create():
@@ -201,6 +169,20 @@ def playlist_delete(playlist_id):
     return redirect(url_for('playlist.playlist_edit', playlist_id=playlist_id))
 
 
+# @playlist_bp.route('/playlist_to_apple/<int:playlist_id>')
+# def playlist_to_apple(playlist_id):
+#     # check if user is connected
+#     if not is_connected():
+#         return redirect(url_for('users.login', next=url_for('playlist.playlist_to_apple', playlist_id=playlist_id)))
+#     # check if user is connected to apple
+#     if not current_user.is_connected_to_apple:
+#         return redirect(url_for('playlist.get_apple_user_token', next=url_for('playlist.playlist_to_apple', playlist_id=playlist_id)))
+    
+#     return jsonify({'message': 'Not implemented yet'}), 501
+
+
+
+
 
 @playlist_bp.route('/playlist_to_spotify/<int:playlist_id>')
 def playlist_to_spotify(playlist_id,non_ajax=False):
@@ -217,10 +199,9 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         
         
         res = get_playlist_with_tracks(playlist_id)
-        print('till fuvkn here')
+ 
         playlist = res['playlist']
         tracks = res['tracks']
-        print('playlist',playlist)
         
         if not isinstance(playlist, dict):
             return jsonify({'error': 'Playlist object is not valid'}), 400
@@ -376,3 +357,68 @@ def jax_create_playlist_from_set_tracks():
         return jsonify({"message": response['message'],'redirect':playlist_url}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@playlist_bp.route('/playlist_to_apple/<int:playlist_id>', methods=['GET','POST']) 
+def playlist_to_apple(playlist_id,non_ajax=False):
+    user_token = get_apple_music_user_token()
+    if not user_token:
+        #return current_user.extra_fields
+        return redirect(url_for('playlist.auth_apple', redirect=request.url))
+    
+    dev_token = get_apple_music_dev_token() 
+    if not dev_token:
+        return jsonify({'error': 'Developer token not found. contact the dev bro'}), 400
+       
+    res = get_playlist_with_tracks(playlist_id)
+ 
+    playlist = res['playlist']
+    tracks = res['tracks']
+    
+    if not isinstance(playlist, dict):
+        return jsonify({'error': 'Playlist object is not valid'}), 400
+    
+    if playlist is None:
+        return jsonify({'error': 'Playlist is None'}), 400
+    
+    if not tracks or len(tracks) == 0:
+        return jsonify({'error': 'No tracks in the playlist'}), 400
+    
+    
+    return create_apple_playlist_and_add_tracks(dev_token,user_token,playlist.get('title'), tracks,playlist)
+    
+    
+    
+    
+    return user_token
+    
+    
+@playlist_bp.route('/auth_apple', methods=['GET'])
+def auth_apple():
+
+    dev_token = get_apple_music_dev_token()
+    redirect = request.args.get('redirect', None)
+
+    return render_template('auth_apple.html',dev_token=dev_token,redirect=redirect)  # Render the Apple authentication template
+
+
+@playlist_bp.route('/auth_apple/callback', methods=['POST'])
+def store_apple_user_token():
+   # user = current_user
+    
+    if not current_user.is_authenticated:
+        return False
+    
+    redirect = request.json.get('redirect', None)
+    print('redirect')
+    print(redirect)
+    if  not redirect:
+        return {'error':'redirect parameter is required'}, 400
+    
+    user_token = request.json.get('token', None)
+    if not user_token:
+        return jsonify({'error': 'No token provided'}), 400
+    
+    set_apple_music_user_token(current_user,user_token)   
+
+    return jsonify({'message': 'Token received and saved successfully','redirect':redirect}), 200 

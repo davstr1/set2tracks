@@ -410,26 +410,6 @@ def create_spotify_playlist(playlist_name, playlist_description=''):
 
     return playlist
 
-# def add_tracks_to_spotify_playlist(playlist_id, track_uris_list):
-    
-#     token_info = session.get('token_info', None)
-#     if not token_info:
-#         return jsonify({'error': 'No Spotify token information found in session'})
-    
-#     try:
-#         sp = spotipy.Spotify(auth=token_info['access_token'])
-#         user_id = sp.me()['id']
-#         print(f"User ID: {user_id}")
-#         print(f"Playlist ID: {playlist_id}")
-#         print(f"Track URIs: {track_uris_list}")
-
-#         response = sp.user_playlist_add_tracks(user_id, playlist_id, track_uris_list)
-       
-#         return jsonify(response)
-#     except spotipy.exceptions.SpotifyException as e:
-#         return jsonify({'error': f'Spotify API error :{e}'})
-#     except Exception as e:
-#         return jsonify({'error': f'Error adding tracks to playlist: {e}'})
 
 def add_tracks_to_spotify_playlist(playlist_id, track_uris_list):
     token_info = session.get('token_info')
@@ -492,3 +472,6 @@ def get_spotify_playlist_tracks_ids(playlist_id):
 
     except Exception as e:
         return jsonify({'error': f'Unexpected error: {e}'}), 500
+    
+    
+    

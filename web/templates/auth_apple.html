@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+
+
+  <button id="authorize-button">Authorize Apple Music</button>
+
+</div>
+
+<script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" data-web-components async></script>
+<script>
+
+  document.addEventListener('musickitloaded', async function () {
+    // Call configure() to configure an instance of MusicKit on the Web.
+    const redirect = '{{redirect}}';
+    try {
+      await MusicKit.configure({
+        developerToken: '{{dev_token}}',
+        app: {
+          name: 'My Cool Web App',
+          build: '1978.4.1',
+        },
+      });
+    } catch (err) {
+      // Handle configuration error
+    }
+
+    const music = await MusicKit.getInstance();
+    console.table(music)
+    music.authorize().then((userToken) => {
+        console.log("User Token:", userToken);
+        console.log("Redirect:", redirect);
+        const userTokenJson = { 'token': userToken, 'redirect': redirect };
+        processAjax("{{url_for('playlist.store_apple_user_token')}}",'POST',userTokenJson)
+        // You can now pass this userToken to your Python script
+      }).catch((error) => {
+        console.error('Authorization failed:', error);
+      });
+    });
+  //   document.getElementById('authorize-button').addEventListener('click', function () {
+      
+  // }); // MusicKit instance is available
+
+
+
+
+
+  // Example: Button click to authorize the user and retrieve the user token
+
+
+</script>
+
+{% include 'js_process_ajax.html' %}
+{% endblock %}

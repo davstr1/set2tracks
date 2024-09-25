@@ -28,12 +28,12 @@
     <!-- Right column: Buttons -->
     <div class="flex flex-col justify-start space-y-4">
 
-      <a data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" id="playlist_to_spotify" class="btn btn-primary{% if playlist.playlist_id_spotify %} hidden{% endif %}">
-        Create playlist on Spotify
+      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" class="export-sync btn btn-primary">
+        <span class="export{% if playlist.playlist_id_spotify %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_spotify %} hidden{% endif %}">Sync with </span>Spotify
       </a>
 
-      <a data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" id="playlist_sync_spotify" class=" tooltip {% if not playlist.playlist_id_spotify %} hidden{% endif %}" data-tip="Add new tracks to spotify playlist">
-        Sync to Spotify
+      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync" >
+        <span class="export{% if playlist.playlist_id_apple %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_apple %} hidden{% endif %}">Sync with </span>Apple Music
       </a>
 
       {% if playlist.set_id %}
@@ -72,41 +72,56 @@
   });
 
 
-  document.querySelector('#playlist_to_spotify').addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.target.setAttribute('disabled', true);
-    const uri = e.target.getAttribute('data-href');
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.export-sync').forEach(function (element) {
+      
+      element.removeAttribute('disabled');
+      element.addEventListener('click', function (e) {
 
-    return processAjax(uri, 'GET', {}, (res) => {
-      if (res?.error) {
-        console.log(res.message);
-        e.target.removeAttribute('disabled');
-        return;
-      }
-      e.target.removeAttribute('disabled');
-      const syncToSpotify = document.querySelector('#playlist_sync_spotify');
-      syncToSpotify.classList.remove('hidden');
-      console.log(res.message);
-      e.target.classList.add('hidden');
-    });
-  });
-
-  document.querySelector('#playlist_sync_spotify').addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.target.setAttribute('disabled', true);
-    const uri = e.target.getAttribute('data-href');
-    return processAjax(uri, 'GET', {}, (res) => {
-      e.target.removeAttribute('disabled');
-      if (res?.error) {
-        console.log(res.message);
+        const target = e.target.closest('.export-sync'); // otherwise the event can be triggered on the inner span
+        target.setAttribute('disabled', true);
+        const uri = target.getAttribute('data-href');
+        console.log('target', target);
+        console.log('target uri', uri);
+        e.preventDefault();
+        e.stopPropagation();
         
-        return;
-      }
-      console.log(res.message);
+
+        return processAjax(uri, 'GET', {}, (res) => {
+          if (res?.error) {
+            console.log(res.message);
+            target.removeAttribute('disabled');
+            return;
+          }
+          target.removeAttribute('disabled');
+
+          const exportText = target.querySelector('.export');
+          const syncText = target.querySelector('.sync');
+
+          exportText.classList.add('hidden');
+          syncText.classList.remove('hidden');
+          console.log(res.message);
+
+        });
+      });
     });
   });
+
+  // document.querySelector('#playlist_sync_spotify').addEventListener('click', function (e) {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   e.target.setAttribute('disabled', true);
+  //   const uri = e.target.getAttribute('data-href');
+  //   return processAjax(uri, 'GET', {}, (res) => {
+  //     e.target.removeAttribute('disabled');
+  //     if (res?.error) {
+  //       console.log(res.message);
+
+  //       return;
+  //     }
+  //     console.log(res.message);
+  //   });
+  // });
 
 
   document.querySelectorAll('.track .remove-track-from-playlist').forEach((element, index) => {

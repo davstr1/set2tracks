@@ -11,7 +11,7 @@
  * @param {function} [onError=fooCallBack] - The callback function to execute on an error response (default: fooCallBack).
  * @returns {Promise} A promise that resolves to the response data or rejects with an error.
  */
-  function processAjax(url, method = 'POST', payload = {}, onSuccess = fooCallBack, onError = fooCallBack) {
+  function processAjax(url, method = 'POST', payload = {}, onSuccess = fooCallBack, onError = fooCallBack,showSystemMessageAfter = true) {
    
     // Define the fetch options
     let fetchOptions = {
@@ -29,7 +29,7 @@
 
     return fetch(url, fetchOptions)
       .then(response => response.json().then(result => {
-        console.log(result)
+       
         const responseData = {
           status_code: response.status,
           message: result?.message,
@@ -39,12 +39,12 @@
 
         console.log(responseData);
 
-        if (response.ok) {
-          showSystemMessage(responseData.message);
-          onSuccess(responseData);
-          
+        if (response.ok && !responseData.error) {
+          if (showSystemMessageAfter) showSystemMessage(responseData.message);
+         
+          onSuccess(responseData);         
         } else {
-          showSystemMessage(responseData.error, 'warning');
+          if (showSystemMessageAfter) showSystemMessage(responseData.error, 'warning');
           onError(responseData);   
         }
 

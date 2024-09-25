@@ -6,6 +6,9 @@ from flask import current_app as app
 from datetime import datetime, timezone  
 from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.dialects.postgresql import JSONB
+
 
 
 class User(db.Model,UserMixin):
@@ -20,8 +23,7 @@ class User(db.Model,UserMixin):
     last_login = db.Column(db.DateTime, nullable=True)
     lang = db.Column(db.String(2), nullable=False, default='en')
     connect_method = db.Column(db.Enum(UserConnectMethod), nullable=False)
-    extra_fields = db.Column(db.JSON, nullable=True)
-    
+    extra_fields = db.Column(MutableDict.as_mutable(JSONB), nullable=True) # Otherwide sqlalchemy will not take changes to this field into account
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config.get('SECRET_KEY'))
         token = s.dumps({'user_id': self.id})
@@ -52,4 +54,5 @@ class Invite(db.Model):
 
     def __repr__(self):
         return f'<Invite {self.email}>'
+
 

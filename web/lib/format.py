@@ -230,6 +230,7 @@ def format_db_track_for_template(track):
             'artist_name': track.artist_name,
             'key_track_spotify': track.key_track_spotify,
             'key_track_shazam': track.key_track_shazam,
+            'key_track_apple': track.key_track_apple,
             #'cover_arts': track.cover_arts,
             'cover_art': get_cover_art(track),
             'preview_uri': get_preview_uri(track),

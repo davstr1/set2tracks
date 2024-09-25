@@ -1,9 +1,14 @@
 import json
 import sys
+
+
 import applemusicpy
+
 from web.lib.utils import safe_get
 import os
 import dotenv
+
+
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)
 import logging
@@ -13,8 +18,9 @@ logger = logging.getLogger('root')
 APPLE_KEY_ID = os.getenv('APPLE_KEY_ID')
 APPLE_TEAM_ID = os.getenv('APPLE_TEAM_ID')
 APPLE_PRIVATE_KEY = os.getenv('APPLE_PRIVATE_KEY').replace("\\n", "\n")
+APPLE_TOKEN_EXPIRY_LENGTH = os.getenv('APPLE_TOKEN_EXPIRY_LENGTH')  # 6 months
 
-os.environ.pop("APPLE_PRIVATE_KEY", None)
+#os.environ.pop("APPLE_PRIVATE_KEY", None)
 
 if not all([APPLE_KEY_ID, APPLE_TEAM_ID, APPLE_PRIVATE_KEY]):
     logger.error("Error: One or more environment variables are not set.")
@@ -91,6 +97,9 @@ def am_songs(song_ids_list: list) -> dict:
     return out
 
 
+
+
+
 def add_apple_track_data_from_json(tracks):
     key_apple_tracks = [song["key_track_apple"] for song in tracks]
     key_apple_tracks = list(set(filter(None, key_apple_tracks)))
@@ -105,6 +114,10 @@ def add_apple_track_data_from_json(tracks):
         song.update(apple_tracks_info.get(song["key_track_apple"], {}))       
         
     return tracks
+
+
+
+
 
 
 
