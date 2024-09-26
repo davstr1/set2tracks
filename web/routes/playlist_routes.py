@@ -1,10 +1,7 @@
 
-import json
-import re
-
-from boilersaas.utils import db
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
+from requests import get
 
 
 
@@ -22,11 +19,14 @@ playlist_bp = Blueprint('playlist', __name__)
 
 @playlist_bp.route('/playlists')  
 def my_playlists():
+    if not is_connected():
+        return redirect(url_for('users.login', next=url_for('playlist.my_playlists')))
+    
     user_id = get_user_id()
     playlists = []
     
-    if user_id:
-        playlists = get_playlists_from_user(user_id)
+
+    playlists = get_playlists_from_user(user_id)
         
     l = {
         'page_title': 'My Playlists' + ' - ' + Lang.APP_NAME, 
@@ -56,13 +56,6 @@ def playlist_create():
             return redirect(url_for('playlist.playlist_create', next=next))
         
         user_id = get_user_id()
-
-        # Check for duplicate playlist name for the user
-        # existing_playlist = Playlist.query.filter_by(user_id=user_id, title=playlist_title).first()
-        # if existing_playlist:
-        #     flash('You already have a playlist with this name', 'error')
-        #     return redirect(url_for('playlist.playlist_create', next=request.args.get('next')))
-
         new_playlist = create_playlist(user_id, playlist_title)
 
         if not new_playlist:
@@ -91,8 +84,9 @@ def show_playlist(playlist_id):
     user_id = get_user_id()
     
     if playlist_author_id == user_id:
-        print('updating edit date')
+        # make this playlist the last used playlist
         update_playlist_edit_date(playlist_id)
+
     
     current_url = request.url
    
@@ -112,14 +106,20 @@ def show_playlist(playlist_id):
 
 @playlist_bp.route('/playlist/<int:playlist_id>/edit', methods=['GET', 'POST'])
 def playlist_edit(playlist_id):
-
+    if not is_connected():
+        return redirect(url_for('users.login', next=url_for('playlist.playlist_edit', playlist_id=playlist_id)))
+    
+    user_id = get_user_id()
+    res = get_playlist_with_tracks(playlist_id)  
+    if res['playlist']['user_id'] != user_id:
+            # User is not the owner of the playlist, just show the playlist
+            return redirect(url_for('playlist.show_playlist', playlist_id=playlist_id))
+        
     if request.method != 'POST':
-        res = get_playlist_with_tracks(playlist_id)
+        
         return render_template('playlist_edit.html',playlist=res['playlist'])
     
-    else:
-    
-    
+    else:  
         try:
             
             data = request.form
@@ -129,8 +129,6 @@ def playlist_edit(playlist_id):
             logger.info(f'changing playlist title from {title_old} to {title_new}')
             if title_new == title_old:
                 raise ValueError('The new title is the same as the old one')
-
-
 
             response = change_playlist_title(playlist_id,title_new )
             
@@ -156,6 +154,18 @@ def playlist_edit(playlist_id):
     
 @playlist_bp.route('/playlist/<int:playlist_id>/delete')
 def playlist_delete(playlist_id):
+    if not is_connected():
+        return redirect(url_for('users.login', next=url_for('playlist.playlist_delete', playlist_id=playlist_id)))
+    
+    playlist = db.get_playlist(playlist_id)
+    if not playlist:
+        flash('Playlist not found', 'error')
+        return redirect(url_for('playlist.my_playlists'))
+    
+    if playlist['user_id'] != get_user_id():
+        flash('You are not allowed to delete this playlist', 'error')
+        return redirect(url_for('playlist.my_playlists'))
+    
     try:
         message = delete_playlist(playlist_id)
         if 'error' in message:
@@ -167,20 +177,6 @@ def playlist_delete(playlist_id):
     except Exception as e:
         flash(str(e), 'error')
     return redirect(url_for('playlist.playlist_edit', playlist_id=playlist_id))
-
-
-# @playlist_bp.route('/playlist_to_apple/<int:playlist_id>')
-# def playlist_to_apple(playlist_id):
-#     # check if user is connected
-#     if not is_connected():
-#         return redirect(url_for('users.login', next=url_for('playlist.playlist_to_apple', playlist_id=playlist_id)))
-#     # check if user is connected to apple
-#     if not current_user.is_connected_to_apple:
-#         return redirect(url_for('playlist.get_apple_user_token', next=url_for('playlist.playlist_to_apple', playlist_id=playlist_id)))
-    
-#     return jsonify({'message': 'Not implemented yet'}), 501
-
-
 
 
 
@@ -234,11 +230,6 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
             return add_tracks_to_spotify_playlist(playlist_id_spotify, tracks_to_add)
             
            
-        
-        if non_ajax:
-            return redirect(url_for('playlist.playlist',playlist_id=playlist_id))
-
-        return jsonify(res)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
@@ -250,12 +241,23 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
 def update_position():
     data = request.json
     
+    if not is_connected():
+        return jsonify({"error": "You are not connected"}), 401
+    
     if not all(k in data for k in ("playlist_id", "track_id", "new_position")):
         return jsonify({"error": "Missing required parameters"}), 400
     
     playlist_id = data['playlist_id']
     track_id = data['track_id']
     new_position = data['new_position']
+    
+    playlist = get_playlist_with_tracks(playlist_id)
+    if not playlist:
+        return jsonify({"error": "Playlist not found"}), 404
+    
+    if playlist['playlist']['user_id'] != get_user_id():
+        return jsonify({"error": "You are not allowed to update this playlist"}), 403
+
     
     try:
         update_playlist_positions_after_track_change_position(playlist_id, track_id, new_position)
@@ -268,10 +270,20 @@ def update_position():
 @playlist_bp.route('/jax/add_track_to_playlist', methods=['POST'])
 def jax_add_track_to_playlist():
     
+    if not is_connected():
+        return jsonify({"error": "You are not connected"}), 401
+    
 
     data = request.json
     playlist_id = data['playlist_id']
     track_id = data['track_id']
+    
+    playlist = get_playlist_with_tracks(playlist_id)
+    if not playlist:
+        return jsonify({"error": "Playlist not found"}), 404
+    
+    if playlist['playlist']['user_id'] != get_user_id():
+        return jsonify({"error": "You are not allowed to update this playlist"}), 403
     
     try:
         response = add_track_to_playlist(playlist_id, track_id)
@@ -287,7 +299,6 @@ def jax_add_track_to_playlist():
 @playlist_bp.route('/jax/add_track_to_playlist_last_used', methods=['POST'])
 def jax_add_track_to_playlist_last_used():
     
-   
     
     data = request.json 
     
@@ -320,6 +331,13 @@ def jax_remove_track_from_playlist():
     if not user_id:
         return jsonify({"error": "User not connected"}), 401
     
+    playlist = get_playlist_with_tracks(playlist_id)
+    if not playlist:
+        return jsonify({"error": "Playlist not found"}), 404
+    
+    if playlist['playlist']['user_id'] != user_id:
+        return jsonify({"error": "You are not allowed to update this playlist"}), 403
+    
     try:
         response = remove_track_from_playlist(playlist_id,track_id, user_id)
         if 'error' in response:
@@ -349,8 +367,6 @@ def jax_create_playlist_from_set_tracks():
         if 'error' in response:
             return jsonify({"error": response['error']}), 409
         
-        
-        print(response)
         
         playlist_url = url_for('playlist.show_playlist',playlist_id=response['playlist_id'])
         
@@ -386,15 +402,13 @@ def playlist_to_apple(playlist_id,non_ajax=False):
     
     
     return create_apple_playlist_and_add_tracks(dev_token,user_token,playlist.get('title'), tracks,playlist)
-    
-    
-    
-    
-    return user_token
-    
+        
     
 @playlist_bp.route('/auth_apple', methods=['GET'])
 def auth_apple():
+    
+    if not is_connected():
+        return redirect(url_for('users.login', next=url_for('playlist.auth_apple')))
 
     dev_token = get_apple_music_dev_token()
     redirect = request.args.get('redirect', None)
