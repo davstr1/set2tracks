@@ -172,8 +172,15 @@
     menu.classList.remove('invisible');
     menu.classList.add('block');
 
+    // Is this called by a track, or by "add all tracks to playlist" button?
     trackWithContextMenu = caller.closest('.track');
-    trackWithContextMenu.classList.add('ring-2', 'ring-primary');
+    if (trackWithContextMenu) {
+      trackWithContextMenu.classList.add('ring-2', 'ring-primary');
+    } else {
+      console.log('trackWithContextMenu not found')
+    }
+
+
 
     blockInteractions.classList.remove('hidden');
 
@@ -185,7 +192,9 @@
     menu.classList.remove('block');
     menu.classList.add('invisible');
     blockInteractions.classList.add('hidden');
-    trackWithContextMenu.classList.remove('ring-2', 'ring-primary');
+    if (trackWithContextMenu) {
+      trackWithContextMenu.classList.remove('ring-2', 'ring-primary');
+    }
     document.removeEventListener('click', hideContextMenuOnClick);
   }
 
@@ -204,9 +213,24 @@
   document.querySelectorAll('.add-track-to-playlist').forEach(link => {
     link.addEventListener('click', function (event) {
       event.preventDefault();
-      const trackId = trackWithContextMenu.getAttribute('data-track-id');
       const playlist_id = this.getAttribute('data-playlist-id');
+      if (!trackWithContextMenu) { // Add all tracks from set to playlist
+        
+        console.log('trackWithContextMenu not found');
+        return addAllTracksFromSetToPlaylist({ playlist_id: playlist_id, set_id: setId })
+          .then(response => {
+            if (response.status_code === 200) {
+              console.log(response.message);
+              showSystemMessage(response.message);
+            } else {
+              console.log(response.error);
+              showSystemMessage(response.error, 'warning');
+            }
+          });
 
+      }
+      // Add single track to playlist
+      const trackId = trackWithContextMenu.getAttribute('data-track-id');
       addTrackToPlaylist({ track_id: trackId, playlist_id: playlist_id })
         .then(response => {
           if (response.status_code === 200) {
@@ -223,6 +247,12 @@
   function addTrackToPlaylist(payload) {
 
     return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
+
+  }
+
+  function addAllTracksFromSetToPlaylist(payload) {
+
+    return processAjax('{{ url_for("playlist.jax_add_all_set_tracks_to_playlist") }}', 'POST', payload)
 
   }
 

@@ -1475,6 +1475,31 @@ def create_playlist_from_set_tracks(set_id, user_id):
     return {"message": f"Playlist \"{playlist_name}\" created successfully with {len(set_data['tracks'])} tracks", "playlist_id": new_playlist.id}
 
 
+def add_all_tracks_from_set_to_playlist(set_id, playlist_id,user_id):
+    try :
+        set_data = get_set_with_tracks(set_id)
+        if 'error' in set_data:
+            return set_data
+        
+        if 'tracks' not in set_data:
+            return {"error": "No tracks found in set"}
+        
+        track_ids = tracks_to_tracks_ids(set_data['tracks'])
+        
+        response = add_tracks_to_playlist(playlist_id, track_ids, user_id)
+        
+        if 'error' in response:
+            return {"error": response['error']}
+        
+    except KeyError as ke:
+        return {"error": f"KeyError - missing key: {str(ke)}"}
+    except TypeError as te:
+        return {"error": f"TypeError - type mismatch: {str(te)}"}
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {str(e)}"}
+    
+    return {"message": f"All tracks from set added to playlist"}    
+
 def import_playlist_from_spotify():
     pass
 

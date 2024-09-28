@@ -1,12 +1,12 @@
 
+
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
-from requests import get
 
 
 
 from lang import Lang
-from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_apple_playlist_and_add_tracks, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_apple_music_dev_token, get_apple_music_user_token, get_playlist_with_tracks, get_playlists_from_user,  remove_track_from_playlist, set_apple_music_user_token, update_playlist_edit_date, update_playlist_positions_after_track_change_position ,get_user_extra_field, set_user_extra_field
+from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_apple_playlist_and_add_tracks, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_apple_music_dev_token, get_apple_music_user_token, get_playlist_with_tracks, get_playlists_from_user,  remove_track_from_playlist, set_apple_music_user_token, update_playlist_edit_date, update_playlist_positions_after_track_change_position ,add_all_tracks_from_set_to_playlist
 
 from web.lib.spotify import add_tracks_to_spotify_playlist, ensure_valid_token, get_spotify_playlist_tracks_ids
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected
@@ -373,6 +373,28 @@ def jax_create_playlist_from_set_tracks():
         return jsonify({"message": response['message'],'redirect':playlist_url}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@playlist_bp.route('/jax/jax_add_all_set_tracks_to_playlist', methods=['POST'])
+def jax_add_all_set_tracks_to_playlist():
+    data = request.json
+    set_id = data['set_id']
+    playlist_id = data['playlist_id']
+    
+    user_id = get_user_id()
+    if not user_id:
+        return jsonify({"error": "User not connected"}), 401
+    
+    try:
+        response = add_all_tracks_from_set_to_playlist(set_id, playlist_id, user_id)
+        if 'error' in response:
+            return jsonify({"error": response['error']}), 409
+        
+        return jsonify({"message": response['message']}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
     
     
 @playlist_bp.route('/playlist_to_apple/<int:playlist_id>', methods=['GET','POST']) 

@@ -51,6 +51,9 @@ even where the player is not behind*/
       View playlist created from set tracks
     </a>
     {% endif %}
+    <a href="" id="add_all_tracks_to_playlist" class="btn  flex justify-center items-center">
+      Add all tracks to playlist
+    </a>
   </div>
 </div>
 
@@ -86,6 +89,16 @@ even where the player is not behind*/
 
 {% set tracks = set.tracks %}
 {% include 'tracklist.html' %}
+
+<script>
+  document.querySelector('#add_all_tracks_to_playlist').addEventListener('click', function (event) {
+    event.stopPropagation();
+    event.preventDefault();
+    showContextMenu(event, this);
+  });
+
+
+</script>
 
 </div>
 
@@ -432,15 +445,18 @@ even where the player is not behind*/
   }
 
 
-  document.getElementById('create-playlist-from-set-tracks').addEventListener('click', function (e) {
-    e.preventDefault();
-    const payload = {
-      "set_id": setId
-    }
+  const createPlaylistButton = document.getElementById('create-playlist-from-set-tracks');
 
-    return processAjax('{{ url_for("playlist.jax_create_playlist_from_set_tracks") }}', 'POST', payload);
+  if (createPlaylistButton) {
+    createPlaylistButton.addEventListener('click', function (e) {
+      e.preventDefault();
+      const payload = {
+        "set_id": setId
+      }
 
-  });
+      return processAjax('{{ url_for("playlist.jax_create_playlist_from_set_tracks") }}', 'POST', payload);
+    });
+  }
 
 </script>
 
