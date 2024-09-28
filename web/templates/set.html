@@ -77,9 +77,9 @@ even where the player is not behind*/
   </div>
 </div>
 
-
-<h1 class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
-
+<div id="containerUnderPlayer">
+<h1  class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
+</div>
 {% if not set.has_chapters %}
 <p class="discreet text-xs italic">(No chapter markers found in this video. Track timestamps are approximate, based on auto detection.)</p>
 {% endif %}
@@ -125,6 +125,7 @@ even where the player is not behind*/
   const metaWrap = document.getElementById('playerMetaWrap');
   const playerTopWrap = playerWrap.parentElement;
   const videoWrap = document.getElementById('videoWrap');
+  const containerUnderPlayer = document.getElementById('containerUnderPlayer');
 
   const h1 = document.querySelector('h1');
   let playerTopWrapHeight = playerTopWrap.offsetHeight;
@@ -201,9 +202,11 @@ even where the player is not behind*/
 
   window.addEventListener('scroll', function () {
     if (!VideoShrinkThresholdReached && window.scrollY > shrinkOn) {
+      containerUnderPlayer.style.marginTop = `${metaWrap.offsetHeight}px`;
       metaWrap.classList.add(...playerFixedClasses);
 
       metaWrap.classList.remove(...playerScrolledClasses);
+      
       //h1.style.marginTop = `${playerTopWrapHeight}px`;
 
       // setTimeout(() => {
@@ -214,6 +217,7 @@ even where the player is not behind*/
     } else if (VideoShrinkThresholdReached && window.scrollY <= shrinkOn) {
       metaWrap.classList.add(...playerScrolledClasses);
       metaWrap.classList.remove(...playerFixedClasses);
+      containerUnderPlayer.style.marginTop = '';
       //h1.style.marginTop = '';
 
       VideoShrinkThresholdReached = false;
