@@ -199,7 +199,12 @@
 
 
 
-
+    {% if is_admin() %}
+    <div class="fixed bottom-0 right-0 bg-red-500 text-white p-2 rounded-tl-lg z-50">
+        <a href="{{url_for('admin.admin')}}">Admin</a>
+        
+    </div>
+    {% endif %}
 
 
 </body>

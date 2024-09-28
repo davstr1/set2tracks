@@ -17,6 +17,7 @@ from flask import Blueprint
 from flask_babel import Babel
 from boilersaas.utils.locale import get_locale,add_babel_translation_directory
 
+from web.inject_globals import inject_globals
 from web.lib.log_config import setup_logging
 
 
@@ -54,7 +55,7 @@ def create_app(config_class=Config):
     app.jinja_env.loader.debug = False
     app.jinja_env.add_extension('jinja2.ext.do')
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
- 
+    app.context_processor(inject_globals)
     #
   
     

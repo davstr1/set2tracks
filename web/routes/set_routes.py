@@ -148,7 +148,7 @@ def sets_queue():
                            pagination=pagination,
                            tpl_utils=tpl_utils,
                            status=status,
-                           is_admin=is_admin(),
+                          
                            format_set_queue_error=format_set_queue_error,
                            include_15min_error=include_15min_error,
                            count=count)
@@ -210,7 +210,7 @@ def set(set_id):
         'page_title': set.get('title') + 'Tracklist  '  + Lang.APP_NAME,
     }      
 
-    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,is_admin=is_admin(),l=l)
+    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l)
 
 
 
