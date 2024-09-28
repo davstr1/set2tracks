@@ -399,7 +399,7 @@ def ensure_valid_token():
 
 
 
-def create_spotify_playlist(playlist_name, playlist_description=''):
+def create_spotify_playlist(playlist_name, playlist_description='Created Set2Tracks'):
     
     token_info = session.get('token_info', None)
     if not token_info:
