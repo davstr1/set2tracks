@@ -1,0 +1,81 @@
+<style>
+  .track {
+    position: relative;
+  }
+
+
+
+  .song-played-indicator,
+  .song-play-button,
+  .song-pause-button {
+    visibility: hidden;
+  }
+
+  .track:hover .song-play-button {
+    visibility: visible;
+  }
+
+  .track.active.playing .song-played-indicator {
+    visibility: visible;
+  }
+
+  .track.active.playing .song-play-button {
+    visibility: hidden;
+  }
+
+  .track.playing .action-pause:hover .song-played-indicator {
+    visibility: hidden;
+  }
+
+  .track.playing .action-pause:hover .song-pause-button {
+    visibility: visible;
+  }
+
+  .track .visible-hover-track {
+    visibility: hidden;
+  }
+
+  .track:hover .visible-hover-track {
+    visibility: visible;
+  }
+
+
+
+
+
+  .track.active .track-number,
+  .track:hover .track-number {
+    visibility: hidden;
+  }
+
+  track.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: inherit;
+    /* Inherit the track's background color */
+    z-index: -2;
+    /* Ensure it’s behind other content but above the progress bar */
+    border-radius: inherit;
+    /* Ensures the pseudo-element respects the border-radius of the parent */
+  }
+
+  .track.active::after {
+    transition: all 20ms;
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 10%;
+    width: var(--background-width, 0%);
+    /* Set this dynamically via JavaScript to change from 0% to 100% */
+    background-color: rgba(255, 255, 255, 0.197);
+    /* Example background color with some transparency */
+    z-index: 0;
+    /* Ensure it’s behind other content */
+    /* border-radius: inherit; Ensures the pseudo-element respects the border-radius of the parent */
+  }
+</style>

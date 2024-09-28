@@ -1,0 +1,240 @@
+<script>
+  function getClosestParentByClass(element, className) {
+    while (element && element !== document) {
+      if (element.classList.contains(className)) {
+        return element;
+      }
+      element = element.parentElement;
+    }
+    return null;
+  }
+
+  audioPlayer = document.getElementById('audio-player');
+  document.querySelectorAll('.play-track-preview').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent the default link behavior
+      event.stopPropagation(); // Prevent the event from bubbling up
+
+      const audioUrl = this.getAttribute('href');
+
+      if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo()
+
+      if (audioPlayer.getAttribute('src') !== audioUrl) {
+        audioPlayer.setAttribute('src', audioUrl);
+        audioPlayer.load(); // Load the new audio source
+      }
+      //audioPlayer.classList.remove('hidden'); // Make the audio player visible
+      audioPlayer.play(); // Start playing the audio
+    });
+  });
+
+
+
+
+  document.querySelectorAll('.track .openRelatedTracks').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+      document.getElementById('overlay').classList.remove('hidden');
+      const relatedTracksUrl = this.getAttribute('data-related-tracks-url');
+      const relatedTracksCheckUrl = this.getAttribute('data-related_tracks-check-url');
+
+      const onSuccess = (response) => {
+        window.location.href = relatedTracksUrl;
+      }
+      const onError = (error) => {
+        document.getElementById('overlay').classList.add('hidden');
+      }
+
+
+
+      return processAjax(relatedTracksCheckUrl, 'POST', { 'caller_url': window.location.href }, onSuccess, onError)
+
+
+    });
+  });
+
+  document.querySelectorAll('.track .openTrackOnPlatform').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.stopPropagation();
+
+    });
+  });
+
+
+  document.querySelectorAll('.track .add-track-to-recent-playlist').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+      const trackId = this.closest('.track').getAttribute('data-track-id');
+      return addTrackToPlaylistLastUsed({ track_id: trackId })
+
+    });
+  });
+
+
+  //song-pause-button
+  document.querySelectorAll('.track .song-pause-button').forEach(link => {
+    link.addEventListener('click', function (event) {
+      console.log('song-pause-button clicked')
+      event.stopPropagation();
+      if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo()
+      audioPlayer.pause();
+
+    });
+  });
+
+
+
+  document.querySelectorAll('.track .song-play-button').forEach(link => {
+    link.addEventListener('click', function (event) {
+      console.log('song-play-button clicked')
+      if (typeof player !== 'undefined') {
+        event.stopPropagation();
+        var playerState = player.getPlayerState();
+        var track = getClosestParentByClass(this, 'track');
+        var trackIsActive = track.classList.contains('active');
+
+        if (!trackIsActive) {
+          var trackStartTime = track.getAttribute('data-start_time');
+          player.seekTo(trackStartTime);
+        }
+
+        player.playVideo();
+        // if (playerState === 2 ){ // paused
+        //   player.playVideo()
+        // // }else{ // video not started yet
+        // //   correspondingTrack = this.closest('.track');
+        // //   trackStartTime = correspondingTrack.getAttribute('data-start_time');
+        // //   console.log(trackStartTime);
+        // //   player.seekTo(trackStartTime);
+
+        // }
+      }
+    });
+  });
+
+  document.querySelectorAll('.track .trigger-track-contextual-menu').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.stopPropagation();
+      event.preventDefault();
+      showContextMenu(event, this);
+    });
+  });
+
+
+
+  let trackWithContextMenu = null;
+
+
+  const menu = document.getElementById('track-options-contextual-menu');
+  const blockInteractions = document.getElementById('block-interactions');
+  function showContextMenu(event, caller) {
+    event.preventDefault();
+
+
+    const rect = event.target.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    const bodyWidth = document.body.offsetWidth;
+    const bodyHeight = window.innerHeight || document.documentElement.clientHeight;
+
+    const computedStyle = window.getComputedStyle(menu);
+    const menuWidth = menu.offsetWidth
+      + parseFloat(computedStyle.marginLeft)
+      + parseFloat(computedStyle.marginRight);
+
+    const menuHeight = menu.offsetHeight
+      + parseFloat(computedStyle.marginTop)
+      + parseFloat(computedStyle.marginBottom);
+
+    let menuLeft = rect.left + scrollLeft + rect.width;
+    let menuTop = rect.top + scrollTop;
+
+    // Check if the menu extends beyond the right edge of the page
+    if (menuLeft + menuWidth > bodyWidth) {
+      // Position the menu to the left of the target element if it does
+      menuLeft = bodyWidth - menuWidth;
+    }
+
+    // Check if the menu extends beyond the bottom edge of the viewport
+    if (menuTop + menuHeight > scrollTop + bodyHeight) {
+      menuTop = scrollTop + bodyHeight - menuHeight;
+    }
+
+    // Check if the menu extends beyond the top edge of the viewport
+    if (menuTop < scrollTop) {
+      menuTop = scrollTop;
+    }
+
+    menu.style.top = `${menuTop}px`;
+    menu.style.left = `${menuLeft}px`;
+    menu.classList.remove('invisible');
+    menu.classList.add('block');
+
+    trackWithContextMenu = caller.closest('.track');
+    trackWithContextMenu.classList.add('ring-2', 'ring-primary');
+
+    blockInteractions.classList.remove('hidden');
+
+    document.addEventListener('click', hideContextMenuOnClick);
+    window.addEventListener('scroll', hideContextMenu);
+  }
+
+  function hideContextMenu() {
+    menu.classList.remove('block');
+    menu.classList.add('invisible');
+    blockInteractions.classList.add('hidden');
+    trackWithContextMenu.classList.remove('ring-2', 'ring-primary');
+    document.removeEventListener('click', hideContextMenuOnClick);
+  }
+
+  function hideContextMenuOnClick(event) {
+    // Check if the click was outside the menu
+
+
+    if (!menu.contains(event.target)) {
+      hideContextMenu();
+    }
+
+    event.stopPropagation();
+  }
+
+
+  document.querySelectorAll('.add-track-to-playlist').forEach(link => {
+    link.addEventListener('click', function (event) {
+      event.preventDefault();
+      const trackId = trackWithContextMenu.getAttribute('data-track-id');
+      const playlist_id = this.getAttribute('data-playlist-id');
+
+      addTrackToPlaylist({ track_id: trackId, playlist_id: playlist_id })
+        .then(response => {
+          if (response.status_code === 200) {
+            console.log(response.message);
+            showSystemMessage(response.message);
+          } else {
+            console.log(response.error);
+            showSystemMessage(response.error, 'warning');
+          }
+        });
+    });
+  });
+
+  function addTrackToPlaylist(payload) {
+
+    return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
+
+  }
+
+  function addTrackToPlaylistLastUsed(payload) {
+
+    payload.caller_url = window.location.href;
+    return processAjax('{{ url_for("playlist.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
+
+
+  }
+
+
+
+
+</script>

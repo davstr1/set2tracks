@@ -90,6 +90,33 @@
     </label>
   </div>
 
+  {% if channel or track %}
+  <div class="py-10">
+    {% if channel %}
+    <h1 class="text-xl">Sets by {{channel.author}}    - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs 
+      <a target="_blank" class="tooltip" data-tip="Check {{channel.author}}'s Channel on Youtube" href="{{channel.channel_url}}">
+        <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+          <use xlink:href="#icon-link-external"></use>
+        </svg>
+      </a>: </h1>
+    {%endif%}
+    {% if track %}
+    <audio id="audio-player" controls class="fixed  bottom-2 left-1/2 transform -translate-x-1/2 z-50 hidden">
+      Your browser does not support the audio element.
+    </audio>
+    <div id="tracklist">
+      {% include 'snippets/track_css.html' %}
+      {% include 'snippets/track_svg.html' %}
+      {% include 'snippets/track.html' %}
+    </div>
+    {% include 'js_tracklist.html' %}
+    {% include 'js_tracklist_no_vid.html' %}
+
+    <h1 class="text-xl">Sets with this track: </h1>
+    {%endif%}
+  </div>
+  {%endif%}
+
 
   <div class="container mx-auto py-8">
 

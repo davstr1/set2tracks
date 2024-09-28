@@ -32,7 +32,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from pprint import pprint
 from collections import OrderedDict, defaultdict
-from web.lib.format import cut_to_if_needed, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
+from web.lib.format import cut_to_if_needed, format_db_track_for_template, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
 
 from web.logger import logger
 
@@ -107,6 +107,11 @@ def validate_set_data(data):
 def get_set_id_by_video_id(video_id):
     set_record = Set.query.filter_by(video_id=video_id).first()
     return set_record.id if set_record else None
+
+
+def get_set_queue_status(video_id):
+    set_queue_record = SetQueue.query.filter_by(video_id=video_id).first()
+    return set_queue_record.status if set_queue_record else None
 
 def is_set_in_queue(video_id):
     # Check if the video is already in the queue
@@ -996,6 +1001,8 @@ def get_set_with_tracks(set_id):
     tracks = format_tracks_with_times(tracks, track_set_dict)  
     
     channel = Channel.query.get(set_instance.channel_id)
+    
+
 
     set_details = {
         'id': set_instance.id,
@@ -1015,6 +1022,7 @@ def get_set_with_tracks(set_id):
         'view_count': set_instance.view_count,
         'like_count': set_instance.like_count,
         'hidden': set_instance.hidden,
+        
     }
     return set_details
 
@@ -1115,6 +1123,13 @@ def update_playlist_edit_date(playlist_id):
         db.session.commit()
         return True
     return False
+
+
+def get_track_by_id(track_id):
+    track = Track.query.get(track_id)
+    if not track :
+        return None
+    return format_db_track_for_template(track)
 
 
 def add_track_to_playlist(playlist_id, track_id):
@@ -1510,7 +1525,8 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
             return {"error": "No valid track IDs found in the provided tracks"}
 
         response = add_tracks_to_spotify_playlist(new_playlist['id'], track_ids)
-        if 'error' in response:
+        print("response",response)
+        if isinstance(response, dict) and 'error' in response:
             return {'error': response['error']}
     except KeyError as e:
         return {"error": f"Missing expected key in track data: {str(e)}"}
@@ -1558,6 +1574,12 @@ def set_toggle_visibility(set_id):
     print(set_instance.hidden)
     return {"message": f"Set visibility toggled to {set_instance.hidden}"}
 
+
+def get_channel_by_id(channel_id):
+    channel = Channel.query.get(channel_id)
+    if not channel:
+        return None
+    return channel
 
 def get_channels(page=1, order_by='recent', per_page=20, hiddens=None):
     """

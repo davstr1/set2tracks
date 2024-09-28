@@ -4,8 +4,9 @@ import stat
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_cors import CORS, cross_origin
+from requests import get
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_status, get_set_with_tracks, get_sets_in_queue, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files
+from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_channel_by_id, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -33,6 +34,21 @@ def sets():
     sets_page,results_count = get_playable_sets(page=page, per_page=PER_PAGE,search=search,order_by=order_by)
     nb_sets_total = get_playable_sets_number()
     
+    track,channel,page_title = None,None,None
+    
+    if search and search.startswith('trackid:'):
+        track_id = int(search.split(':')[1])
+        track = get_track_by_id(track_id)
+        
+        if track:
+            page_title = f"DJ Sets playing \"{track['title']}\" - {Lang.APP_NAME}"
+    elif search and search.startswith('channelid:'):
+        channel_id = search.split(':')[1]
+        channel = get_channel_by_id(channel_id)
+        if channel:
+            page_title = f"DJ Sets by {channel.author} - {Lang.APP_NAME}"
+        
+        
     
     #inspiration_searches = get_random_set_searches(20,20)
     inspiration_searches = get_all_featured_set_searches()
@@ -56,8 +72,11 @@ def sets():
     
     is_paginated = sets_page.has_next or sets_page.has_prev
     
+    if not page_title:
+        page_title = Lang.APP_NAME + ' - ' + 'Find tracks from your favorite DJ sets'
+    
     l = {
-        'page_title': Lang.APP_NAME + ' - ' + 'Find tracks from your favorite DJ sets',
+        'page_title': page_title,
     }  
     
     #playlists_user = get_playlists_from_user(1)
@@ -70,6 +89,8 @@ def sets():
                            is_paginated=is_paginated,
                            inspiration_searches=inspiration_searches,
                            tpl_utils=tpl_utils,
+                           track=track,
+                           channel=channel,
                            l=l) 
     
 # Add get params for page and status
@@ -142,7 +163,16 @@ def set(set_id):
 
     
     if 'error' in set:
-        return redirect(url_for('basic.index'))
+        return redirect(url_for('set.sets'))
+    
+    set_queue_status = get_set_queue_status(set['video_id'])
+    
+    if set_queue_status:
+        print('set_queue_status:',set_queue_status)
+        
+    if not is_admin() and set_queue_status and set_queue_status != 'done':
+        flash('This set is not publically accessible. Please try again later.', 'error')
+        return redirect(url_for('set.sets'))
     
     #genres = get_set_genres_by_occurrence(set_id)
     #pprint(genres)
