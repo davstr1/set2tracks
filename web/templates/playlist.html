@@ -26,21 +26,35 @@
     </div>
 
     <!-- Right column: Buttons -->
-    <div class="flex flex-col justify-start space-y-4">
+    <div class="flex flex-col justify-start space-y-4 border b-1 p-4">
 
-      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" class="export-sync btn btn-primary">
+      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" class="export-sync btn ">
         <span class="export{% if playlist.playlist_id_spotify %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_spotify %} hidden{% endif %}">Sync with </span>Spotify
       </a>
+
 
       <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync" >
         <span class="export{% if playlist.playlist_id_apple %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_apple %} hidden{% endif %}">Sync with </span>Apple Music
       </a>
 
-      {% if playlist.set_id %}
 
-      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class=" tooltip" data-tip="The set from which playlist was created">
+      <hr class="my-4">
+      {% if playlist.set_id %}
+      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="tooltip" data-tip="The set from which playlist was created">
         View set from playlist </a>
 
+      {% endif %}
+
+      {% if playlist.playlist_id_spotify %}
+      <a target="_blank" href="https://open.spotify.com/playlist/{{playlist.playlist_id_spotify}}" class="tooltip">See on Spotify <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+        <use xlink:href="#icon-link-external"></use>
+      </svg></a>
+      {% endif %}
+
+      {% if playlist.playlist_id_apple %} 
+      <a target="_blank" href="https://music.apple.com/library/playlist/{{playlist.playlist_id_apple}}" class="tooltip">See on Apple <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
+        <use xlink:href="#icon-link-external"></use>
+      </svg></a>
       {% endif %}
 
 
