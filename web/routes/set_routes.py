@@ -1,3 +1,4 @@
+from math import e
 from pprint import pprint
 import re
 import stat
@@ -6,7 +7,7 @@ from flask_login import current_user
 from flask_cors import CORS, cross_origin
 from requests import get
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_channel_by_id, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files
+from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_channel_by_id, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -106,8 +107,11 @@ def sets_queue():
         include_15min_error = request.args.get('include_15min_error', default=False, type=bool)
     else:
         include_15min_error = True
-    
-    sets,nb_sets = get_sets_in_queue(page=page, status=status, include_15min_error=include_15min_error)
+        
+    if status and status == 'zero_track':
+        sets,nb_sets = get_sets_with_zero_track(page=page)
+    else:     
+        sets,nb_sets = get_sets_in_queue(page=page, status=status, include_15min_error=include_15min_error)
     #my_sets = get_my_sets_in_queue(user_id=get_user_id())
     my_sets = None
     

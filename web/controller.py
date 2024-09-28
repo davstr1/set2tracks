@@ -409,6 +409,29 @@ def upsert_setsearch(query, nb_results):
         db.session.rollback()
         raise
     
+def get_sets_with_zero_track(page=1):
+    query = Set.query.outerjoin(SetQueue, Set.video_id == SetQueue.video_id)
+    query = query.filter(Set.nb_tracks==0)
+    query = query.with_entities(
+    Set.id.label('set_id'),  
+    SetQueue.id,
+    SetQueue.video_id,                # Standard field names from SetQueue model
+    SetQueue.user_id,
+    SetQueue.user_premium,
+    SetQueue.status,
+    SetQueue.queued_at,
+    SetQueue.time_in_queue,
+    SetQueue.time_processed,
+    SetQueue.time_processed_and_queued,
+    SetQueue.discarded_reason,
+    SetQueue.video_info_json,
+    SetQueue.duration,
+    SetQueue.nb_chapters
+)
+    results_count = query.count()
+    results = query.paginate(page=page, per_page=10, error_out=False)
+    return results, results_count
+    
 def get_sets_in_queue(page=1, status=None,include_15min_error=True):
     #query = SetQueue.query
     query = SetQueue.query.outerjoin(Set, SetQueue.video_id == Set.video_id)
@@ -466,10 +489,14 @@ def count_sets_with_status(status):
     return SetQueue.query.filter_by(status=status).count()
 
 def count_sets_with_all_statuses():
-    distinct_statuses = SetQueue.query.with_entities(SetQueue.status).distinct().all()
+    #distinct_statuses = SetQueue.query.with_entities(SetQueue.status).distinct().all()
+    distinct_statuses = [status for status in SetQueue.__table__.columns['status'].type.enums]
+
     result = {'all': SetQueue.query.count()}
     for status in distinct_statuses:
-        result[status[0]] = count_sets_with_status(status[0])
+        result[status] = count_sets_with_status(status) or 0
+    # Not a proper status, but used to count sets with no tracks
+    result['zero_track'] = Set.query.filter_by(nb_tracks=0).count() or 0
     return result
     
 

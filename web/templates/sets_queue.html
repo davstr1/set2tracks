@@ -30,7 +30,9 @@
         <li class="me-2">
           <a href="{{ url_for('set.sets_queue',status='processing') }}" class="{{'text-primary ' if status=='processing' }}inline-block p-4  bg-gray-100 rounded-t-lg dark:bg-gray-800">Processing ({{count['processing']}})</a>
         </li>
-
+        <li class="me-2">
+          <a href="{{ url_for('set.sets_queue',status='zero_track') }}" class="{{'text-primary ' if status=='zero_track' }}inline-block p-4  bg-gray-100 rounded-t-lg dark:bg-gray-800">Zero tracks ({{count['zero_track']}})</a>
+        </li>
       </ul>
       </ul>
       {% if is_admin %}
