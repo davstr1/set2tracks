@@ -3,16 +3,17 @@
   <div class="action-pause p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12 relative flex items-center justify-center">
     <div class="track-number">
       {% if loop_index is defined %}
+      <span class="sm:hidden">#</span>
       {{ loop_index }}
       {% endif %}
     </div>
     <div class="song-play-button absolute align-middle bg-center">
-      <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+      <svg class="lg:w-6 lg:h-6 fill-base-content hover:fill-primary">
         <use xlink:href="#icon-play"></use>
       </svg>
     </div>
     <div class="song-pause-button absolute align-middle bg-center ">
-      <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+      <svg class="lg:w-6 lg:h-6 fill-base-content hover:fill-primary">
         <use xlink:href="#icon-pause"></use>
       </svg>
     </div>
@@ -23,28 +24,28 @@
   <div class="p-2 w-full sm:w-1/6 lg:w-20 flex flex-col items-center relative group ">
     <div class="absolute inset-0 flex items-center justify-center invisible group-hover:visible">
       <a target="_blank" href="{{track.preview_uri}}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
-        <svg fill="#ffffff" class="w-6 h-6 fill-base-content hover:fill-primary">
+        <svg fill="#ffffff" class="lg:w-6 lg:h-6 fill-base-content hover:fill-primary">
           <use xlink:href="#icon-headphones"></use>
         </svg>
       </a>
     </div>
     <img class="h-full " src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
     <div class="h-0 w-16">
-      <div class="bg-base-content h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>
+      <div class="bg-base-content discreet h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>
     </div>
   </div>
   <div class="p-2 lg:flex-1 w-full sm:w-4/6 lg:w-auto text-center sm:text-left">
 
-    <div class="font-bold text-lg line-clamp-1 tooltip text-left" data-tip="{{ track.title if track.title != " Track not found" else '-' }}">{{ track.title if track.title != "Track not found" else '' }}
+    <div class="font-bold text-lg line-clamp-1 tooltip text-center sm:text-left" data-tip="{{ track.title if track.title != " Track not found" else '-' }}">{{ track.title if track.title != "Track not found" else '' }}
       
     </div>
     {% if track.id != 1 %}
-    <div class="italic line-clamp-1">{{ track.artist_name if track.artist_name else '-' }}</div>
+    <div class="italic line-clamp-1 text-center sm:text-left">{{ track.artist_name if track.artist_name else '-' }}</div>
     {% endif %}
   </div>
 
   <div class="hidden sm:w-1/6 sm:flex"></div>
-  <div class="p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
+  <div class=" discreet bg-primary-content p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
     {% if track.tempo %}
     <div>{{ track.tempo if track.tempo else '' }}</div>
     {% endif %}
@@ -54,74 +55,70 @@
   </div>
   <div class="p-0 w-20 h-16 lg:flex items-end space-x-1 hidden ">
     {% if track.danceability %}
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ (100 - track.instrumentalness) | int }}% vocal" style="height: {{ 100 - track.instrumentalness }}%;">&nbsp;</div>
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ (track.instrumentalness) | int }}% instrumental" style="height: {{ track.instrumentalness }}%;">&nbsp;</div>
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ (track.speechiness) | int }}% speechy" style="height: {{ track.speechiness }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (100 - track.instrumentalness) | int }}% vocal" style="height: {{ 100 - track.instrumentalness }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.instrumentalness) | int }}% instrumental" style="height: {{ track.instrumentalness }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.speechiness) | int }}% speechy" style="height: {{ track.speechiness }}%;">&nbsp;</div>
     {% endif %}
   </div>
   <div class="p-0 w-20 h-16 space-x-1 lg:flex items-end hidden ">
     {% if track.danceability %}
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ (track.danceability) | int }}% danceable" style="height: {{ track.danceability }}%;">&nbsp;</div>
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ (track.energy) | int }}% energetic" style="height: {{ track.energy }}%;">&nbsp;</div>
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ track.loudness  }}% loud" style="height: {{ track.loudness }}%;">&nbsp;</div>
-    <div class="bar-vertical bg-base-content w-3 tooltip" data-tip="{{ (track.valence) | int }}% happy" style="height: {{ track.valence }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.danceability) | int }}% danceable" style="height: {{ track.danceability }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.energy) | int }}% energetic" style="height: {{ track.energy }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ track.loudness  }}% loud" style="height: {{ track.loudness }}%;">&nbsp;</div>
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.valence) | int }}% happy" style="height: {{ track.valence }}%;">&nbsp;</div>
     {% endif %}
   </div>
 
-  <div class="p-2 w-20 absolute top-12 right-2 sm:relative text-right sm:top-auto sm:right-auto sm:text-left">
-
+  <div class="discreet bg-primary-content p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left">
     <div>{{ track.release_year if track.release_year else '-'}}</div>
   </div>
 
-  <div class="p-2 flex sm:justify-end space-x-2  sm:w-50 buttons absolute bottom-16 w-full justify-center md:w-auto  md:relative md:right-auto md:bottom-auto">
+  <div class="track-ext p-2 flex  space-x-2  buttons absolute bottom-16 w-full justify-center md:w-auto  sm:bottom-auto lg:justify-end  sm:relative lg:right-auto lg:bottom-auto">
     {% if track.artist_name and track.id != 1 %}
-    <div class="sm:visible-hover-track text-center">
+    <div class="sm:visible-hover-track text-center sm:p-0 p-5 bg-primary-content sm:bg-transparent rounded-xl">
       <a href="#" class="add-track-to-recent-playlist pr-4 tooltip " data-tip="Add to last used playlist">
-        <svg class="stroke-base-content hover:stroke-primary w-6 h-6 ">
+        <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
           <use xlink:href="#icon-plus-circle"></use>
         </svg>
       </a>
       <a href="#" class="remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from playlist">
-        <svg class="stroke-base-content hover:stroke-primary w-6 h-6">
+        <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
           <use xlink:href="#icon-minus-circle"></use>
         </svg>
       </a>
 
       
       {% if track.nb_sets > 1 %}
-      <a class="relative h-6 w-6 tooltip openTrackOnPlatform " data-tip="Check sets with this track" href="{{url_for('set.sets',s='trackid:'~ track.id)}}">
+      <a class="relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="Check sets with this track" href="{{url_for('set.sets',s='trackid:'~ track.id)}}">
       
-        <div class="w-6 h-6 rounded-full bg-base-content hover:bg-primary absolute z-0 text-primary-content text-xs flex items-center justify-center">{{ track.nb_sets}}</div>
+        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content discreet hover:bg-primary absolute z-0 text-primary-content text-xs flex items-center justify-center">{{ track.nb_sets}}</div>
       </a>
       {% else %}
-      <div class="relative inline-block w-6 h-6 bg-base-content bg-transparent "></div>
+      <div class="relative inline-block lg:w-6 lg:h-6 bg-base-content discreet bg-transparent "></div>
       {% endif %}
 
-      <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="w-6 h-6 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
-
-        <svg class=" w-6 h-6 fill-base-content hover:fill-primary{{ ' border-b-2 border-t-2 border-current' if track.has_related_tracks }}">
+      <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="lg:w-6 lg:h-6 h-12 w-12 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
+        <svg class=" lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary{{ ' border-b-2 border-t-2 border-current' if track.has_related_tracks }}">
           <use xlink:href="#icon-related-tracks"></use>
         </svg>
-
-
       </a>
 
 
 
-      <a class="relative h-6 w-6 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" href="{{tpl_utils.spotify_track_url(track)}}">
-        <svg class="pointer-events-none w-6 h-6 absolute z-20 fill-base">
+      <a class="relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" href="{{tpl_utils.spotify_track_url(track)}}">
+        <svg class="pointer-events-none lg:w-6 lg:h-6 h-12 w-12 absolute z-20 fill-base">
           <use xlink:href="#icon-spotify-no-circle"></use>
         </svg>
-        <div class="w-6 h-6 rounded-full bg-base-content hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
+        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content discreet hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
       </a>
-      <a class="w-6 h-6 tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" href="{{tpl_utils.apple_track_url(track)}}">
-        <svg class="w-6 h-6 pointer-events-none absolute z-20 fill-base ">
+      <a class="lg:w-6 lg:h-6 h-12 w-12  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" href="{{tpl_utils.apple_track_url(track)}}">
+        <svg class="lg:w-6 lg:h-6 h-12 w-12  pointer-events-none absolute z-20 fill-base ">
           <use xlink:href="#icon-apple-no-square"></use>
         </svg>
-        <div class="w-6 h-6 rounded-md bg-base-content hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
+        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-md bg-base-content discreet hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
       </a>
-      <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="text-lg font-semibold cursor-pointer tooltip trigger-track-contextual-menu absolute top-2 right-2 lg:relative lg:top-auto lg:right-auto">
-        <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+      <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="text-lg font-semibold cursor-pointer tooltip trigger-track-contextual-menu lg:relative lg:top-auto lg:right-auto">
+        <svg class="lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary">
           <use xlink:href="#icon-plus"></use>
         </svg>
       </a>

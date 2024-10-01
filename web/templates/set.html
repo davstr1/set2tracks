@@ -17,10 +17,10 @@ even where the player is not behind*/
 
 
 
-<div class="flex justify-between items-start p-4 pl-0 pr-0">
-  <div class=" pl-2">
-    <!-- Insert your text here -->
-    <h1 class="text-2xl"><span class="discreet block">Tracklist from</span>
+<div class="md:flex md:justify-between md:items-start p-4 pl-0 pr-0">
+  <div class="pl-2">
+    
+    <h1 class="lg:text-2xl"><span class="discreet block">Tracklist from</span>
       <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
         <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
           <use xlink:href="#icon-link-external"></use>
@@ -42,17 +42,17 @@ even where the player is not behind*/
 
     <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
   </div>
-  <div>
+  <div class="mt-4 md:mt-0">
     {% if not set.playlist_id %}
-    <a href="#" id="create-playlist-from-set-tracks" class="btn btn-primary flex justify-center items-center">
+    <a href="#" id="create-playlist-from-set-tracks" class="btn mb-4 btn-primary flex justify-center items-center">
       Create Playlist from set tracks
     </a>
     {% else %}
-    <a href="{{url_for('playlist.show_playlist',playlist_id=set.playlist_id)}}" class="btn flex justify-center items-center">
+    <a href="{{url_for('playlist.show_playlist',playlist_id=set.playlist_id)}}" class="btn mb-4 flex justify-center items-center">
       View playlist created from set tracks
     </a>
     {% endif %}
-    <a href="" id="add_all_tracks_to_playlist" class="btn  flex justify-center items-center">
+    <a href="" id="add_all_tracks_to_playlist" class="btn  mb-4 flex justify-center items-center">
       Add all tracks to playlist
     </a>
   </div>
@@ -104,9 +104,10 @@ even where the player is not behind*/
 </div>
 
 
-<div class="fixed bottom-0 w-full p-4 text-center bg-primary-content z-50 border-t-2">
+<div class="fixed bottom-0 w-full  text-center bg-primary-content z-50 border-t-2 p-2 text-xs lg:p-4 lg:text-xl">
   <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
-    ❤ Support your DJ! Like, comment, and subscribe on YouTube
+    ❤ Support your DJ! 
+    <span class="inline-block lg:inline">Like, comment, and subscribe on YouTube</span>
     <svg class="w-6 h-6 fill-current inline hover:fill-primary">
       <use xlink:href="#icon-link-external"></use>
     </svg>
