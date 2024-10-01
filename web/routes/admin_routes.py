@@ -4,7 +4,7 @@ from flask_login import current_user
 
 
 from lang import Lang
-from web.controller import channel_toggle_visibility, get_hidden_channels, get_hidden_sets, get_set_searches, queue_discard_set, queue_reset_set, remove_set_temp_files, search_toggle_featured, set_toggle_visibility
+from web.controller import channel_toggle_followable, channel_toggle_visibility, get_channels_with_feat, get_hidden_channels, get_hidden_sets, get_set_searches, queue_discard_set, queue_reset_set, remove_set_temp_files, search_toggle_featured, set_toggle_visibility
 from web.logger import logger
 from web.model import SetQueue
 from web.routes.routes_utils import is_admin
@@ -32,7 +32,7 @@ def set_visibility_toggle(set_id):
     return redirect(url_for('set.set',set_id=set_id))
 
 
-@admin_bp.route('/admin/channel/hide/<int:channel_id>', methods=['GET'])  
+@admin_bp.route('/admin/channel/toggle_visible/<int:channel_id>', methods=['GET'])  
 def channel_visibility_toggle(channel_id):
 
     if not is_admin():
@@ -46,10 +46,25 @@ def channel_visibility_toggle(channel_id):
     elif isinstance(result, dict) and 'message' in result:
         flash(result['message'], 'success')
     
-    return redirect(url_for('set.sets'))
+    return redirect(request.referrer or url_for('set.sets'))
         
     #return render_template(url_for('set',set_id=set_id))
+   
+@admin_bp.route('/admin/channel/toggle_followable/<int:channel_id>', methods=['GET'])  
+def channel_followability_toggle(channel_id):
+
+    if not is_admin():
+        flash('You are not an admin', 'error')
+        return redirect(url_for('set.sets'))
     
+    result = channel_toggle_followable(channel_id)
+    
+    if isinstance(result, dict) and 'error' in result:
+        flash(result['error'], 'error')
+    elif isinstance(result, dict) and 'message' in result:
+        flash(result['message'], 'success')
+    
+    return redirect(request.referrer or url_for('set.sets'))
     
 @admin_bp.route('/admin')
 def admin():
@@ -79,19 +94,22 @@ def hidden_sets():
     return render_template('admin/hidden_sets.html', sets=sets,tpl_utils=tpl_utils,l=l)
 
 
-@admin_bp.route('/admin/hidden_channels')
-def hidden_channels():
+@admin_bp.route('/admin/channels',methods=['GET'])
+def channels():
     if not is_admin():
         flash('You are not an admin', 'error')      
         return redirect(url_for('set.sets'))
     
-    channels = get_hidden_channels()
+    feat = request.args.get('feat', 'hidden') 
+    print(feat) # feat is always hidden. WHy ??
+    
+    channels = get_channels_with_feat(feat)
     
     l = {
         'page_title': Lang.ADMIN + ' - ' + 'Hidden Channels', 
     }
     
-    return render_template('admin/hidden_channels.html', channels=channels,tpl_utils=tpl_utils,l=l)
+    return render_template('admin/channels.html', channels=channels,tpl_utils=tpl_utils,l=l)
 
 
 @admin_bp.route('/admin/tags')

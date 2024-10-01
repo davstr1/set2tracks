@@ -1,0 +1,11 @@
+<ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
+  <li class="me-2">
+    <a href="{{ url_for('admin.hidden_sets') }}" aria-current="page" class="inline-block p-4 text-blue-600 bg-gray-100 rounded-t-lg dark:bg-gray-800 dark:text-blue-500">Hidden Sets</a>
+  </li>
+  <li class="me-2">
+    <a href="{{ url_for('admin.channels',feat='hidden') }}" class="inline-block p-4 text-gray-500 bg-gray-100 rounded-t-lg active dark:bg-gray-800 dark:text-gray-400">Hidden Channels</a>
+  </li>
+  <li class="me-2">
+    <a href="{{ url_for('admin.channels',feat='not_followable') }}" class="inline-block p-4 text-gray-500 bg-gray-100 rounded-t-lg active dark:bg-gray-800 dark:text-gray-400">Not followable Channels</a>
+  </li>
+</ul>

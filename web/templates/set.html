@@ -36,7 +36,8 @@ even where the player is not behind*/
       <a href="{{url_for('set.sets',s=set.channel.author)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
       {%if is_admin() %}
       <a href="{{url_for('admin.channel_visibility_toggle',channel_id=set.channel.id)}}" class="text-gray-600">[{{ "Show" if set.channel.hidden else "Hide" }}
-        ]</a>
+        ]</a> 
+        <a href="{{url_for('admin.channel_followability_toggle',channel_id=set.channel.id)}}">[ Make {%if set.channel.followable %}un{% endif %}followable ]</a>
       {%endif%}
 
     <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>

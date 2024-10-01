@@ -522,7 +522,7 @@ def get_my_sets_in_queue(user_id):
     
     
 def get_channel_to_check():   
-    channel = Channel.query.filter(Channel.channel_id != 'None',Channel.hidden == False).order_by(Channel.updated_at.asc()).first() # yeah, mysterious channel with None id appears. @TODO
+    channel = Channel.query.filter(Channel.channel_id != 'None',Channel.hidden == False,Channel.followable == True).order_by(Channel.updated_at.asc()).first() # yeah, mysterious channel with None id appears. @TODO
 
     return channel
 
@@ -1605,6 +1605,17 @@ def get_random_set_searches(min_popularity, n):
         .filter(SetSearch.featured == True) \
         .order_by(func.random()).limit(n).all()
 
+def channel_toggle_followable(channel_id):
+    channel = Channel.query.get(channel_id)
+    if not channel:
+        return {"error": "Channel not found"}
+    
+    # Toggle the followable status
+    channel.followable = not channel.followable
+
+    db.session.commit()
+    return {"message":  f"channel_followable set to {channel.followable}"}
+
 
 def channel_toggle_visibility(channel_id):
     channel = Channel.query.get(channel_id)
@@ -1612,6 +1623,10 @@ def channel_toggle_visibility(channel_id):
         return {"error": "Channel not found"}
     
     channel.hidden = not channel.hidden
+    # If the channel is hidden, set followable to False
+    # But not necessary to set followable to True if channel is unhidden
+    if channel.hidden:
+        channel.followable = False
     db.session.commit()
     
     return {"message": f"Channel visibility toggled to {channel.hidden}"}
@@ -1673,6 +1688,21 @@ def get_channels(page=1, order_by='recent', per_page=20, hiddens=None):
 
 def get_hidden_channels():
     return Channel.query.filter_by(hidden=True).all()
+
+def get_channels_with_feat(feat):
+    if feat == 'hidden':
+        return get_hidden_channels()
+    elif feat == 'not_followable':
+        return Channel.query.filter_by(followable=False).all()
+    elif feat == 'followable':
+        return Channel.query.filter_by(followable=True).all()
+    elif feat == 'not_hidden':
+        return Channel.query.filter_by(hidden=False).all()
+    else:
+        return {'error': 'Invalid feat'}
+
+def get_unfollowable_channels():
+    return Channel.query.filter_by(followable=False).all()
 
 def get_hidden_sets():
     return Set.query.filter_by(hidden=True).all()

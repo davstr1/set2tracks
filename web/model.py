@@ -117,6 +117,7 @@ class Channel(db.Model):
     sets = db.relationship('Set', backref='channel', lazy=True)  # completed this line
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     hidden = db.Column(db.Boolean, default=False, index=True)
+    followable = db.Column(db.Boolean, default=False, index=True)
         
 
 class Set(db.Model):
