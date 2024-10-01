@@ -7,7 +7,7 @@ from flask_login import current_user
 from flask_cors import CORS, cross_origin
 from requests import get
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_channel_by_id, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files
+from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files, upsert_set_browsing_history
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -92,7 +92,68 @@ def sets():
                            tpl_utils=tpl_utils,
                            track=track,
                            channel=channel,
+                            page="sets",
                            l=l) 
+    
+    
+@set_bp.route('/history')
+def browsing_history():
+    # Constants
+    PER_PAGE = 30
+    user_id = current_user.id  # Assuming the user is logged in and `current_user` is available
+    
+    # Request parameters
+    page = request.args.get('page', 1, type=int)
+    search = request.args.get('s', '', type=str)
+    order_by = request.args.get('order_by', 'recent', type=str)
+    
+    # Get browsing history with pagination and search
+    sets_page, results_count = get_browsing_history(
+        user_id=user_id, 
+        page=page, 
+        per_page=PER_PAGE, 
+        order_by=order_by, 
+        search=search
+    )
+    
+    # Generate pagination URLs
+    def get_pagination_url(page):
+        params = {}
+        if search:
+            params['s'] = search
+        if order_by != 'recent':
+            params['order_by'] = order_by
+        if page != 1:
+            params['page'] = page
+        return url_for('set.browsing_history', **params)
+
+    # Pagination logic
+    pagination = {}
+    if sets_page.has_prev:
+        pagination['prev_url'] = get_pagination_url(page - 1)
+    if sets_page.has_next:
+        pagination['next_url'] = get_pagination_url(page + 1)
+    
+    is_paginated = sets_page.has_next or sets_page.has_prev
+    
+    # Page title
+    page_title = 'My Browsing History - ' + Lang.APP_NAME
+    
+    l = {
+        'page_title': page_title,
+    }  
+    
+    # Render the template
+    return render_template('sets.html', 
+                           sets_page=sets_page,
+                           results_count=results_count,
+                           search=search, 
+                           order_by=order_by,
+                           pagination=pagination,
+                           is_paginated=is_paginated,
+                           page_title=page_title,
+                           tpl_utils=tpl_utils,l=l)
+
     
 # Add get params for page and status
 @set_bp.route('/sets/queue')  
@@ -187,7 +248,7 @@ def set(set_id):
  
     most_common_decades = calculate_decade_distribution(set['tracks'])
     
-    pprint(most_common_decades)
+    #pprint(most_common_decades)
     # most_common_tempos = calculate_and_sort_tempo_distribution(set['tracks'])
     # pprint(avg_properties)
     # pprint('------')
@@ -203,6 +264,7 @@ def set(set_id):
     
     if user_id:
         user_playlists = get_playlists_from_user(user_id, order_by='title')
+        upsert_set_browsing_history(set_id,user_id)
     else:
         user_playlists = []
         

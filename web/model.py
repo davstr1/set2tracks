@@ -164,7 +164,18 @@ class SetSearch(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
+class SetBrowsingHistory(db.Model):
+    __tablename__ = 'set_browsing_history'
     
+    set_id = db.Column(db.Integer, db.ForeignKey('sets.id'), primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False, primary_key=True)
+    datetime = db.Column(db.DateTime, nullable=False, default=db.func.now(), onupdate=db.func.now())
+    
+    __table_args__ = (
+        db.UniqueConstraint('set_id', 'user_id', name='uq_set_user'),  # Ensures no duplicates
+        db.Index('ix_set_user_datetime', 'set_id', 'user_id', 'datetime'),  # For performance
+    )
+   
 
 class SetQueue(db.Model):
     __tablename__ = 'set_queue'

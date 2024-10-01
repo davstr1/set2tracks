@@ -24,7 +24,7 @@ from web.lib.shazam import sync_process_segments
 from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
 from web.lib.utils import as_dict, calculate_avg_properties
 from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
-from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
+from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetBrowsingHistory, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
 from datetime import datetime, timezone
 from boilersaas.utils.db import db
 
@@ -484,6 +484,23 @@ def get_sets_in_queue(page=1, status=None,include_15min_error=True):
 
     # Return the paginated items and the total count as a tuple
     return paginated_sets, total_count
+
+
+def upsert_set_browsing_history(set_id, user_id):
+    # Check if the record exists
+    history_item = SetBrowsingHistory.query.filter_by(set_id=set_id, user_id=user_id).first()
+    
+    if history_item:
+        # Record exists, update the datetime (this happens automatically due to `onupdate=db.func.now()`)
+        db.session.commit()
+    else:
+        # Record does not exist, insert new record
+        new_history_item = SetBrowsingHistory(set_id=set_id, user_id=user_id)
+        db.session.add(new_history_item)
+        db.session.commit()
+
+    return True
+
 
 def count_sets_with_status(status):
     return SetQueue.query.filter_by(status=status).count()
@@ -990,6 +1007,40 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
     if search:
         upsert_setsearch(search, results_count)
     return results,results_count
+
+
+def get_browsing_history(user_id, page=1, per_page=20, order_by='recent', search=None):
+    # Query to fetch the browsing history for the given user
+    query = db.session.query(Set).join(SetBrowsingHistory, Set.id == SetBrowsingHistory.set_id) \
+                .join(Channel, Set.channel_id == Channel.id) \
+                .filter(SetBrowsingHistory.user_id == user_id) \
+                .filter(Set.playable_in_embed == True, Set.published == True, Channel.hidden == False)
+    # If there's a search term, apply it to filter the results based on the set's title or channel's author
+    if search:
+        search_filter = or_(
+            Set.title_tsv.match(search),  # Assuming title_tsv is a full-text search vector for the set title
+            Set.channel.has(Channel.author.ilike(f'%{search}%'))  # Assuming the author field is searchable
+        )
+        query = query.filter(search_filter)
+
+    # Ordering based on the order_by parameter
+    if order_by == 'recent':
+        query = query.order_by(SetBrowsingHistory.datetime.desc())
+    elif order_by == 'old':
+        query = query.order_by(SetBrowsingHistory.datetime.asc())
+    elif order_by == 'views':
+        query = query.order_by(Set.view_count.desc())
+    elif order_by == 'likes':
+        query = query.order_by(Set.like_count.desc())
+    
+    # Get total results count
+    results_count = query.count()
+
+    # Paginate results
+    results = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return results, results_count
+
 
                     
 def get_playable_sets_number():
