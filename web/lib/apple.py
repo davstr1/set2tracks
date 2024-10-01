@@ -103,12 +103,9 @@ def am_songs(song_ids_list: list) -> dict:
 def add_apple_track_data_from_json(tracks):
     key_apple_tracks = [song["key_track_apple"] for song in tracks]
     key_apple_tracks = list(set(filter(None, key_apple_tracks)))
-    
-    json.dump(key_apple_tracks, open('apple_tracks.json', 'w'), indent=4)
    
     apple_tracks_info = am_songs(key_apple_tracks)
-    
-    json.dump(apple_tracks_info, open('apple_tracks_info.json', 'w'), indent=4)
+       
   
     for song in tracks:
         song.update(apple_tracks_info.get(song["key_track_apple"], {}))       
