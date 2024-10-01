@@ -243,7 +243,7 @@ import concurrent.futures
 
 def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
     
-    json.dump(tracks_json, open('tracks.json', 'w'), indent=4)
+    #json.dump(tracks_json, open('tracks.json', 'w'), indent=4)
     
     def first_match(tracks,title,artist):
         first_match = None
