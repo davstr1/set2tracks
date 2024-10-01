@@ -232,8 +232,6 @@ def set(set_id):
     
     set_queue_status = get_set_queue_status(set['video_id'])
     
-    if set_queue_status:
-        print('set_queue_status:',set_queue_status)
         
     if not is_admin() and set_queue_status and set_queue_status != 'done':
         flash('This set is not publically accessible. Please try again later.', 'error')
@@ -397,8 +395,6 @@ def jax_check_set_status(youtube_video_id):
     
 @set_bp.route('/jax/check_save_related_tracks/<int:track_id>', methods=['GET','POST'])
 def jax_check_save_related_tracks(track_id):
-    
-    print(request.json)
     
     data = request.json 
     caller_url = data['caller_url'] if 'caller_url' in data else None

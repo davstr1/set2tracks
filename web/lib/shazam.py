@@ -34,17 +34,6 @@ def transform_shazam_data(data):
     return result
 
 
-# async def shazam_related_tracks(track_id,limit=20):
-#     print (f'shazam_related_tracks for {track_id}')
-#     try:
-#         shazam = Shazam()
-#         related = await shazam.related_tracks(track_id=track_id, limit=limit,proxy=PROXY_URL)
-#         transformed = transform_shazam_data(related)
-#         return transformed
-#     except Exception as e:
-#         logger.error(f"Error in shazam_related_tracks: {e}")
-#         return []
-
 async def shazam_related_tracks(track_id, limit=20):
     """
     Retrieves related tracks from Shazam for a given track ID.

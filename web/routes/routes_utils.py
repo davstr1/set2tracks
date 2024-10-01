@@ -31,10 +31,7 @@ def jax_redirect_if_not_connected(next_url=None):
     if is_connected():
         return False
     
-    redirect_url = url_for('users.login',next=next_url)
-    print('next_url:',next_url)
-    print('redirect_url:',redirect_url)
-   
+    redirect_url = url_for('users.login',next=next_url) 
     return jsonify({"redirect":redirect_url }), 401
   
   

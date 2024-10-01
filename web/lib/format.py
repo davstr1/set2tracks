@@ -32,7 +32,6 @@ def ensure_datetime_with_timezone(value):
 def time_ago(value,less_than_a_day=True):
   
     now = datetime.now(pytz.UTC)  
-    print(type(value))
     # If 'value' is naive, make it timezone-aware (assuming UTC or you can set your desired timezone)
     # if  value.tzinfo is None:
     #     value = pytz.UTC.localize(value)

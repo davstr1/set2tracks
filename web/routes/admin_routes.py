@@ -100,9 +100,7 @@ def channels():
         flash('You are not an admin', 'error')      
         return redirect(url_for('set.sets'))
     
-    feat = request.args.get('feat', 'hidden') 
-    print(feat) # feat is always hidden. WHy ??
-    
+    feat = request.args.get('feat', 'hidden')    
     channels = get_channels_with_feat(feat)
     
     l = {

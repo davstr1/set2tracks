@@ -448,8 +448,6 @@ def get_spotify_playlist_tracks_ids(playlist_id):
         sp = spotipy.Spotify(auth=token_info['access_token'])
         user = sp.me()
         playlist = sp.user_playlist(user,playlist_id, fields='id')
-        print ('playlist')
-        print(playlist)
         if 'id' not in playlist:
             return jsonify({'error': 'Playlist not found'}), 404
         

@@ -214,11 +214,9 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         
         
         if playlist_id_spotify is None:
-            print('creating new spotify playlist')
             return create_spotify_playlist_and_add_tracks(playlist.get('title'), tracks,playlist_id)
             
         else:
-            print('updating existing spotify playlist')
             spotify_playlist_tracks_ids = get_spotify_playlist_tracks_ids(playlist_id_spotify)
             local_tracks_ids = [track['key_track_spotify'] for track in tracks]
             tracks_to_add = list(set(local_tracks_ids) - set(spotify_playlist_tracks_ids))
@@ -446,8 +444,7 @@ def store_apple_user_token():
         return False
     
     redirect = request.json.get('redirect', None)
-    print('redirect')
-    print(redirect)
+    
     if  not redirect:
         return {'error':'redirect parameter is required'}, 400
     

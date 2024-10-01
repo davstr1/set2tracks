@@ -150,8 +150,7 @@ def calculate_decade_distribution(tracks):
     decade_percentages = {str(decade): int((count / total_tracks) * 100) for decade, count in decade_counter.items()}
     
     sorted_decade_percentages = dict(sorted(decade_percentages.items(), key=lambda item: item[1],reverse=True))
-    print('sorted_decade_percentages')
-    print(sorted_decade_percentages)
+
 
     
     
