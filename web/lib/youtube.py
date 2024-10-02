@@ -154,28 +154,38 @@ def youbube_video_info(video_id: str, retry_count: int = 5) -> dict:
  
 
 
-def download_youtube_video(id:str,vid_dir)->str:
+def download_youtube_video(id: str, vid_dir: str, retry_count: int = 5) -> str:
     
     def my_hook(d):
-        #print(d)
         if d['status'] == 'downloading':
             logger.debug(f"{d['downloaded_bytes'] / d['total_bytes'] * 100:.2f}% downloaded")
-
+    
     options = {
-        'progress_hooks':[my_hook],
+        'proxy': PROXY_URL,
+        'progress_hooks': [my_hook],
         'write-thumbnail': True,
         'format': 'bestaudio/best',
         'outtmpl': f'{vid_dir}/full.%(ext)s',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-           'preferredcodec': 'opus',
+            'preferredcodec': 'opus',
             'preferredquality': '192',
         }],
     }
-    with YoutubeDL(params=options) as ydl:
-        yt = f"https://www.youtube.com/watch?v={id}"
-        ydl.download([yt])
-        return f"{id}.opus"
+    
+    yt = f"https://www.youtube.com/watch?v={id}"
+    
+    for attempt in range(retry_count):
+        try:
+            with YoutubeDL(params=options) as ydl:
+                ydl.download([yt])
+                return f"{id}.opus"
+        except Exception as e:
+            logger.error(f"Attempt {attempt + 1} failed: {str(e)}")
+            if attempt + 1 == retry_count:
+                raise e
+            logger.info("Retrying...")
+
     
 
 
