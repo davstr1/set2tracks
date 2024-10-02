@@ -9,6 +9,7 @@ import shutil
 import time
 
 
+from flask import url_for
 from flask_login import current_user
 import jwt
 import requests
@@ -173,7 +174,7 @@ def filter_out_existing_sets(video_ids):
     return [video_id for video_id in video_ids if not is_set_exists_or_in_queue(video_id)]
 
 
-def queue_set(video_id,user_id=None,discard_if_exists=False):
+def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,play_sound=False):
     
     if is_set_exists(video_id): # todo : the published stuff
         return {'error': 'Set was already here.','video_id':video_id}
@@ -245,7 +246,9 @@ def queue_set(video_id,user_id=None,discard_if_exists=False):
         queued_at=datetime.now(timezone.utc),
         video_info_json=video_info_json,
         duration=video_info.get('duration', 0),
-        nb_chapters=len(chapters)
+        nb_chapters=len(chapters),
+        send_email=send_email,
+        play_sound=play_sound
     )
     db.session.add(queued_entry)
     db.session.commit()
@@ -535,7 +538,24 @@ def queue_reset_set(set_queue_item):
 def get_my_sets_in_queue(user_id):
     return SetQueue.query.filter_by(user_id=user_id).order_by(SetQueue.id.desc()).limit(10).all()
 
-
+def get_my_sets_in_queue_not_notified(user_id):
+    # should retrieve only one a once, with the oldest first
+    # first check if there is something errored
+    set_in_queue = SetQueue.query.filter_by(user_id=user_id,play_sound=True,notification_sound_sent=False,status='failed').order_by(SetQueue.id.asc()).first()
+    if not set_in_queue:
+        set_in_queue = SetQueue.query.filter_by(user_id=user_id,play_sound=True,notification_sound_sent=False,status='discarded').order_by(SetQueue.id.asc()).first()
+    if set_in_queue:
+        return {'error': 'Something went wrong with a set you added :','set_queue_info':set_in_queue}   
+    
+    set_in_queue = SetQueue.query.filter_by(user_id=user_id,play_sound=True,notification_sound_sent=False,status='done').order_by(SetQueue.id.asc()).first()
+    if set_in_queue:
+        set_in_queue.notification_sound_done = True
+        db.session.commit()
+        
+        set_info  = Set.query.filter_by(video_id=set_in_queue.video_id).first()
+        return {'message': f'Set {set_info.title} is ready. <a href="{url_for("sets.set",id=set_info.id)}">Check it out</a>'}
+    
+    return None # no set to notify about
     
     
 def get_channel_to_check():   
@@ -568,6 +588,8 @@ def insert_set_from_queue():
         #pending_entry = SetQueue.query.filter_by(id='23').first()
     except Exception as e:
         logger.error(f'Error fetching pending entry : {e}')
+        # I had an error ERROR Error fetching pending entry : Can't reconnect until invalid transaction is rolled back.  Please rollback() fully before proceeding
+        db.session.rollback() # Is this a real fix ? 
         return None
     
     if pending_entry is None:
@@ -639,7 +661,7 @@ def insert_set_from_queue():
     
     
 
-AUDIO_SEGMENTS_LENGTH = int(os.getenv('AUDIO_SEGMENTS_LENGTH'))
+AUDIO_SEGMENTS_LENGTH = int(os.getenv('AUDIO_SEGMENTS_LENGTH'))#
 
 def error_out(msg):
     return({'error':msg})
