@@ -13,6 +13,7 @@ from web.lib.utils import silent_function
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)
 PROXY_URL = os.getenv('SHAZAM_PROXY_URL')
+PROXY_URL_SOCKS5 = os.getenv('PROXY_URL_SOCKS5')
 
 logger = logging.getLogger('root')
 
@@ -117,14 +118,15 @@ def youtube_video_exists(input_str: str) -> bool:
 #         ret['video_id'] = video_id
 #         return ret
     
-def youbube_video_info(video_id: str, retry_count: int = 5) -> dict:
+def youbube_video_info(video_id: str, retry_count: int = 10) -> dict:
     properties_to_keep = [
         'upload_date', 'thumbnail', 'title', 'description', 'channel', 
         'channel_id', 'channel_url', 'duration', 'playable_in_embed', 
         'chapters', 'channel_follower_count', 'like_count', 'view_count', 
         'is_live', 'availability', 'error'
     ]
-    options = {'quiet': True, 'no_warnings': True, 'proxy': PROXY_URL}
+    options = {'quiet': True, 'no_warnings': True, 'noplaylist': True,'nocheckcertificate': True, 'proxy': PROXY_URL_SOCKS5}
+    print(f'getting vid info with options {options} ')
 
     attempt = 0
     while attempt < retry_count:
@@ -154,16 +156,16 @@ def youbube_video_info(video_id: str, retry_count: int = 5) -> dict:
  
 
 
-def download_youtube_video(id: str, vid_dir: str, retry_count: int = 5) -> str:
+def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
     
     def my_hook(d):
         if d['status'] == 'downloading':
             logger.debug(f"{d['downloaded_bytes'] / d['total_bytes'] * 100:.2f}% downloaded")
     
     options = {
-        'proxy': PROXY_URL,
+        'proxy': PROXY_URL_SOCKS5,
         'progress_hooks': [my_hook],
-        'write-thumbnail': True,
+        #'write-thumbnail': True,
         'format': 'bestaudio/best',
         'outtmpl': f'{vid_dir}/full.%(ext)s',
         'postprocessors': [{
@@ -171,6 +173,14 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 5) -> str:
             'preferredcodec': 'opus',
             'preferredquality': '192',
         }],
+        'fragment-retries': 1,  # Reduce retries on fragment failure
+        'retries': 3,           # General retries count for failed downloads
+        'concurrent-fragments': 5,  # Download 5 fragments concurrently (default is 1)
+        'http_chunk_size': 10 * 1024 * 1024,  # Chunk size (10MB for faster throughput)
+        'noplaylist': True,
+        'nocheckcertificate': True,
+        'quiet': True,  # Suppresses most of the output
+        'skip-download': False  # Forces the download without extra checks
     }
     
     yt = f"https://www.youtube.com/watch?v={id}"
@@ -178,6 +188,7 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 5) -> str:
     for attempt in range(retry_count):
         try:
             with YoutubeDL(params=options) as ydl:
+                print(f"Downloading with options: {options}")
                 ydl.download([yt])
                 return f"{id}.opus"
         except Exception as e:
