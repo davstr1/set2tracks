@@ -6,6 +6,7 @@ import requests
 import re
 from yt_dlp import YoutubeDL
 import xml.etree.ElementTree as ET
+from fake_useragent import UserAgent
 
 from web.lib.utils import silent_function
 # for list of options see https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312
@@ -119,17 +120,25 @@ def youtube_video_exists(input_str: str) -> bool:
 #         return ret
     
 def youbube_video_info(video_id: str, retry_count: int = 10) -> dict:
+    ua = UserAgent(platforms='pc')
     properties_to_keep = [
         'upload_date', 'thumbnail', 'title', 'description', 'channel', 
         'channel_id', 'channel_url', 'duration', 'playable_in_embed', 
         'chapters', 'channel_follower_count', 'like_count', 'view_count', 
         'is_live', 'availability', 'error'
     ]
-    options = {'quiet': True, 'no_warnings': True, 'noplaylist': True,'nocheckcertificate': True, 'proxy': PROXY_URL_SOCKS5}
+    options = {'quiet': True, 'no_warnings': True, 'noplaylist': True,'nocheckcertificate': True, 'proxy': PROXY_URL_SOCKS5, 
+               'headers': {
+                'User-Agent': ua.random,  # Random User-Agent for each request
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.youtube.com',
+        },}
     print(f'getting vid info with options {options} ')
 
     attempt = 0
     while attempt < retry_count:
+        ua = UserAgent(platforms='pc')
+        options['headers']['User-Agent'] = ua.random
         with YoutubeDL(params=options) as ydl:
             yt = f"https://www.youtube.com/watch?v={video_id}"
             try:
@@ -157,7 +166,7 @@ def youbube_video_info(video_id: str, retry_count: int = 10) -> dict:
 
 
 def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
-    
+    ua = UserAgent(platforms='pc')
     def my_hook(d):
         if d['status'] == 'downloading':
             logger.debug(f"{d['downloaded_bytes'] / d['total_bytes'] * 100:.2f}% downloaded")
@@ -171,7 +180,7 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'opus',
-            'preferredquality': '192',
+            'preferredquality': '192', #'192',
         }],
         'fragment-retries': 1,  # Reduce retries on fragment failure
         'retries': 3,           # General retries count for failed downloads
@@ -180,13 +189,20 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
         'noplaylist': True,
         'nocheckcertificate': True,
         'quiet': True,  # Suppresses most of the output
-        'skip-download': False  # Forces the download without extra checks
+        'skip-download': False,  # Forces the download without extra checks
+        'headers': {
+            'User-Agent': ua.random,  # Random User-Agent for each request
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.youtube.com',
+        },
     }
     
     yt = f"https://www.youtube.com/watch?v={id}"
     
     for attempt in range(retry_count):
         try:
+            ua = UserAgent(platforms='pc')
+            options['headers']['User-Agent'] = ua.random
             with YoutubeDL(params=options) as ydl:
                 print(f"Downloading with options: {options}")
                 ydl.download([yt])
