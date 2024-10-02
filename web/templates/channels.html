@@ -6,7 +6,7 @@
   {% for channel in channels %}
   <div class="mb-20">
     <h2 class="text-xl mb-5">
-      <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s=channel.author)}}">
+      <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s='channelid:' + channel.id|string)}}">
         {{ channel.author }}
       </a>
       - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs 
