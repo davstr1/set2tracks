@@ -95,6 +95,8 @@ def sets():
                            track=track,
                            channel=channel,
                             page="sets",
+                            page_name="explore",
+                            subpage_name="sets",
                            l=l) 
     
     

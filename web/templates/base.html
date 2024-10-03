@@ -37,11 +37,11 @@
                 </div>
 
                 <div class="hidden lg:flex lg:gap-x-12">
-                    <a href="{{url_for('channel.channels')}}" class="text-sm font-semibold leading-6 py-2.5 px-4">Explore</a>
+                    <a href="{{url_for('set.sets')}}" class="{{ 'text-primary ' if page_name == 'explore' }}text-sm font-semibold leading-6 py-2.5 px-4">Explore</a>
                 </div>
 
                 <div class="hidden lg:flex lg:gap-x-12">
-                    <a href="{{url_for('playlist.my_playlists')}}" class="text-sm font-semibold leading-6 py-2.5 px-4">{{_("My Playlists")}}</a>
+                    <a href="{{url_for('playlist.my_playlists')}}" class="{{ 'text-primary ' if page_name == 'my_playlists' }} text-sm font-semibold leading-6 py-2.5 px-4">{{_("My Playlists")}}</a>
                 </div>
 
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">

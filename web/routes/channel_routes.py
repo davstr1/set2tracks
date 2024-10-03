@@ -59,4 +59,6 @@ def channels(page=1):
                            tpl_utils=tpl_utils, 
                            pagination=pagination, 
                            is_paginated=is_paginated, 
+                           page_name = 'explore',
+                           subpage_name = 'channels',
                            l=l)

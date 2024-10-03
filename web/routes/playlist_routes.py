@@ -32,7 +32,7 @@ def my_playlists():
         'page_title': 'My Playlists' + ' - ' + Lang.APP_NAME, 
     }
         
-    return render_template('playlists.html',user_id=user_id,playlists=playlists,tpl_utils=tpl_utils,l=l)
+    return render_template('playlists.html',user_id=user_id,playlists=playlists,tpl_utils=tpl_utils,page_name='my_playlists',l=l)
 
 
 @playlist_bp.route('/playlist/create', methods=['GET', 'POST'])
