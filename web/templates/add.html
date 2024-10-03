@@ -2,11 +2,7 @@
 
 {% block content %}
 <script>
-  function replayAudio() {
-    var audio = document.getElementById('myAudio');
-    audio.currentTime = 0; 
-    audio.play(); 
-  }
+  
    // Function to set a cookie
    function setCookie(name, value, days) {
     var expires = "";
@@ -54,10 +50,7 @@
     updateCheckboxCookie('play_sound', 'play_sound');
   });
 </script>
-<audio id="myAudio">
-  <source src="{{url_for('static',filename=notif_sound)}}" type="audio/mpeg">
- 
-</audio>
+
 <div class="flex items-center justify-center pt-20">
   <div class="form-wrapper">
     <h1 class="text-xl text-center font-semibold leading-7 mb-12">Add DJ set → Get tracks.</h1>
@@ -82,7 +75,7 @@
       <!-- Checkbox to play sound -->
       <div class="m-4 mt-0">
         <label for="play_sound">
-          <input type="checkbox" id="play_sound" name="play_sound" /> <span onclick="replayAudio()">{{_('Play a sound')}}</span>
+          <input type="checkbox" id="play_sound" name="play_sound" /> <span onclick="replayNotifSound()">{{_('Play a sound')}}</span>
         </label>
       </div>
 

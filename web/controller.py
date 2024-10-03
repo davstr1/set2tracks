@@ -565,8 +565,8 @@ def get_my_sets_in_queue_not_notified(user_id):
     
     set_in_queue = SetQueue.query.filter_by(user_id=user_id,play_sound=True,notification_sound_sent=False,status='done').order_by(SetQueue.id.asc()).first()
     if set_in_queue:
-    #     set_in_queue.notification_sound_done = True
-    #     db.session.commit()
+        set_in_queue.notification_sound_done = True
+        db.session.commit()
         
         set_info  = Set.query.filter_by(video_id=set_in_queue.video_id).first()
         return {'message': f'Set {set_info.title} is ready. <a href="{url_for("set.set",set_id=set_info.id)}">Check it out</a>'}

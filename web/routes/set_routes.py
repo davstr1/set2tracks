@@ -2,12 +2,14 @@ from math import e
 from pprint import pprint
 import re
 import stat
+from boilersaas.utils.mail import send_email
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
+from flask import current_app as app
 from flask_cors import CORS, cross_origin
 from requests import get
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files, upsert_set_browsing_history
+from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files, upsert_set_browsing_history
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -328,13 +330,16 @@ def add():
         # Example of successful processing redirect or message
         #flash('URL received successfully.', 'success')
         video_id = youtube_video_id_from_url(youtube_url)
-        return redirect(url_for('set.insert_set_route',video_id=video_id))
+        send_email = request.form.get('send_email')
+        play_sound = request.form.get('play_sound')
+        return redirect(url_for('set.insert_set_route',video_id=video_id,send_email=send_email,play_sound=play_sound))
     
     youtube_url = request.args.get('youtube_url', '')
     
     l = {
         'page_title': 'Add a set' + ' - ' + Lang.APP_NAME,
-    }      
+    }    
+    
     
     return render_template('add.html',youtube_url=youtube_url,l=l)
 
@@ -344,6 +349,9 @@ def insert_set_route(video_id):
     
     if (is_set_exists(video_id)):
        return redirect(url_for('set.set',set_id=get_set_id_by_video_id(video_id))) 
+   
+    send_email = request.args.get('send_email')
+    play_sound = request.args.get('play_sound')
     
     result = queue_set(video_id,get_user_id()) #insert_set(video_id)
    
@@ -366,7 +374,20 @@ def insert_set_route(video_id):
 
 
 
+@set_bp.route('/jax/check_user_queue')
+def jax_check_user_queue():
+    if not is_connected():
+        return {}, 500
 
+    user_id = get_user_id()
+    if not user_id:
+        return jsonify({}), 401
+    
+    my_sets = get_my_sets_in_queue_not_notified(user_id)
+    if not my_sets:
+        return jsonify({}), 304
+    
+    return jsonify(my_sets), 200
 
     
     

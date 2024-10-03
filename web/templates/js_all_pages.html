@@ -11,8 +11,8 @@
  * @param {function} [onError=fooCallBack] - The callback function to execute on an error response (default: fooCallBack).
  * @returns {Promise} A promise that resolves to the response data or rejects with an error.
  */
-  function processAjax(url, method = 'POST', payload = {}, onSuccess = fooCallBack, onError = fooCallBack,showSystemMessageAfter = true) {
-   
+  function processAjax(url, method = 'POST', payload = {}, onSuccess = fooCallBack, onError = fooCallBack, showSystemMessageAfter = true) {
+
     // Define the fetch options
     let fetchOptions = {
       method: method,
@@ -29,7 +29,7 @@
 
     return fetch(url, fetchOptions)
       .then(response => response.json().then(result => {
-       
+
         const responseData = {
           status_code: response.status,
           message: result?.message,
@@ -41,11 +41,11 @@
 
         if (response.ok && !responseData.error) {
           if (showSystemMessageAfter) showSystemMessage(responseData.message);
-         
-          onSuccess(responseData);         
+
+          onSuccess(responseData);
         } else {
           if (showSystemMessageAfter) showSystemMessage(responseData.error, 'warning');
-          onError(responseData);   
+          onError(responseData);
         }
 
         if (response?.redirect) { // @TODO check if this is necessary
@@ -74,4 +74,59 @@
       });
   }
 
+  function replayNotifSound() {
+    var audio = document.getElementById('notifSound');
+    audio.currentTime = 0;
+    audio.play();
+  }
+
+  function testAudioPlayUntilSuccess() {
+    // Play silent audio until successful, 
+    // cause browsers block audio play without user interaction
+    return new Promise((resolve) => {
+      const silentAudio = "{{url_for('static', filename='750-milliseconds-of-silence.mp3')}}";
+      const audio = new Audio(silentAudio); // Create an audio object with silent audio
+
+      const tryPlay = () => {
+        audio.play().then(() => {
+          console.log("Silent audio played successfully.");
+          resolve();
+        }).catch((error) => {
+          console.error("Error playing silent audio. Retrying in 1 second...", error);
+          setTimeout(tryPlay, 1000); // Retry after 1 second if play fails
+        });
+      };
+
+      // Start trying to play the silent audio
+      tryPlay();
+    });
+  }
+
+
+
+  testAudioPlayUntilSuccess().then(() => {
+    checkUserQueue();
+  });
+
+  function checkUserQueue() {
+    // Check the user queue every 60 seconds
+    processAjax("{{url_for('set.jax_check_user_queue')}}", 'GET', {}, (response) => {
+      replayNotifSound();
+      showSystemMessage(response.message);
+      setTimeout(checkUserQueue, 60000);
+    }, (error) => {
+      if (error.status_code === 302) {
+        return;
+      }
+      console.log(error);
+      if (error?.error) {
+        replayNotifSound();
+        showSystemMessage(error.error, 'warning');
+        setTimeout(checkUserQueue, 60000);
+
+      }
+    }, false);
+  }
 </script>
+
+{{url_for('static', filename=notif_sound)}}

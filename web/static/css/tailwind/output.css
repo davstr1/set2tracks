@@ -2979,6 +2979,10 @@ input[type=password]:focus {
   margin-top: 1.25rem;
 }
 
+.mb-0 {
+  margin-bottom: 0px;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;

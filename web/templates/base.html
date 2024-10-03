@@ -205,7 +205,9 @@
         
     </div>
     {% endif %}
-
+    <audio id="notifSound">
+        <source src="{{url_for('static',filename=notif_sound)}}" type="audio/mpeg">
+      </audio>
 
 </body>
 {% include 'js_all_pages.html' %}
@@ -238,7 +240,7 @@
             clearTimeout(SystemMessagetimeoutID);
         }
 
-        systemMessageContent.innerText = message;
+        systemMessageContent.innerHTML = message;
         systemMessage.classList.remove('bg-primary', 'bg-danger', 'bg-success', 'bg-warning', 'bg-info');
         systemMessage.classList.add('bg-' + type);
         systemMessage.classList.add('show');
