@@ -23,5 +23,5 @@ def tracks():
                            tpl_utils=tpl_utils,
                            l=l,
                            page_name='explore',
-                           sub_page_name='tracks',)
+                           subpage_name='tracks',)
 
