@@ -214,6 +214,7 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
         return queue_set_discarted(video_id,f'Error getting video info : "{str(e)}"')
     
     if 'error' in video_info:
+        video_info['error'] = video_info['error'].lower()
         if 'not a bot' in video_info['error'] or 'bot verification' in video_info['error']:
             return queue_set_failed(video_id, video_info['error'])
         
@@ -658,11 +659,16 @@ def insert_set_from_queue():
         pending_entry.status = 'done'
         logger.info('Set inserted successfully, updated status to done')
     else:
-        pending_entry.status = 'failed'
         distarted_reason = result.get('error', 'Unknown error')
-        logger.error(f'Set insertion failed, updated status to failed. Reason: {distarted_reason}')
+
+        if 'not a bot' in distarted_reason or 'bot verification' in distarted_reason:
+            pending_entry.status = 'failed'
+        else:
+            pending_entry.status = 'discarded'
+        
+        logger.error(f'Set insertion {pending_entry.status}. Reason: {distarted_reason}')
         pending_entry.discarded_reason = cut_to_if_needed(distarted_reason, 255)
-        logger.error('Set insertion failed, updated status to failed')
+        
 
     # Update times
     pending_entry.time_processed = time_processed
