@@ -192,6 +192,11 @@ class SetQueue(db.Model):
     video_info_json = db.Column(db.JSON)
     duration = db.Column(db.Integer, index=True)  # in seconds
     nb_chapters = db.Column(db.Integer, default=0, index=True)
+    send_email = db.Column(db.Boolean, default=False, index=True)
+    play_sound = db.Column(db.Boolean, default=False, index=True)
+    notification_email_sent = db.Column(db.Boolean, default=False, index=True)
+    notification_sound_sent = db.Column(db.Boolean, default=False, index=True)
+
     
     
 class Playlist(db.Model):
