@@ -7,6 +7,52 @@
     audio.currentTime = 0; 
     audio.play(); 
   }
+   // Function to set a cookie
+   function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  }
+
+  // Function to get a cookie value by name
+  function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  // Function to check or uncheck a checkbox based on the cookie value
+  function setCheckboxFromCookie(checkboxId, cookieName, defaultValue) {
+    var cookieValue = getCookie(cookieName);
+    var checkbox = document.getElementById(checkboxId);
+    checkbox.checked = cookieValue === null ? defaultValue : cookieValue === 'true';
+  }
+
+  // Function to update the cookie when the checkbox value changes
+  function updateCheckboxCookie(checkboxId, cookieName) {
+    var checkbox = document.getElementById(checkboxId);
+    checkbox.addEventListener('change', function () {
+      setCookie(cookieName, checkbox.checked, 7); // Persist for 7 days
+    });
+  }
+
+  // Initialize checkboxes on page load
+  document.addEventListener('DOMContentLoaded', function () {
+    setCheckboxFromCookie('send_email', 'send_email', true); // Default to true
+    setCheckboxFromCookie('play_sound', 'play_sound', true); // Default to true
+
+    updateCheckboxCookie('send_email', 'send_email');
+    updateCheckboxCookie('play_sound', 'play_sound');
+  });
 </script>
 <audio id="myAudio">
   <source src="{{url_for('static',filename=notif_sound)}}" type="audio/mpeg">
