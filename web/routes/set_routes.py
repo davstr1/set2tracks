@@ -385,7 +385,7 @@ def jax_check_user_queue():
     
     my_sets = get_my_sets_in_queue_not_notified(user_id)
     if not my_sets:
-        return jsonify({}), 304
+        return jsonify({}), 401
     
     return jsonify(my_sets), 200
 
