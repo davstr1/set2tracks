@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% include 'snippets/explore_submenu.html' %}
 <div class="container mx-auto py-8">
   <h1 class="text-3xl mb-10">DJ channels</h1>
   {% for channel in channels %}

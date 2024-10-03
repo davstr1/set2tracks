@@ -2,6 +2,9 @@
 
 {% block content %}
 
+
+{% include 'snippets/explore_submenu.html' %}
+
 <form id="search_sets" action="{% if page == 'sets' %} {{ url_for('set.sets') }} {% else %} {{ url_for('set.browsing_history', page=page) }} {% endif %}">
 
   <div class="flex space-y-1">

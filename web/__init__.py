@@ -22,7 +22,7 @@ from web.lib.log_config import setup_logging
 
 
 bp = Blueprint('main', __name__,template_folder='templates')
-from web.routes import basic_bp, set_bp, spotify_bp, playlist_bp,admin_bp,channel_bp
+from web.routes import basic_bp, set_bp, spotify_bp, playlist_bp,admin_bp,channel_bp,track_bp
 
 
 
@@ -33,6 +33,7 @@ def init_extend_app(app):
     app.register_blueprint(playlist_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(channel_bp)
+    app.register_blueprint(track_bp)
     add_babel_translation_directory('translations',app)
     babel = Babel(app)
     babel.init_app(app,locale_selector=get_locale) 

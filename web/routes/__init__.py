@@ -4,3 +4,4 @@ from web.routes.set_routes import set_bp
 from web.routes.spotify_routes import spotify_bp
 from web.routes.admin_routes import admin_bp
 from web.routes.channel_routes import channel_bp
+from web.routes.track_routes import track_bp
