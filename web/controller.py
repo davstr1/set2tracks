@@ -563,13 +563,19 @@ def get_channel_to_check():
 
     return channel
 
-def get_set_to_check():   
-    set = Set.query.filter(((Set.error == '') | (Set.error == None)) & (Set.hidden == False)).order_by(Set.updated_at.asc()).first()
+# def get_set_to_check():   
+#     set = Set.query.filter(((Set.error == '') | (Set.error == None)) & (Set.hidden == False)).order_by(Set.updated_at.asc()).first()
+#    return set
 
+def get_set_to_check():
+    set_to_check = Set.query.join(Channel, Set.channel_id == Channel.id) \
+        .filter(((Set.error == '') | (Set.error == None)) & (Set.hidden == False)) \
+        .filter(Channel.channel_id != 'None', Channel.hidden == False, Channel.followable == True) \
+        .order_by(Set.updated_at.asc()) \
+        .first()
+    
+    return set_to_check
 
-
-
-    return set
 
 def get_set_to_check_with_error():   
     set = Set.query.filter(Set.error != '').order_by(Set.updated_at.asc()).first()
