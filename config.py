@@ -30,6 +30,7 @@ class Config:
         SIGNUP_OPTIONS = SIGNUP_OPTIONS
         LOGGING_CONFIG_FILE = os.environ['LOGGING_CONFIG_FILE']
         ADMIN_UID = os.environ['ADMIN_UID']
+        NOTIF_SOUND = 'pop-bouncy-plop-betacut-1-00-02.mp3'
     except KeyError as e:
         sys.exit(f"Missing environment variable(s). Please add all the required environments variables as instructed in the README")
     
