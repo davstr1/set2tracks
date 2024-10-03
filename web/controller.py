@@ -139,6 +139,19 @@ def queue_set_discarted(video_id,reason):
     #return discarded_entry
     return {'error':reason}
 
+def queue_set_failed(video_id,reason):
+    discarded_entry = SetQueue(
+        video_id=video_id,
+        status='failed',
+        discarded_reason=reason,
+        queued_at=datetime.now(timezone.utc)
+    )
+    db.session.add(discarded_entry)
+    db.session.commit()
+    discarded_entry.error = reason
+    #return discarded_entry
+    return {'error':reason}
+
 
 def is_set_exists_or_in_queue(video_id):   
     return is_set_exists(video_id) or is_set_in_queue(video_id)
@@ -201,6 +214,9 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
         return queue_set_discarted(video_id,f'Error getting video info : "{str(e)}"')
     
     if 'error' in video_info:
+        if video_info['error'].contains('not a bot') or video_info['error'].contains('bot verification'):
+            return queue_set_failed(video_id,'Video unavailable.')
+        
         return queue_set_discarted(video_id,video_info['error'])
    
     if video_info is None:        
