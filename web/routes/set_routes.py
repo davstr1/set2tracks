@@ -26,7 +26,7 @@ set_bp = Blueprint('set', __name__)
 ## PAGES ##
 ## Scroll down to see the ACTIONS pages ##
 
-@set_bp.route('/')
+@set_bp.route('/explore')
 def sets():   
     
     PER_PAGE = 30

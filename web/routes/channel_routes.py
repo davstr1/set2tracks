@@ -12,7 +12,7 @@ from web.routes.routes_utils import tpl_utils
 channel_bp = Blueprint('channel', __name__)
 
 
-@channel_bp.route('/channels')
+@channel_bp.route('/explore/channels')
 @channel_bp.route('/channels/page/<int:page>')
 def channels(page=1):
     order_by = request.args.get('order_by', 'popular')

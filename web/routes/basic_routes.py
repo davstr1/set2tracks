@@ -9,7 +9,7 @@ from lang import Lang
 basic_bp = Blueprint('basic', __name__)
 
 
-@basic_bp.route('/index')
+@basic_bp.route('/')
 def index():
     return 'index'
     return redirect(url_for('set.sets'))
@@ -31,10 +31,7 @@ def dashboard():
 
 
 
-@basic_bp.route('/quickstart')
-def quickstart():
-    return 'yo quickstart'
-    return render_template('quickstart.html')
+
 
 @basic_bp.route('/help')
 def help():
