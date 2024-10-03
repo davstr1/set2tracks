@@ -9,7 +9,8 @@ __pycache__/
 # Mac
 **/.DS_Store
 
-
+# Any hidden files
+$*
 
 # Default templates. They are copied from boilersaas/src/boilersaas/templates
 # Used for reference, to overright templates in the project
