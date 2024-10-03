@@ -1,21 +1,50 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<script>
+  function replayAudio() {
+    var audio = document.getElementById('myAudio');
+    audio.currentTime = 0; 
+    audio.play(); 
+  }
+</script>
+<audio id="myAudio">
+  <source src="{{url_for('static',filename=notif_sound)}}" type="audio/mpeg">
+ 
+</audio>
 <div class="flex items-center justify-center pt-20">
   <div class="form-wrapper">
     <h1 class="text-xl text-center font-semibold leading-7 mb-12">Add DJ set → Get tracks.</h1>
-
-   
 
     <form action="/add" method="POST" class="mt-4">
       <div class="mt-1">
         <input type="text" id="youtube_url" name="youtube_url" placeholder="{{_('Paste YouTube Video URL or ID')}}" value="{{youtube_url}}"/>
       </div>
+
+      <!-- Text for when the set is imported and ready -->
+      <div class="mt-4">
+        <p>When the set is imported and ready:</p>
+      </div>
+
+      <!-- Checkbox to send email -->
+      <div class="m-4 mb-0">
+        <label for="send_email">
+          <input type="checkbox" id="send_email" name="send_email" /> {{_('Send me an email')}}
+        </label>
+      </div>
+
+      <!-- Checkbox to play sound -->
+      <div class="m-4 mt-0">
+        <label for="play_sound">
+          <input type="checkbox" id="play_sound" name="play_sound" /> <span onclick="replayAudio()">{{_('Play a sound')}}</span>
+        </label>
+      </div>
+
       <button type="submit" class="btn btn-primary w-full">{{_('Add Set')}}</button>
     </form>
   </div>
 </div>
+
 
 
 
