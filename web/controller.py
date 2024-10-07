@@ -56,9 +56,9 @@ def get_track_by_shazam_key(key_track_shazam):
 def get_track_by_id(id):
     return Track.query.filter_by(id=id).first()    
 
-def get_tracks(order='new',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None):
+def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None):
     query = Track.query
-    if order == 'new':
+    if order == 'recent':
         query = query.order_by(Track.id.desc())
     elif order == 'popular':
         query = query.order_by(Track.nb_sets.desc())
@@ -81,7 +81,8 @@ def get_tracks(order='new',page=1,per_page=20,search=None,bpm_min=None,bpm_max=N
     count = query.count()    
         
     ret = query.paginate(page=page, per_page=per_page, error_out=False)
-    return format_db_tracks_for_template(ret.items),count
+    tracks_for_template  = format_db_tracks_for_template(ret.items)
+    return tracks_for_template,ret,count
 
 def get_or_create_channel(data):
     
