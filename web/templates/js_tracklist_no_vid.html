@@ -43,7 +43,7 @@
       audioPlayer.load(); // Load the new audio source
       audioPlayer.addEventListener('loadedmetadata', function () {
         console.log('Duration of the song:', audioPlayer.duration, 'seconds');
-
+        audioPlayer.volume = 0.5; // Set the volume to 50%
         audioPlayer.play();
         audioPlayer.removeEventListener('loadedmetadata', this);
       });
