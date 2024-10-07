@@ -4,9 +4,30 @@
 
 {% include 'snippets/explore_submenu.html' %}
 
-<div class="flex flex-col items-center justify-center">
-  
 
+
+<form id="search_tracks" action="{{ url_for('track.tracks') }}">
+
+  <div class="flex space-y-1">
+    <!-- Left side with the search field -->
+    <div class="flex flex-col w-full lg:w-2/3 mb-4">
+
+      <div class="relative w-full">
+        <input type="text" class="form-input w-full pr-10 bg-gray-800 text-white border-gray-700 placeholder-gray-500" name="s" placeholder="Search tracks or artist" value="{{ search }}">
+        {% if search %}
+        <span class="absolute inset-y-0 right-10 flex items-center pr-3 text-gray-500">{{ results_count }} results</span>
+        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none" onclick="document.querySelector('input[name=\'s\']').value='';document.getElementById('search_tracks').submit();">
+          <svg class="h-5 w-5 rounded-full bg-gray-600 hover:bg-gray-500 p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="flex flex-col items-center justify-center">
   <h1 class="text-xl font-semibold mt-8 mb-4">New Tracks</h1>
 
   {% include 'tracklist.html' %}

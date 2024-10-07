@@ -65,16 +65,23 @@ def get_tracks(order='new',page=1,per_page=20,search=None,bpm_min=None,bpm_max=N
     else:
         query = query.order_by(Track.id.desc())
         
-    if search:
-        query = query.filter(Track.title.ilike(f"%{search}%"))
+    if search and search.strip():
+        query = query.filter(
+             or_(
+            Track.title.ilike(f"%{search}%"),
+            Track.artist_name.ilike(f"%{search}%")
+        )
+        )
     
     if bpm_min:
         query = query.filter(Track.bpm >= bpm_min)
     if bpm_max:
         query = query.filter(Track.bpm <= bpm_max)
         
+    count = query.count()    
+        
     ret = query.paginate(page=page, per_page=per_page, error_out=False)
-    return format_db_tracks_for_template(ret.items)
+    return format_db_tracks_for_template(ret.items),count
 
 def get_or_create_channel(data):
     
