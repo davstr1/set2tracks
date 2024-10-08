@@ -281,7 +281,7 @@ def set(set_id):
 
 @set_bp.route('/related_tracks/<int:track_id>')
 def related_tracks(track_id):
-    track = get_track_by_id(track_id)
+    track = get_track_by_id(track_id,format_for_template=False)
     if not track:
         logger.error(f"Track with ID {track_id} does not exist.")
         return redirect(request.referrer or url_for('basic.index'))
@@ -425,7 +425,7 @@ def jax_check_save_related_tracks(track_id):
     if not is_connected():
         return jax_redirect_if_not_connected(next_url=caller_url)
     
-    track = get_track_by_id(track_id)
+    track = get_track_by_id(track_id,format_for_template=False)
     if not track:
         return jsonify({'error':f"Track does not exist in our papers."}), 404
     

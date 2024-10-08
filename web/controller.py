@@ -1297,11 +1297,13 @@ def update_playlist_edit_date(playlist_id):
     return False
 
 
-def get_track_by_id(track_id):
+def get_track_by_id(track_id,format_for_template=True):
     track = Track.query.get(track_id)
     if not track :
         return None
-    return format_db_track_for_template(track)
+    if format_for_template:
+        return format_db_track_for_template(track)
+    return track
 
 
 def add_track_to_playlist(playlist_id, track_id):
