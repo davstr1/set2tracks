@@ -18,7 +18,10 @@
     <title>{{ l.page_title if l is defined and l.page_title is defined else 'no title' }}</title>
 
     <link href="{{url_for('static',filename='css/tailwind/output.css')}}" rel="stylesheet">
-</head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
 
 <body class="bg-primary-content min-h-screen lg:overflow-x-hidden p-0">
 
@@ -45,7 +48,7 @@
                 </div>
 
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-                    
+
                     <a href="{{ url_for('basic.help') }}" class="discreet text-sm font-semibold leading-6 py-2.5 px-4">Feedback/Help</a>
 
                     {% if current_user.is_authenticated %}
@@ -201,12 +204,12 @@
     {% if is_admin() %}
     <div class="fixed bottom-0 right-0 bg-red-500 text-white p-2 rounded-tl-lg z-50">
         <a href="{{url_for('admin.admin')}}">Admin</a>
-        
+
     </div>
     {% endif %}
     <audio id="notifSound">
         <source src="{{url_for('static',filename=notif_sound)}}" type="audio/mpeg">
-      </audio>
+    </audio>
 
 </body>
 {% include 'js_all_pages.html' %}
@@ -224,12 +227,12 @@
     sytemMessageCloseButton.addEventListener('click', () => {
         systemMessage.classList.remove('show');
     });
-    if (typeof(systemMessageContent) !== 'undefined') {
+    if (typeof (systemMessageContent) !== 'undefined') {
         SystemMessagetimeoutID = setTimeout(() => {
             systemMessage.classList.remove('show');
         }, SYSTEM_MESSAGE_TIMEOUT_MS);
     }
-    
+
 
     function showSystemMessage(message, type = 'info') {
 

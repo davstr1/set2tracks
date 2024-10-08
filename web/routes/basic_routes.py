@@ -1,5 +1,5 @@
 from re import L
-from flask import Blueprint, Config, redirect, render_template, request, url_for
+from flask import Blueprint, Config, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user
 
 from lang import Lang
@@ -30,7 +30,13 @@ def dashboard():
     return redirect(url_for('basic.index'))
 
 
-
+@basic_bp.route('/apple-touch-icon.png')
+@basic_bp.route('/favicon-32x32.png')
+@basic_bp.route('/favicon-16x16.png')
+@basic_bp.route('/favicon.ico')
+@basic_bp.route('/site.webmanifest')
+def serve_static_files():
+    return send_from_directory('static/root', request.path[1:])
 
 
 @basic_bp.route('/help')
