@@ -109,13 +109,13 @@
         <svg class="pointer-events-none lg:w-6 lg:h-6 h-12 w-12 absolute z-20 fill-base">
           <use xlink:href="#icon-spotify-no-circle"></use>
         </svg>
-        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content discreet hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
+        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content  hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
       </a>
       <a class="lg:w-6 lg:h-6 h-12 w-12  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" href="{{tpl_utils.apple_track_url(track)}}">
         <svg class="lg:w-6 lg:h-6 h-12 w-12  pointer-events-none absolute z-20 fill-base ">
           <use xlink:href="#icon-apple-no-square"></use>
         </svg>
-        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-md bg-base-content discreet hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
+        <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-md bg-base-content  hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
       </a>
       <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="text-lg font-semibold cursor-pointer tooltip trigger-track-contextual-menu lg:relative lg:top-auto lg:right-auto">
         <svg class="lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary">
