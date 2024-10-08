@@ -169,8 +169,10 @@ def queue_reset(queue_id):
         return redirect(request.referrer or url_for('set.sets_queue'))
 
     if set_queue_item.status == 'pending':
-        flash('Pending sets can not be discarded.', 'error')
+        flash('Pending sets can not be reset.', 'error')
         return redirect(request.referrer or url_for('set.sets_queue'))
+    elif set_queue_item.status == 'done':
+        flash('Done sets can not be reset.', 'error')
     
     
     result = queue_reset_set(set_queue_item)

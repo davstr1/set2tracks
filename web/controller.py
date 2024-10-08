@@ -591,6 +591,13 @@ def queue_discard_set(set_queue_item):
     return queue_change_set_status(set_queue_item, 'discarded')
 
 def queue_reset_set(set_queue_item):
+    # Put the set back in the queue with the 'pending' status
+    # If the set already has info, no need to make a whole queue set request
+    if set_queue_item.video_info_json:
+        set_queue_item.status = 'pending'
+        set_queue_item.discarded_reason = None
+        db.session.commit()
+        return True
     
     return queue_set(set_queue_item.video_id, user_id=set_queue_item.user_id, discard_if_exists=True)
 
