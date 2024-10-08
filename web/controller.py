@@ -1098,7 +1098,7 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
     
     results_count = query.count()
     results = query.paginate(page=page, per_page=per_page, error_out=False)
-    if search:
+    if search and not prefixed_search:
         upsert_setsearch(search, results_count)
     return results,results_count
 
