@@ -54,9 +54,18 @@ def get_track_by_shazam_key(key_track_shazam):
      
 
 def get_track_by_id(id):
-    return Track.query.filter_by(id=id).first()    
+    return Track.query.filter_by(id=id).first()   
 
-def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None):
+def get_tracks_min_maxes():
+    # Get the minimum and maximum values for release year and BPM from every track in the database, excluding zeroes and nulls.
+    year_min = Track.query.with_entities(func.min(Track.release_year)).filter(Track.release_year.isnot(None), Track.release_year != 0).scalar()
+    year_max = Track.query.with_entities(func.max(Track.release_year)).filter(Track.release_year.isnot(None), Track.release_year != 0).scalar()
+    bpm_min = Track.query.with_entities(func.min(Track.tempo)).filter(Track.tempo.isnot(None), Track.tempo != 0).scalar()
+    bpm_max = Track.query.with_entities(func.max(Track.tempo)).filter(Track.tempo.isnot(None), Track.tempo != 0).scalar()
+    return {'year_min': year_min, 'year_max': year_max, 'bpm_min': bpm_min, 'bpm_max': bpm_max}
+
+
+def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None):
     query = Track.query
     if order == 'recent':
         query = query.order_by(Track.id.desc())
@@ -74,11 +83,19 @@ def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_ma
         )
     
     if bpm_min:
-        query = query.filter(Track.bpm >= bpm_min)
+        query = query.filter(Track.tempo >= bpm_min)
     if bpm_max:
-        query = query.filter(Track.bpm <= bpm_max)
+        query = query.filter(Track.tempo <= bpm_max)
+        
+    if year_min:
+        query = query.filter(Track.release_year >= year_min)
+    if year_max:
+        query = query.filter(Track.release_year <= year_max)
         
     count = query.count()    
+    
+    year_min = Track.query.with_entities(func.min(Track.release_year)).scalar()
+    year_max = Track.query.with_entities(func.max(Track.release_year)).scalar()
         
     ret = query.paginate(page=page, per_page=per_page, error_out=False)
     tracks_for_template  = format_db_tracks_for_template(ret.items)

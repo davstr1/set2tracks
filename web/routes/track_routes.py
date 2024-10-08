@@ -5,7 +5,7 @@ from flask_login import current_user
 from web.routes.routes_utils import tpl_utils
 
 from lang import Lang
-from web.controller import get_tracks
+from web.controller import get_tracks, get_tracks_min_maxes
 
 
 
@@ -16,11 +16,28 @@ track_bp = Blueprint('track', __name__)
 def tracks():
     
     
+    
     PER_PAGE = 30
     page = request.args.get('page', 1, type=int)
     search = request.args.get('s', '', type=str)
+    year_min = request.args.get('year_min', None, type=int)
+    year_max = request.args.get('year_max', None, type=int)
+    bpm_min = request.args.get('bpm_min', None, type=int)
+    bpm_max = request.args.get('bpm_max', None, type=int)
     order_by = request.args.get('order_by', 'recent', type=str)
-    tracks,tracks_raw,results_count = get_tracks(search=search, page=page, per_page=PER_PAGE)
+    
+    min_maxes = get_tracks_min_maxes()
+    if year_min == min_maxes['year_min']:
+        year_min = None
+    if year_max == min_maxes['year_max']:
+        year_max = None
+    if bpm_min == min_maxes['bpm_min']:
+        bpm_min = None
+    if bpm_max == min_maxes['bpm_max']:
+        bpm_max = None
+    
+    
+    tracks,tracks_raw,results_count = get_tracks(search=search, page=page, per_page=PER_PAGE, year_min=year_min, year_max=year_max,bpm_max=bpm_max,bpm_min=bpm_min, order=order_by)
     l = {
         'page_title' : 'Top 1000 Tracks - ' + Lang.APP_NAME
     }
@@ -33,6 +50,14 @@ def tracks():
             params['order_by'] = order_by
         if page != 1:
             params['page'] = page
+        if year_min is not None:
+            params['year_min'] = year_min
+        if year_max is not None:
+            params['year_max'] = year_max
+        if bpm_min is not None:
+            params['bpm_min'] = bpm_min
+        if bpm_max is not None:
+            params['bpm_max'] = bpm_max
         return url_for('track.tracks', **params)
 
     pagination = {}
@@ -43,12 +68,31 @@ def tracks():
     
     is_paginated = tracks_raw.has_next or tracks_raw.has_prev
     
+    min_maxes = get_tracks_min_maxes()
+    if year_min is None:
+        year_min = min_maxes['year_min']
+    if year_max is None:
+        year_max = min_maxes['year_max']
+    if bpm_min is None:
+        bpm_min = min_maxes['bpm_min']
+    if bpm_max is None:
+        bpm_max = min_maxes['bpm_max']
+    
+    
     return render_template('tracks.html', 
                            tracks=tracks,
                            results_count=results_count,
                            pagination=pagination,
                            is_paginated=is_paginated,
                            search=search,
+                           year_min=year_min,
+                            year_max=year_max,
+                            year_min_default=min_maxes['year_min'],
+                            year_max_default=min_maxes['year_max'],
+                            bpm_min=bpm_min,
+                            bpm_max=bpm_max,
+                            bpm_min_default=min_maxes['bpm_min'],
+                            bpm_max_default=min_maxes['bpm_max'],
                            tpl_utils=tpl_utils,
                            l=l,
                            page_name='explore',

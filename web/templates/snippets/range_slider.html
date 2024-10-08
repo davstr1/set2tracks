@@ -1,0 +1,24 @@
+<div class="flex items-center mt-5">
+  <div x-data="range({{min}},{{max}},{{min_val}},{{max_val}})" x-init="mintrigger(); maxtrigger()" class="relative  w-full">
+    <div class="mb-2">
+      <input type="range" step="1" x-bind:min="min" x-bind:max="max" x-on:input="mintrigger" x-on:change="mintrigger(); submitForm()" x-model="minVal" class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer">
+      <input type="range" step="1" x-bind:min="min" x-bind:max="max" x-on:input="maxtrigger" x-on:change="mintrigger(); submitForm()" x-model="maxVal" class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer">
+
+      <div class="relative z-10 h-2">
+        <div class="absolute z-10 left-0 right-0 bottom-0 top-0 rounded-md bg-gray-200"></div>
+        <div class="absolute z-20 top-0 bottom-0 rounded-md bg-primary" x-bind:style="'right:'+maxthumb+'%; left:'+minthumb+'%'"></div>
+        <div class="absolute z-30 w-6 h-6 top-0 left-0 bg-primary rounded-full -mt-2 -ml-1" x-bind:style="'left: '+minthumb+'%'"></div>
+        <div class="absolute z-30 w-6 h-6 top-0 right-0 bg-primary rounded-full -mt-2 -mr-3" x-bind:style="'right: '+maxthumb+'%'"></div>
+      </div>
+    </div>
+    <div class="flex justify-between items-center">
+      <div class="w-12">
+        <input type="text" name="{{min_val_name}}" maxlength="5" x-on:input="mintrigger" x-model="minVal" class="px-1 py-2 border border-primary-content rounded text-center text-xs">
+      </div>
+      <div>{{label}}</div>
+      <div class="w-12">
+        <input type="text" name="{{max_val_name}}" maxlength="5" x-on:input="maxtrigger" x-model="maxVal" class="px-1 py-2 border border-primary-content rounded  text-center text-xs">
+      </div>
+    </div>
+  </div>
+</div>

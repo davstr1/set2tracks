@@ -58,7 +58,7 @@ class Track(db.Model):
     cover_arts = db.Column(JSON)  # Consolidated cover art URIs
     preview_uris = db.Column(JSON)  # Consolidated preview URIs
     uri_apple = db.Column(db.String(255))
-    release_year = db.Column(db.String(4), index=True)
+    release_year = db.Column(db.Integer, index=True)
     release_date = db.Column(db.Date, nullable=True, index=True)
     artist_popularity_spotify = db.Column(db.Integer)
     
