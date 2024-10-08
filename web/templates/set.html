@@ -40,7 +40,7 @@ even where the player is not behind*/
         <a href="{{url_for('admin.channel_followability_toggle',channel_id=set.channel.id)}}">[ Make {%if set.channel.followable %}un{% endif %}followable ]</a>
       {%endif%}
 
-    <p class="text-gray-600">{{ tpl_utils.time_ago(set.publish_date,False) }} - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes</p>
+    <p class="text-gray-600">@{{ tpl_utils.time_ago(set.publish_date,False) }} <!--- - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes --></p>
   </div>
   <div class="flex flex-col justify-start space-y-4 border b-1 p-4  mt-5 md:mt-0">
     {% if not set.playlist_id %}

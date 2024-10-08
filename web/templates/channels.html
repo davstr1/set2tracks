@@ -36,9 +36,10 @@
             <h3 class="text-white font-semibold hover:text-primary">{{ set.title }}</h3>
           </a>
           <p class="text-gray-600">
-            {{ tpl_utils.time_ago(set.publish_date,False) }}
-            - {{ tpl_utils.km_number(set.view_count) }} views
+            @{{ tpl_utils.time_ago(set.publish_date,False) }}
+          <!-- - {{ tpl_utils.km_number(set.view_count) }} views
             - {{ tpl_utils.km_number(set.like_count) }} likes
+            --> 
           </p>
         </div>
       </div>
