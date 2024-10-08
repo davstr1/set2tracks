@@ -88,7 +88,7 @@
       </a>
 
       
-      {% if track.nb_sets > 1 %}
+      {% if track.nb_sets > 0 %}
       <a class="relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="Check sets with this track" href="{{url_for('set.sets',s='trackid:'~ track.id)}}">
       
         <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content discreet hover:bg-primary absolute z-0 text-primary-content text-xs flex items-center justify-center">{{ track.nb_sets}}</div>
