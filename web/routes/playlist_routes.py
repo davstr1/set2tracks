@@ -132,7 +132,7 @@ def show_playlist(playlist_id):
    
     
     if user_id:
-        user_playlists = get_playlists_from_user(user_id, order_by='title')
+        user_playlists = get_playlists_from_user(user_id, order_by='az')
     else:
         user_playlists = []
         
