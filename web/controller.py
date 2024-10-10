@@ -69,7 +69,7 @@ def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_ma
     query = Track.query
     if order == 'recent':
         query = query.order_by(Track.id.desc())
-    elif order == 'popular':
+    elif order == 'channel_popularity':
         query = query.order_by(Track.nb_sets.desc())
     else:
         query = query.order_by(Track.id.desc())
@@ -1088,20 +1088,24 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
     
     if order_by == 'recent':
         query = query.order_by(Set.publish_date.desc())
-    elif order_by == 'old':
-        query = query.order_by(Set.publish_date.asc())
-    elif order_by == 'likes':
-        query = query.order_by(Set.like_count.desc())
-    elif order_by == 'views':
-        query = query.order_by(Set.view_count.desc())
-    elif order_by == 'views_minus':
-        query = query.order_by(Set.view_count.asc())
-    elif order_by == 'likes_minus':
-        query = query.order_by(Set.like_count.asc())
-    elif order_by == 'popular':
+    elif order_by == 'channel_popularity':
         query = query.order_by(Channel.channel_follower_count.desc())
-    elif order_by == 'outsider':
-        query = query.order_by(Channel.channel_follower_count.asc())
+    # 
+    # OBSOLETE for now
+    #
+    # elif order_by == 'old':
+    #     query = query.order_by(Set.publish_date.asc())
+    # elif order_by == 'likes':
+    #     query = query.order_by(Set.like_count.desc())
+    # elif order_by == 'views':
+    #     query = query.order_by(Set.view_count.desc())
+    # elif order_by == 'views_minus':
+    #     query = query.order_by(Set.view_count.asc())
+    # elif order_by == 'likes_minus':
+    #     query = query.order_by(Set.like_count.asc())
+    # elif order_by == 'small_channel':
+    #     query = query.order_by(Channel.channel_follower_count.asc())
+
     
     results_count = query.count()
     results = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -1801,7 +1805,7 @@ def get_channel_by_id(channel_id):
         return None
     return channel
 
-def get_channels(page=1, order_by='recent', per_page=20, hiddens=None):
+def get_channels(page=1, order_by='channel_popularity', per_page=20, hiddens=None):
     """
     Retrieves a paginated list of channels with customizable sorting and filtering options.
 
@@ -1811,7 +1815,7 @@ def get_channels(page=1, order_by='recent', per_page=20, hiddens=None):
         - 'recent' (default): Orders by most recently created channels first (descending by creation date).
         - 'old': Orders by oldest channels first (ascending by creation date).
         - 'popular': Orders by channels with the most followers first (descending by follower count).
-        - 'outsider': Orders by channels with the fewest followers first (ascending by follower count).
+        - 'small_channel': Orders by channels with the fewest followers first (ascending by follower count).
     - per_page (int, optional): The number of results per page. Defaults to 20.
     - hiddens (bool, optional): If provided, filters channels by their hidden status (True for hidden, False for visible).
 
@@ -1828,9 +1832,9 @@ def get_channels(page=1, order_by='recent', per_page=20, hiddens=None):
         query = query.order_by(Channel.create_date.desc())
     elif order_by == 'old':
         query = query.order_by(Channel.create_date.asc())
-    elif order_by == 'popular':
+    elif order_by == 'channel_popularity':
         query = query.order_by(Channel.channel_follower_count.desc())
-    elif order_by == 'outsider':
+    elif order_by == 'small_channel':
         query = query.order_by(Channel.channel_follower_count.asc())
         
     if hiddens is not None:

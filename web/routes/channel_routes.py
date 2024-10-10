@@ -15,7 +15,7 @@ channel_bp = Blueprint('channel', __name__)
 @channel_bp.route('/explore/channels')
 @channel_bp.route('/channels/page/<int:page>')
 def channels(page=1):
-    order_by = request.args.get('order_by', 'popular')
+    order_by = request.args.get('order_by', 'channel_popularity')
     per_page = request.args.get('per_page', 20)
 
     channels = get_channels(page, order_by, int(per_page), False)
@@ -34,7 +34,7 @@ def channels(page=1):
     def get_pagination_url(page):
         params = {}
 
-        if order_by != 'popular':
+        if order_by != 'channel_popularity':
             params['order_by'] = order_by
         if page != 1:
             params['page'] = page
