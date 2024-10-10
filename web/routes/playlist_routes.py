@@ -1,5 +1,6 @@
 
 
+
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 
@@ -152,8 +153,8 @@ def playlist_edit(playlist_id):
     user_id = get_user_id()
     res = get_playlist_with_tracks(playlist_id)  
     if res['playlist']['user_id'] != user_id:
-            # User is not the owner of the playlist, just show the playlist
-            return redirect(url_for('playlist.show_playlist', playlist_id=playlist_id))
+            # User is not the owner of the playlist, return to playlist page
+            return redirect(url_for('playlist.my_playlists'))
         
     if request.method != 'POST':
         
@@ -197,7 +198,18 @@ def playlist_delete(playlist_id):
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('playlist.playlist_delete', playlist_id=playlist_id)))
     
-    playlist = db.get_playlist(playlist_id)
+    user_id = get_user_id()
+    res = get_playlist_with_tracks(playlist_id)  
+    if not res:
+        flash('No result for this playlist', 'error')
+        return redirect(url_for('playlist.my_playlists'))
+    
+    if not res['playlist']:
+        flash('Playlist not found', 'error')
+        return redirect(url_for('playlist.my_playlists'))
+    
+    playlist = res['playlist']
+    
     if not playlist:
         flash('Playlist not found', 'error')
         return redirect(url_for('playlist.my_playlists'))
