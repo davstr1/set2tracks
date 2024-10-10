@@ -32,7 +32,7 @@ def my_playlists():
     order_by = request.args.get('order_by', 'edit_date')
 
     # Fetch playlists with search and pagination
-    playlists = get_playlists_from_user(user_id, search=search, page=page, per_page=per_page)
+    playlists = get_playlists_from_user(user_id, search=search, page=page, per_page=per_page,order_by=order_by)
 
     # Helper function to generate pagination URLs
     def get_pagination_url(page):
@@ -69,6 +69,7 @@ def my_playlists():
         search=search,
         page=page,
         per_page=per_page,
+        order_by=order_by,
         pagination=pagination,
         is_paginated=is_paginated
     )

@@ -1276,11 +1276,11 @@ def create_playlist(user_id, playlist_name,set_id=None):
 def get_playlists_from_user(user_id, order_by='edit_date', search=None, page=1, per_page=10):
     # Define the valid columns for ordering
     valid_order_by_columns = {
-        'create_date': Playlist.create_date,
-        'edit_date': Playlist.edit_date,
-        'title': Playlist.title,
-        'duration': Playlist.duration,
-        'nb_tracks': Playlist.nb_tracks
+        'create_date': Playlist.create_date.desc(),
+        'edit_date': Playlist.edit_date.desc(),
+        'az': Playlist.title.asc(),
+        'duration': Playlist.duration.desc(),
+        'nb_tracks': Playlist.nb_tracks.desc()
     }
 
     # Check if the provided order_by column is valid
@@ -1298,7 +1298,7 @@ def get_playlists_from_user(user_id, order_by='edit_date', search=None, page=1, 
         query = query.filter(Playlist.title.ilike(f"%{search}%"))
 
     # Apply ordering
-    query = query.order_by(order_column.desc())
+    query = query.order_by(order_column)
 
     # Apply pagination
     paginated_query = query.offset((page - 1) * per_page).limit(per_page)
