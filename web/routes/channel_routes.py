@@ -17,7 +17,7 @@ channel_bp = Blueprint('channel', __name__)
 def channels(page=1):
     order_by = request.args.get('order_by', 'channel_popularity')
     per_page = request.args.get('per_page', 20)
-
+    page = int(page) or 1
     channels = get_channels(page, order_by, int(per_page), False)
     
     # Filter each channel's sets to only include ones where set.hidden is False
@@ -59,6 +59,9 @@ def channels(page=1):
                            tpl_utils=tpl_utils, 
                            pagination=pagination, 
                            is_paginated=is_paginated, 
+                           order_by=order_by,
+                           page=page,
+                           per_page=per_page,
                            page_name = 'explore',
                            subpage_name = 'channels',
                            l=l)

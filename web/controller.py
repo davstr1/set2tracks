@@ -1857,14 +1857,13 @@ def get_channels(page=1, order_by='channel_popularity', per_page=20, hiddens=Non
 
     
     query = Channel.query
-    if order_by == 'recent':
-        query = query.order_by(Channel.create_date.desc())
-    elif order_by == 'old':
-        query = query.order_by(Channel.create_date.asc())
-    elif order_by == 'channel_popularity':
+    
+
+    if order_by == 'az':
+        query = query.order_by(Channel.author.asc())
+    else:
+        # as popularity is the default and only one other
         query = query.order_by(Channel.channel_follower_count.desc())
-    elif order_by == 'small_channel':
-        query = query.order_by(Channel.channel_follower_count.asc())
         
     if hiddens is not None:
         query = query.filter_by(hidden=hiddens)
