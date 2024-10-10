@@ -1088,6 +1088,8 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='latest_youtube
     
     if order_by == 'latest_youtube':
         query = query.order_by(Set.publish_date.desc())
+    elif order_by == 'latest_set2tracks':
+        query = query.order_by(Set.id.desc())
     elif order_by == 'channel_popularity':
         query = query.order_by(Channel.channel_follower_count.desc())
     
