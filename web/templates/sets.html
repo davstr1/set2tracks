@@ -81,7 +81,7 @@
   </div>
   <div class="relative h-10 w-24 min-w-[200px]">
     <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
-      <option value="recent" {% if order_by=='recent' %}selected{% endif %}>Latest</option>
+      <option value="latest_youtube" {% if order_by=='latest_youtube' %}selected{% endif %}>Latest @Youtube</option>
       <option value="channel_popularity" {% if order_by=='channel_popularity' %}selected{% endif %}>Channel Popularity</option>
       <!--
       <option value="small_channel" {% if order_by=='small_channel' %}selected{% endif %}>Small channel first</option>

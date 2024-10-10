@@ -1037,7 +1037,7 @@ def compile_and_sort_genres(track_sets):
     return sorted_genre_counts
 
 
-def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
+def get_playable_sets(page=1, per_page=20, search=None, order_by='latest_youtube'):
     
     prefixed_search = False
     
@@ -1086,10 +1086,11 @@ def get_playable_sets(page=1, per_page=20, search=None, order_by='recent'):
 
 
     
-    if order_by == 'recent':
+    if order_by == 'latest_youtube':
         query = query.order_by(Set.publish_date.desc())
     elif order_by == 'channel_popularity':
         query = query.order_by(Channel.channel_follower_count.desc())
+    
     # 
     # OBSOLETE for now
     #

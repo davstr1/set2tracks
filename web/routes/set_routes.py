@@ -32,7 +32,7 @@ def sets():
     PER_PAGE = 30
     page = request.args.get('page', 1, type=int)
     search = request.args.get('s', '', type=str)
-    order_by = request.args.get('order_by', 'recent', type=str)
+    order_by = request.args.get('order_by', 'latest_youtube', type=str)
     
     sets_page,results_count = get_playable_sets(page=page, per_page=PER_PAGE,search=search,order_by=order_by)
     nb_sets_total = get_playable_sets_number()
@@ -61,7 +61,7 @@ def sets():
         params = {}
         if search:
             params['s'] = search
-        if order_by != 'recent':
+        if order_by != 'latest_youtube':
             params['order_by'] = order_by
         if page != 1:
             params['page'] = page
