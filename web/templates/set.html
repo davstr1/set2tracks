@@ -8,9 +8,13 @@ otherwise player playerMetaWrap takes all width
 even where the player is not behind*/
   #playerMetaWrap {
     pointer-events: none;
+    max-width: 100vw !important;
   }
 
+
+
   #playerWrap {
+    max-width: 85vw !important;
     pointer-events: auto;
   }
 </style>
@@ -19,7 +23,7 @@ even where the player is not behind*/
 
 <div class="md:flex md:justify-between md:items-start p-4 pl-0 pr-0">
   <div class="pl-2">
-    
+
     <h1 class="lg:text-2xl"><span class="discreet block">Tracklist from</span>
       <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
         <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
@@ -36,8 +40,8 @@ even where the player is not behind*/
       <a href="{{url_for('set.sets',s='channelid:'+set.channel.id|string)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
       {%if is_admin() %}
       <a href="{{url_for('admin.channel_visibility_toggle',channel_id=set.channel.id)}}" class="text-gray-600">[{{ "Show" if set.channel.hidden else "Hide" }}
-        ]</a> 
-        <a href="{{url_for('admin.channel_followability_toggle',channel_id=set.channel.id)}}">[ Make {%if set.channel.followable %}un{% endif %}followable ]</a>
+        ]</a>
+      <a href="{{url_for('admin.channel_followability_toggle',channel_id=set.channel.id)}}">[ Make {%if set.channel.followable %}un{% endif %}followable ]</a>
       {%endif%}
 
     <p class="text-gray-600">@{{ tpl_utils.time_ago(set.publish_date,False) }} <!--- - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes --></p>
@@ -79,7 +83,7 @@ even where the player is not behind*/
 </div>
 
 <div id="containerUnderPlayer">
-<h1  class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
+  <h1 class="text-xl font-semibold mt-8 ">Tracks in Set</h1>
 </div>
 {% if not set.has_chapters %}
 <p class="discreet text-xs italic">(No chapter markers found in this video. Track timestamps are approximate, based on auto detection.)</p>
@@ -106,7 +110,7 @@ even where the player is not behind*/
 
 <div class="fixed bottom-0 w-full  text-center bg-primary-content z-50 border-t-2 p-2 text-xs lg:p-4 lg:text-xl">
   <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
-    ❤ Support your DJ! 
+    ❤ Support your DJ!
     <span class="inline-block lg:inline">Like, comment, and subscribe on YouTube</span>
     <svg class="w-6 h-6 fill-current inline hover:fill-primary">
       <use xlink:href="#icon-link-external"></use>
@@ -177,29 +181,52 @@ even where the player is not behind*/
 
   window.addEventListener('DOMContentLoaded', loadWrapWidth);
 
+  // Mouse events
   draggable.addEventListener('mousedown', (e) => {
-    videoWrap.classList.add('pointer-events-none')
+    videoWrap.classList.add('pointer-events-none');
     isDragging = true;
     startX = e.clientX - modifyLeftMargin.offsetLeft;
   });
 
   document.addEventListener('mousemove', (e) => {
     if (isDragging) {
-      let ml = e.clientX - startX;
-      modifyLeftMargin.style.marginLeft = ml + 'px';
+      handleDrag(e.clientX);
     }
   });
 
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
-    const wrapWidth = videoWrap.offsetWidth > 65 ? videoWrap.offsetWidth : 65;
-    modifyLeftMargin.style.marginLeft = '0px';
-    playerWrap.style.width = `${wrapWidth}px`;
-    videoWrap.classList.remove('pointer-events-none')
-    saveWrapWidth(wrapWidth);
+  document.addEventListener('mouseup', endDrag);
+
+  // Touch events
+  draggable.addEventListener('touchstart', (e) => {
+    videoWrap.classList.add('pointer-events-none');
+    isDragging = true;
+    startX = e.touches[0].clientX - modifyLeftMargin.offsetLeft;
   });
 
+  document.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+      handleDrag(e.touches[0].clientX);
+    }
+  });
 
+  document.addEventListener('touchend', endDrag);
+
+  // Common functions
+  function handleDrag(clientX) {
+    let ml = clientX - startX;
+    modifyLeftMargin.style.marginLeft = ml + 'px';
+  }
+
+  function endDrag() {
+    if (isDragging) {
+      isDragging = false;
+      const wrapWidth = videoWrap.offsetWidth > 65 ? videoWrap.offsetWidth : 65;
+      modifyLeftMargin.style.marginLeft = '0px';
+      playerWrap.style.width = `${wrapWidth}px`;
+      videoWrap.classList.remove('pointer-events-none');
+      saveWrapWidth(wrapWidth);
+    }
+  }
 
 
   window.addEventListener('scroll', function () {
@@ -208,7 +235,7 @@ even where the player is not behind*/
       metaWrap.classList.add(...playerFixedClasses);
 
       metaWrap.classList.remove(...playerScrolledClasses);
-      
+
       //h1.style.marginTop = `${playerTopWrapHeight}px`;
 
       // setTimeout(() => {
