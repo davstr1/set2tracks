@@ -32,9 +32,29 @@
     </div>
 
     {% endfor %}
+
+    {% if is_paginated %}
+  </div>
+    <div class="mt-8 flex justify-center space-x-4">
+      
+      {% if pagination.prev_url %}
+      <a href="{{ pagination.prev_url }}" class="px-4 py-2 btn-primary btn rounded-full">Previous</a>
+      {% endif %}
+      {% if pagination.next_url %}
+      <a href="{{ pagination.next_url }}" class="px-4 py-2 btn-primary btn rounded-full">Next</a>
+      {% endif %}
+      
+    </div>
+    {% else %}
+    </div>
+  
+    {% endif %}
+
     {% else %}
     <div class="flex pt-20 justify-center min-h-screen">
       <p class="text-4xl">Manage and export/sync your playlists to spotify and apple music.</p>
     </div>
+  </div>
     {% endif %}
+   
     {% endblock %}

@@ -17,22 +17,61 @@ from web.logger import logger
 playlist_bp = Blueprint('playlist', __name__)
 
 
-@playlist_bp.route('/playlists')  
+@playlist_bp.route('/playlists')
 def my_playlists():
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('playlist.my_playlists')))
     
     user_id = get_user_id()
     playlists = []
-    
 
-    playlists = get_playlists_from_user(user_id)
-        
+    # Get search and pagination parameters from the request
+    search = request.args.get('search', None)
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    order_by = request.args.get('order_by', 'edit_date')
+
+    # Fetch playlists with search and pagination
+    playlists = get_playlists_from_user(user_id, search=search, page=page, per_page=per_page)
+
+    # Helper function to generate pagination URLs
+    def get_pagination_url(page):
+        params = {'page': page}
+        if search:
+            params['search'] = search
+        if order_by != 'edit_date':
+            params['order_by'] = order_by
+        return url_for('playlist.my_playlists', **params)
+
+    # Determine if there are previous or next pages
+    has_next = len(playlists) == per_page
+    has_prev = page > 1
+
+    pagination = {}
+    if has_prev:
+        pagination['prev_url'] = get_pagination_url(page - 1)
+    if has_next:
+        pagination['next_url'] = get_pagination_url(page + 1)
+    
+    is_paginated = has_next or has_prev
+
     l = {
         'page_title': 'My Playlists' + ' - ' + Lang.APP_NAME, 
     }
-        
-    return render_template('playlists.html',user_id=user_id,playlists=playlists,tpl_utils=tpl_utils,page_name='my_playlists',l=l)
+
+    return render_template(
+        'playlists.html',
+        user_id=user_id,
+        playlists=playlists,
+        tpl_utils=tpl_utils,
+        page_name='my_playlists',
+        l=l,
+        search=search,
+        page=page,
+        per_page=per_page,
+        pagination=pagination,
+        is_paginated=is_paginated
+    )
 
 
 @playlist_bp.route('/playlist/create', methods=['GET', 'POST'])
