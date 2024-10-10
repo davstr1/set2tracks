@@ -231,6 +231,9 @@ def filter_out_existing_sets(video_ids):
 
 
 def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,play_sound=False):
+    # Queue a set for processing
+    # update the channel sub count if it exists
+    # we take advantage of the request to update the channel info
     
     if is_set_exists(video_id): # todo : the published stuff
         return {'error': 'Set was already here.','video_id':video_id}
@@ -298,6 +301,29 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
        "like_count": video_info.get('like_count'),
         "view_count": video_info.get('view_count'),
        }
+    
+    # Extract the channel information
+    channel_id = video_info.get('channel_id')
+    channel_follower_count = video_info.get('channel_follower_count')
+
+    # Check if the channel exists in the database
+    channel = Channel.query.filter_by(channel_id=channel_id).first()
+
+    if channel:
+        # Log old and new follower count
+        old_follower_count = channel.channel_follower_count
+        new_follower_count = channel_follower_count
+
+        if new_follower_count is not None and old_follower_count != new_follower_count:
+            logger.info(f"Updating follower count for channel {channel_id}: {old_follower_count} -> {new_follower_count}")
+            channel.channel_follower_count = new_follower_count
+            channel.updated_at = datetime.now(timezone.utc)
+
+        # Save the updated channel info to the database
+        db.session.add(channel)
+
+    # Commit the changes to the database
+    db.session.commit()
     
     queued_entry = SetQueue(
         video_id=video_id,
