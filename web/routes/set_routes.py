@@ -265,7 +265,7 @@ def set(set_id):
     user_id = get_user_id()
     
     if user_id:
-        user_playlists = get_playlists_from_user(user_id, order_by='title')
+        user_playlists = get_playlists_from_user(user_id, order_by='az')
         upsert_set_browsing_history(set_id,user_id)
     else:
         user_playlists = []
@@ -293,7 +293,7 @@ def related_tracks(track_id):
         user_id = get_user_id()
     
         if user_id:
-            user_playlists = get_playlists_from_user(user_id, order_by='title')
+            user_playlists = get_playlists_from_user(user_id, order_by='az')
         else:
             user_playlists = []
             
