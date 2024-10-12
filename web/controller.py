@@ -8,7 +8,6 @@ import re
 import shutil
 import time
 
-
 from flask import url_for
 from flask_login import current_user
 import jwt
@@ -169,7 +168,13 @@ def is_set_exists(video_id):
 
 
 
-def queue_set_discarted(video_id,reason):
+def queue_set_discarted(video_id,reason,existing_entry=None):
+    if existing_entry:
+        existing_entry.status = 'discarded'
+        existing_entry.discarded_reason = reason
+        db.session.commit()
+        return existing_entry
+    
     discarded_entry = SetQueue(
         video_id=video_id,
         status='discarded',
@@ -182,7 +187,14 @@ def queue_set_discarted(video_id,reason):
     #return discarded_entry
     return {'error':reason}
 
-def queue_set_failed(video_id,reason):
+def queue_set_failed(video_id,reason,existing_entry=None):
+    
+    if existing_entry:
+        existing_entry.status = 'failed'
+        existing_entry.discarded_reason = reason
+        db.session.commit()
+        return existing_entry
+    
     discarded_entry = SetQueue(
         video_id=video_id,
         status='failed',
@@ -230,6 +242,10 @@ def filter_out_existing_sets(video_ids):
     return [video_id for video_id in video_ids if not is_set_exists_or_in_queue(video_id)]
 
 
+def get_first_prequeued_set():
+    return SetQueue.query.filter_by(status='prequeued').order_by(SetQueue.queued_at.asc()).first()
+
+
 def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,play_sound=False):
     # Queue a set for processing
     # update the channel sub count if it exists
@@ -242,46 +258,49 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
     
     if existing_queue_entry:
         
+        # user_id = existing_queue_entry.user_id
+        # send_email = existing_queue_entry.send_email
+        # play_sound = existing_queue_entry.play_sound
+        
         if not discard_if_exists:
-            existing_queue_entry = as_dict(existing_queue_entry)
-            if existing_queue_entry['status'] == 'discarded' or existing_queue_entry['status'] == 'failed':
-                return {'error': f"Set was discarted from queue for the following reason : {existing_queue_entry['discarded_reason']}. Please let us know if you thing that's a mistake."}
-            return {'error':'Set already in queue.'} # do not queue it again
+            if existing_queue_entry.status == 'discarded' or existing_queue_entry.status == 'failed':
+                return {'error': f"Set was discarded from queue for the following reason: {existing_queue_entry.discarded_reason}. Please let us know if you think that's a mistake."}
+ 
         else:
             db.session.delete(existing_queue_entry)
             db.session.commit()
     
     if not youtube_video_exists(video_id):
-        return queue_set_discarted(video_id,'Youtube Video doesn\t exist.')
+        return queue_set_discarted(video_id,'Youtube Video doesn\t exist.',existing_queue_entry)
     
     try :
         video_info = youbube_video_info(video_id)
     except Exception as e:
-        return queue_set_discarted(video_id,f'Error getting video info : "{str(e)}"')
+        return queue_set_discarted(video_id,f'Error getting video info : "{str(e)}"',existing_queue_entry)
     
     if 'error' in video_info:
         video_info['error'] = video_info['error'].lower()
         if 'not a bot' in video_info['error'] or 'bot verification' in video_info['error']:
-            return queue_set_failed(video_id, video_info['error'])
+            return queue_set_failed(video_id, video_info['error'],existing_queue_entry)
         
-        return queue_set_discarted(video_id,video_info['error'])
+        return queue_set_discarted(video_id,video_info['error'],existing_queue_entry)
    
     if video_info is None:        
-        return queue_set_discarted(video_id,'Error getting video info.')
+        return queue_set_discarted(video_id,'Error getting video info.',existing_queue_entry)
     
     chapters = video_info.get('chapters',[]) or []
     if len(chapters) and len(chapters) < 5:
-        return queue_set_discarted(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.')
+        return queue_set_discarted(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.',existing_queue_entry)
     
     if video_info.get('duration',0) < 900:
-        return queue_set_discarted(video_id,'Video shorter than 15m. Only sets longer than 15m are accepted.')
+        return queue_set_discarted(video_id,'Video shorter than 15m. Only sets longer than 15m are accepted.',existing_queue_entry)
     
     if video_info.get('duration',0) > 14400:
-        return queue_set_discarted(video_id,'Video longer than 4h. Only sets shorter than 4h are accepted for now.')
+        return queue_set_discarted(video_id,'Video longer than 4h. Only sets shorter than 4h are accepted for now.',existing_queue_entry)
 
     
     if not video_info.get('playable_in_embed',False):
-        return queue_set_discarted(video_id,'Video is not embeddable. (Set by the uploader)')
+        return queue_set_discarted(video_id,'Video is not embeddable. (Set by the uploader)',existing_queue_entry)
     
 
 
@@ -325,6 +344,19 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
     # Commit the changes to the database
     db.session.commit()
     
+    if existing_queue_entry:
+        existing_queue_entry.status = 'pending'
+        existing_queue_entry.discarded_reason = ''
+        existing_queue_entry.queued_at = datetime.now(timezone.utc)
+        existing_queue_entry.video_info_json = video_info_json
+        existing_queue_entry.duration = video_info.get('duration', 0)
+        existing_queue_entry.nb_chapters = len(chapters)
+        # existing_queue_entry.send_email = send_email
+        # existing_queue_entry.play_sound = play_sound
+        db.session.commit()
+        return existing_queue_entry
+    
+    
     queued_entry = SetQueue(
         video_id=video_id,
         user_id=user_id,
@@ -339,6 +371,66 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
     db.session.add(queued_entry)
     db.session.commit()
     return queued_entry
+
+
+
+def pre_queue_set(video_id, user_id=None, discard_if_exists=False, send_email=False, play_sound=False):
+    """
+    Pre-queue a set for processing.
+    - If the set already exists, returns an error.
+    - If 'discard_if_exists' is True, deletes existing queue entry before adding a new one.
+    - Otherwise, it queues with status 'prequeued'.
+    - Skips video info check for speed, as it's prone to bot verification and retries issues.
+    """
+    
+    def to_bool(value):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in ('1', 'true', 'on', 'yes')
+        return bool(value)
+
+    send_email = to_bool(send_email)
+    play_sound = to_bool(play_sound)
+    
+    print(send_email,type(send_email))
+    print(play_sound,type(play_sound))
+    
+    if is_set_exists(video_id):
+        return {'error': 'Set was already here.', 'video_id': video_id}
+    
+    existing_queue_entry = is_set_in_queue(video_id)
+    
+    if existing_queue_entry:
+        if not discard_if_exists:
+            existing_queue_entry = as_dict(existing_queue_entry)
+            if existing_queue_entry['status'] in ['discarded', 'failed']:
+                return {
+                    'error': f"Set was discarded from queue for the following reason: {existing_queue_entry['discarded_reason']}. Please let us know if you think that's a mistake."
+                }
+            return {'error': 'Set already in queue.'}
+        else:
+            db.session.delete(existing_queue_entry)
+            db.session.commit()
+
+    if not youtube_video_exists(video_id):
+        return queue_set_discarted(video_id, 'YouTube video does not exist.')
+
+    # Create or update the queued entry
+    queued_entry = SetQueue(
+        video_id=video_id,
+        user_id=user_id,
+        status='prequeued',
+        discarded_reason='',
+        queued_at=datetime.now(timezone.utc),
+        send_email=send_email,
+        play_sound=play_sound
+    )
+    db.session.add(queued_entry)
+    db.session.commit()
+    
+    return queued_entry
+
 
 
 def upsert_set(data):
@@ -625,7 +717,12 @@ def queue_reset_set(set_queue_item):
         db.session.commit()
         return True
     
-    return queue_set(set_queue_item.video_id, user_id=set_queue_item.user_id, discard_if_exists=True)
+    set_queue_item.status = 'prequeued'
+    set_queue_item.discarded_reason = None
+    db.session.commit()
+    return True
+    
+    #return queue_set(set_queue_item.video_id, user_id=set_queue_item.user_id, discard_if_exists=True)
 
 
 def get_my_sets_in_queue(user_id):

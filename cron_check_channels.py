@@ -6,7 +6,7 @@ from requests import get
 import requests
 
 from web import create_app
-from web.controller import filter_out_existing_sets, get_channel_to_check, insert_set_from_queue, queue_set
+from web.controller import filter_out_existing_sets, get_channel_to_check, insert_set_from_queue, pre_queue_set, queue_set
 from boilersaas.utils.db import db
 
 from web.lib.youtube import youtube_get_channel_feed_video_ids
@@ -36,7 +36,7 @@ def worker_set_queue():
             
             if len(videos_ids_new) > 0:
                 logger.info (f'Enqueuing first video in the list : {videos_ids_new[0]}')
-                result = queue_set(videos_ids_new[0]) #insert_set(video_id)
+                result = pre_queue_set(videos_ids_new[0]) #insert_set(video_id)
                 
                 if isinstance(result, dict) and 'error' in result:
                     logger.error(result['error'])

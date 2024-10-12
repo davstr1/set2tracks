@@ -180,10 +180,10 @@ class SetBrowsingHistory(db.Model):
 class SetQueue(db.Model):
     __tablename__ = 'set_queue'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    video_id = db.Column(db.String(255), nullable=True, index=True)  # Allow null and index for faster queries
+    video_id = db.Column(db.String(255), nullable=False, unique=True, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     user_premium = db.Column(db.Boolean, default=False)
-    status = db.Column(ENUM('pending', 'processing', 'done', 'discarded', 'failed', name='status_enum'), nullable=False, default='pending')
+    status = db.Column(ENUM('prequeued','pending', 'processing', 'done', 'discarded', 'failed', name='status_enum'), nullable=False, default='prequeued')
     queued_at = db.Column(db.DateTime(timezone=True), nullable=False, default=db.func.current_timestamp())
     time_in_queue = db.Column(db.Integer)  # duration in seconds
     time_processed = db.Column(db.Integer)  # duration in seconds

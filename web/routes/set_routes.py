@@ -9,7 +9,7 @@ from flask import current_app as app
 from flask_cors import CORS, cross_origin
 from requests import get
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, queue_set, remove_set_temp_files, upsert_set_browsing_history
+from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, pre_queue_set, queue_set, remove_set_temp_files, upsert_set_browsing_history
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -355,7 +355,7 @@ def insert_set_route(video_id):
     send_email = request.args.get('send_email')
     play_sound = request.args.get('play_sound')
     
-    result = queue_set(video_id,get_user_id()) #insert_set(video_id)
+    result = pre_queue_set(video_id,get_user_id(),send_email,play_sound) #insert_set(video_id)
    
    
     if isinstance(result, dict) and 'error' in result:
@@ -363,7 +363,7 @@ def insert_set_route(video_id):
         return redirect(url_for('set.add', youtube_url=video_id))
 
     if isinstance(result, SetQueue) and result.id:
-        flash('Set added to the queue', 'success')
+        flash('Set added to the pre queue', 'success')
         return redirect(url_for('set.add'))
     
 
