@@ -833,7 +833,7 @@ def insert_set_from_queue():
         distarted_reason = result.get('error', 'Unknown error')
 
         if any(keyword in distarted_reason for keyword in error_keywords):
-            pending_entry.status = 'failed'
+            queue_reset_set(pending_entry,distarted_reason)
             
         # elif any(keyword in distarted_reason for keyword in premiere_keywords):
         #     pending_entry.status = 'premiered'
