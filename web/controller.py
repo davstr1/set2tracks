@@ -601,9 +601,6 @@ def get_sets_with_zero_track(page=1):
     SetQueue.user_premium,
     SetQueue.status,
     SetQueue.queued_at,
-    SetQueue.time_in_queue,
-    SetQueue.time_processed,
-    SetQueue.time_processed_and_queued,
     SetQueue.discarded_reason,
     SetQueue.video_info_json,
     SetQueue.duration,
@@ -624,9 +621,6 @@ def get_sets_in_queue(page=1, status=None,include_15min_error=True):
     SetQueue.user_premium,
     SetQueue.status,
     SetQueue.queued_at,
-    SetQueue.time_in_queue,
-    SetQueue.time_processed,
-    SetQueue.time_processed_and_queued,
     SetQueue.discarded_reason,
     SetQueue.video_info_json,
     SetQueue.duration,
@@ -802,10 +796,6 @@ def insert_set_from_queue():
         logger.info('No pending entry found')
         return None
     
-    # Update the time_in_queue to now - queued_at (in sec)
-    now = datetime.now(timezone.utc)
-    pending_entry.time_in_queue = (now - pending_entry.queued_at).total_seconds()   
-    logger.debug(f'Updated time_in_queue: {pending_entry.time_in_queue}')
 
     # Update the status to 'processing' and commit
     pending_entry.status = 'processing'
@@ -822,10 +812,6 @@ def insert_set_from_queue():
     result = insert_set(video_info)
     logger.debug(f'insert_set result: {result}')
 
-    # Calculate time_processed and time_processed_and_queued
-    time_processed = (datetime.now(timezone.utc) - start_time_processing).total_seconds()
-    time_processed_and_queued = (pending_entry.time_in_queue + time_processed)
-    logger.debug(f'time_processed: {time_processed}, time_processed_and_queued: {time_processed_and_queued}')
 
     # Check result and update status accordingly
     if 'set_id' in result:
@@ -842,10 +828,6 @@ def insert_set_from_queue():
         logger.error(f'Set insertion {pending_entry.status}. Reason: {distarted_reason}')
         pending_entry.discarded_reason = cut_to_if_needed(distarted_reason, 255)
         
-
-    # Update times
-    pending_entry.time_processed = time_processed
-    pending_entry.time_processed_and_queued = time_processed_and_queued
 
     # Commit the changes
     db.session.commit()
