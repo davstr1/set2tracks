@@ -53,10 +53,12 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead>
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pos</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Video</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attempts</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queued @</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated @</th>
             {% if is_admin() %}
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             {% endif %}
@@ -97,7 +99,13 @@
               <p class="text-sm">{{set.status}}</p>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
+              <p class="text-sm">{{set.n_attempts}}</p>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
               <p class="text-sm">{{tpl_utils.time_ago(set.queued_at)}}</p>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <p class="text-sm">{{tpl_utils.time_ago(set.updated_at)}}</p>
             </td>
             {% if is_admin() %}
             <td class="px-6 py-4 whitespace-nowrap">

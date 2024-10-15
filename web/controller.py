@@ -168,10 +168,12 @@ def is_set_exists(video_id):
 
 
 
-def queue_set_discarted(video_id,reason,existing_entry=None):
+def queue_set_discarded(video_id, reason, existing_entry=None):
     if existing_entry:
         existing_entry.status = 'discarded'
         existing_entry.discarded_reason = reason
+        existing_entry.n_attempts += 1  # Increment n_attempts
+        existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
         db.session.commit()
         return existing_entry
     
@@ -179,33 +181,40 @@ def queue_set_discarted(video_id,reason,existing_entry=None):
         video_id=video_id,
         status='discarded',
         discarded_reason=reason,
-        queued_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),  #
+        n_attempts=1  
     )
     db.session.add(discarded_entry)
     db.session.commit()
     discarded_entry.error = reason
     #return discarded_entry
-    return {'error':reason}
+    return {'error': reason}
 
-def queue_set_failed(video_id,reason,existing_entry=None):
+
+def queue_set_failed(video_id, reason, existing_entry=None):
     
     if existing_entry:
         existing_entry.status = 'failed'
         existing_entry.discarded_reason = reason
+        existing_entry.n_attempts += 1  # Increment n_attempts
+        existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
         db.session.commit()
         return existing_entry
     
-    discarded_entry = SetQueue(
+    failed_entry = SetQueue(
         video_id=video_id,
         status='failed',
         discarded_reason=reason,
-        queued_at=datetime.now(timezone.utc)
+        queued_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),  # Set updated_at for new entries
+        n_attempts=1  # Initialize n_attempts for new entries
     )
-    db.session.add(discarded_entry)
+    db.session.add(failed_entry)
     db.session.commit()
-    discarded_entry.error = reason
-    #return discarded_entry
-    return {'error':reason}
+    failed_entry.error = reason
+    #return failed_entry
+    return {'error': reason}
+
 
 
 def is_set_exists_or_in_queue(video_id):   
@@ -271,36 +280,36 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
             db.session.commit()
     
     if not youtube_video_exists(video_id):
-        return queue_set_discarted(video_id,'Youtube Video doesn\t exist.',existing_queue_entry)
+        return queue_set_discarded(video_id,'Youtube Video doesn\t exist.',existing_queue_entry)
     
     try :
         video_info = youbube_video_info(video_id)
     except Exception as e:
-        return queue_set_discarted(video_id,f'Error getting video info : "{str(e)}"',existing_queue_entry)
+        return queue_set_discarded(video_id,f'Error getting video info : "{str(e)}"',existing_queue_entry)
     
     if 'error' in video_info:
         video_info['error'] = video_info['error'].lower()
         if 'not a bot' in video_info['error'] or 'bot verification' in video_info['error']:
             return queue_set_failed(video_id, video_info['error'],existing_queue_entry)
         
-        return queue_set_discarted(video_id,video_info['error'],existing_queue_entry)
+        return queue_set_discarded(video_id,video_info['error'],existing_queue_entry)
    
     if video_info is None:        
-        return queue_set_discarted(video_id,'Error getting video info.',existing_queue_entry)
+        return queue_set_discarded(video_id,'Error getting video info.',existing_queue_entry)
     
     chapters = video_info.get('chapters',[]) or []
     if len(chapters) and len(chapters) < 5:
-        return queue_set_discarted(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.',existing_queue_entry)
+        return queue_set_discarded(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.',existing_queue_entry)
     
     if video_info.get('duration',0) < 900:
-        return queue_set_discarted(video_id,'Video shorter than 15m. Only sets longer than 15m are accepted.',existing_queue_entry)
+        return queue_set_discarded(video_id,'Video shorter than 15m. Only sets longer than 15m are accepted.',existing_queue_entry)
     
     if video_info.get('duration',0) > 14400:
-        return queue_set_discarted(video_id,'Video longer than 4h. Only sets shorter than 4h are accepted for now.',existing_queue_entry)
+        return queue_set_discarded(video_id,'Video longer than 4h. Only sets shorter than 4h are accepted for now.',existing_queue_entry)
 
     
     if not video_info.get('playable_in_embed',False):
-        return queue_set_discarted(video_id,'Video is not embeddable. (Set by the uploader)',existing_queue_entry)
+        return queue_set_discarded(video_id,'Video is not embeddable. (Set by the uploader)',existing_queue_entry)
     
 
 
@@ -414,7 +423,7 @@ def pre_queue_set(video_id, user_id=None, discard_if_exists=False, send_email=Fa
             db.session.commit()
 
     if not youtube_video_exists(video_id):
-        return queue_set_discarted(video_id, 'YouTube video does not exist.')
+        return queue_set_discarded(video_id, 'YouTube video does not exist.')
 
     # Create or update the queued entry
     queued_entry = SetQueue(
@@ -601,6 +610,8 @@ def get_sets_with_zero_track(page=1):
     SetQueue.user_premium,
     SetQueue.status,
     SetQueue.queued_at,
+    SetQueue.updated_at,
+    SetQueue.n_attempts,
     SetQueue.discarded_reason,
     SetQueue.video_info_json,
     SetQueue.duration,
@@ -621,6 +632,8 @@ def get_sets_in_queue(page=1, status=None,include_15min_error=True):
     SetQueue.user_premium,
     SetQueue.status,
     SetQueue.queued_at,
+    SetQueue.updated_at,
+    SetQueue.n_attempts,
     SetQueue.discarded_reason,
     SetQueue.video_info_json,
     SetQueue.duration,
@@ -692,21 +705,19 @@ def count_sets_with_all_statuses():
     return result
     
 
-def queue_change_set_status(set_queue_item, new_status):
-    remove_set_temp_files(set_queue_item.video_id)
-    set_queue_item.status = new_status
-    db.session.commit()
-    return True
-
-
 def queue_discard_set(set_queue_item):
-    return queue_change_set_status(set_queue_item, 'discarded')
+    remove_set_temp_files(set_queue_item.video_id)
+    set_queue_item.status = 'discarded'
+    set_queue_item.updated_at = datetime.now(timezone.utc)
+    set_queue_item.n_attempts += 1  
+    db.session.commit()
 
 def queue_reset_set(set_queue_item):
     # Put the set back in the queue with the 'pending' status
     # If the set already has info, no need to make a whole queue set request
     if set_queue_item.video_info_json:
         set_queue_item.status = 'pending'
+        set_queue_item.updated_at=datetime.now(timezone.utc)
         set_queue_item.discarded_reason = None
         db.session.commit()
         return True
@@ -799,37 +810,54 @@ def insert_set_from_queue():
 
     # Update the status to 'processing' and commit
     pending_entry.status = 'processing'
+    pending_entry.updated_at = datetime.now(timezone.utc)
     db.session.commit()
     logger.info('Updated status to processing and committed changes')
 
-    # Start a timer (start_time_processing)
-    start_time_processing = datetime.now(timezone.utc)
-    logger.debug('Started processing timer')
-
-    # Call insert_set with the video_info_json
     video_info = pending_entry.video_info_json
-    
     result = insert_set(video_info)
-    logger.debug(f'insert_set result: {result}')
 
 
     # Check result and update status accordingly
+    
+    # TODO : check for extra errors and implement premieres
+    
+    error_keywords = [
+    'failed to extract any player response',
+    'unable to download video',
+    'not a bot',
+    'bot verification'
+    ]
+    
+    premiere_keywords = [
+        'live event will begin in ',
+        'premieres in '
+    ]
+
     if 'set_id' in result:
         pending_entry.status = 'done'
         logger.info('Set inserted successfully, updated status to done')
     else:
         distarted_reason = result.get('error', 'Unknown error')
 
-        if 'not a bot' in distarted_reason or 'bot verification' in distarted_reason:
+        if any(keyword in distarted_reason for keyword in error_keywords):
             pending_entry.status = 'failed'
+            
+        # elif any(keyword in distarted_reason for keyword in premiere_keywords):
+        #     pending_entry.status = 'premiered'
+        #     # TODO: Implement premieres
         else:
+            # Too long, too short, not enough tracks found errors
+            
             pending_entry.status = 'discarded'
         
         logger.error(f'Set insertion {pending_entry.status}. Reason: {distarted_reason}')
+        pending_entry.n_attempts += 1
         pending_entry.discarded_reason = cut_to_if_needed(distarted_reason, 255)
         
 
     # Commit the changes
+    pending_entry.updated_at = datetime.now(timezone.utc)
     db.session.commit()
     logger.info('Committed final changes')
 
