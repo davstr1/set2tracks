@@ -609,6 +609,7 @@ def get_sets_with_zero_track(page=1):
     SetQueue.duration,
     SetQueue.nb_chapters
 )
+    query = query.order_by(SetQueue.updated_at.desc())
     results_count = query.count()
     results = query.paginate(page=page, per_page=10, error_out=False)
     return results, results_count
@@ -656,7 +657,7 @@ def get_sets_in_queue(page=1, status=None,include_15min_error=True):
     total_count = query.count()
 
     # Order by SetQueue.id ascending
-    query = query.order_by(SetQueue.id.desc())
+    query = query.order_by(SetQueue.updated_at.desc())
 
     # Paginate the results
     sets_per_page = 10  # Adjust this number based on how many sets you want per page
