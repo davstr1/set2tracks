@@ -183,10 +183,10 @@ class SetQueue(db.Model):
     video_id = db.Column(db.String(255), nullable=False, unique=True, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     user_premium = db.Column(db.Boolean, default=False)
-    status = db.Column(ENUM('prequeued','pending', 'processing', 'done', 'discarded', 'failed', name='status_enum'), nullable=False, default='prequeued')
+    status = db.Column(ENUM('premiered','prequeued','pending', 'processing', 'done', 'discarded', 'failed', name='status_enum'), nullable=False, default='prequeued')
     queued_at = db.Column(db.DateTime(timezone=True), nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
-    n_attempts = db.Column(db.Integer, nullable=False, default=0)  # New field
+    n_attempts = db.Column(db.Integer, nullable=False, default=1)  # New field
     discarded_reason = db.Column(db.String(255))
     video_info_json = db.Column(db.JSON)
     duration = db.Column(db.Integer, index=True)  # in seconds

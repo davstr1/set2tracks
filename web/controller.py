@@ -1,6 +1,7 @@
 
 
 
+import dis
 import json
 from nis import cat
 import os
@@ -172,7 +173,6 @@ def queue_set_discarded(video_id, reason, existing_entry=None):
     if existing_entry:
         existing_entry.status = 'discarded'
         existing_entry.discarded_reason = reason
-        existing_entry.n_attempts += 1  # Increment n_attempts
         existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
         db.session.commit()
         return existing_entry
@@ -186,24 +186,17 @@ def queue_set_discarded(video_id, reason, existing_entry=None):
     )
     db.session.add(discarded_entry)
     db.session.commit()
-    discarded_entry.error = reason
-    #return discarded_entry
     return {'error': reason}
 
 
-def queue_set_failed(video_id, reason, existing_entry=None):
+def queue_set_to_retry(video_id, reason, existing_entry=None):
     
     if existing_entry:
-        existing_entry.status = 'failed'
-        existing_entry.discarded_reason = reason
-        existing_entry.n_attempts += 1  # Increment n_attempts
-        existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
-        db.session.commit()
-        return existing_entry
+       return queue_reset_set(existing_entry,reason)
     
     failed_entry = SetQueue(
         video_id=video_id,
-        status='failed',
+        status='prequeued',
         discarded_reason=reason,
         queued_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),  # Set updated_at for new entries
@@ -211,7 +204,6 @@ def queue_set_failed(video_id, reason, existing_entry=None):
     )
     db.session.add(failed_entry)
     db.session.commit()
-    failed_entry.error = reason
     #return failed_entry
     return {'error': reason}
 
@@ -252,7 +244,7 @@ def filter_out_existing_sets(video_ids):
 
 
 def get_first_prequeued_set():
-    return SetQueue.query.filter_by(status='prequeued').order_by(SetQueue.queued_at.asc()).first()
+    return SetQueue.query.filter_by(status='prequeued').order_by(SetQueue.updated_at.asc()).first()
 
 
 def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,play_sound=False):
@@ -290,7 +282,7 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
     if 'error' in video_info:
         video_info['error'] = video_info['error'].lower()
         if 'not a bot' in video_info['error'] or 'bot verification' in video_info['error']:
-            return queue_set_failed(video_id, video_info['error'],existing_queue_entry)
+            return queue_set_to_retry(video_id, video_info['error'],existing_queue_entry)
         
         return queue_set_discarded(video_id,video_info['error'],existing_queue_entry)
    
@@ -712,20 +704,19 @@ def queue_discard_set(set_queue_item):
     set_queue_item.n_attempts += 1  
     db.session.commit()
 
-def queue_reset_set(set_queue_item):
+def queue_reset_set(set_queue_item,discarded_reason=None):
     # Put the set back in the queue with the 'pending' status
     # If the set already has info, no need to make a whole queue set request
     if set_queue_item.video_info_json:
         set_queue_item.status = 'pending'
-        set_queue_item.updated_at=datetime.now(timezone.utc)
-        set_queue_item.discarded_reason = None
-        db.session.commit()
-        return True
+    else:
+        set_queue_item.status = 'prequeued'
     
-    set_queue_item.status = 'prequeued'
-    set_queue_item.discarded_reason = None
+    set_queue_item.n_attempts += 1
+    set_queue_item.updated_at=datetime.now(timezone.utc)
+    set_queue_item.discarded_reason = discarded_reason
     db.session.commit()
-    return True
+    return set_queue_item
     
     #return queue_set(set_queue_item.video_id, user_id=set_queue_item.user_id, discard_if_exists=True)
 
@@ -786,7 +777,7 @@ def insert_set_from_queue():
 
     # Fetch the first pending entry queued_at ASC (FIFO)
     try:
-        pending_entry = SetQueue.query.filter_by(status='pending').order_by(SetQueue.queued_at.asc()).first()
+        pending_entry = SetQueue.query.filter_by(status='pending').order_by(SetQueue.updated_at.asc()).first()
         #pending_entry = SetQueue.query.filter_by(id='23').first()
     except Exception as e:
         logger.error(f'Error fetching pending entry : {e}')
