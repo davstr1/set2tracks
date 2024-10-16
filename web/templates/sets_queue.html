@@ -19,7 +19,10 @@
           <a href="{{ url_for('set.sets_queue') }}" class="{{'active ' if status==None }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">All ({{count['all']}})</a>
         </li>
         <li class="me-2">
-          <a href="{{ url_for('set.sets_queue',status='failed') }}" class="{{'text-primary ' if status == 'failed' }}inline-block p-4  bg-gray-100 rounded-t-lg dark:bg-gray-800">Failed ({{count['failed']}})</a>
+          <a href="{{ url_for('set.sets_queue',status='prequeued') }}" class="{{'text-primary ' if status == 'prequeued' }}inline-block p-4  bg-gray-100 rounded-t-lg dark:bg-gray-800">Prequeued ({{count['prequeued']}})</a>
+        </li>
+        <li class="me-2">
+          <a href="{{ url_for('set.sets_queue',status='premiered') }}" class="{{'text-primary ' if status == 'premiered' }}inline-block p-4  bg-gray-100 rounded-t-lg dark:bg-gray-800">Premiered ({{count['premiered']}})</a>
         </li>
         <li class="me-2">
           <a href="{{ url_for('set.sets_queue',status='discarded') }}" class="{{'text-primary ' if status=='discarded' }}inline-block p-4  bg-gray-100 rounded-t-lg dark:bg-gray-800">Discarded ({{count['discarded']}})</a>
