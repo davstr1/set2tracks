@@ -27,8 +27,16 @@ def worker_set_queue():
                 videos_ids = youtube_get_channel_feed_video_ids(channel_id)
             except requests.exceptions.ConnectionError as e:
                 logger.error(f'Connection error: {e}')
-                time.sleep(5)  # Wait for 5 seconds before retrying
+                time.sleep(5)  
                 continue  # Retry the loop
+            except requests.exceptions.ReadTimeout as e:
+                logger.error(f'Read timeout error: {e}')
+                time.sleep(5)  
+                continue
+            except Exception as e:
+                logger.error(f'Error: {e}')
+                time.sleep(5)
+                continue
             
             logger.info(f'Found {len(videos_ids)} videos')
             videos_ids_new = filter_out_existing_sets(videos_ids)
