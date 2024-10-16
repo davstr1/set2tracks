@@ -1657,10 +1657,12 @@ def add_tracks_to_playlist(playlist_id, track_ids, user_id):
         pos = db.session.query(db.func.max(TrackPlaylist.pos)).filter_by(playlist_id=playlist_id).scalar()
         pos = (pos or 0) + 1
         
-        #pprint(track_dict) # still in the same order
+        # Remove duplicates while keeping the original order
+        track_ids_to_add = [track_id for track_id in track_ids if track_id not in existing_track_ids]
+
         
         new_entries = []
-        for track_id in set(track_ids):
+        for track_id in track_ids_to_add:
             if track_id == 1 or track_id in existing_track_ids : # Unkown track, do not add it
                 continue
 
@@ -1839,6 +1841,8 @@ def create_playlist_from_set_tracks(set_id, user_id):
             return {"error": "Error creating playlist"}
         
         track_ids = tracks_to_tracks_ids(set_data['tracks'])
+        
+        
         
         response = add_tracks_to_playlist(new_playlist.id, track_ids, user_id)
         
