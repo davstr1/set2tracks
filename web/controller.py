@@ -207,9 +207,11 @@ def extract_time_from_reason(reason):
 def queue_set_premiered(video_id, reason, existing_entry=None):
     # Extract time from the reason (only days, hours, or minutes, not a combination)
     premiere_duration = extract_time_from_reason(reason)
-
-    # Add 4 hours buffer to the premiere time
-    premiere_ends = datetime.now(timezone.utc) + premiere_duration + timedelta(hours=4)
+    premiere_ends = datetime.now(timezone.utc) + premiere_duration
+    if 'live event' in reason:
+        # Add 4 hours buffer to the live event time
+         premiere_ends = premiere_ends + timedelta(hours=4)
+    
     if existing_entry:
         existing_entry.status = 'premiered'
         existing_entry.premiere_ends = premiere_ends
