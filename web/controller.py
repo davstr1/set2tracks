@@ -191,6 +191,12 @@ def queue_set_discarded(video_id, reason, existing_entry=None):
 def extract_time_from_reason(reason):
     # This function extracts time from the reason string
     # It searches for patterns like "in 2 days", "in 3 hours", or "in 5 minutes"
+    
+    # Check for "in a few" and treat it as 20 minutes
+    # "the premiere will start in a few moments"
+    if "in a few" in reason:
+        return timedelta(minutes=20)
+    
     days_match = re.search(r"(\d+)\s*day", reason)
     hours_match = re.search(r"(\d+)\s*hour", reason)
     minutes_match = re.search(r"(\d+)\s*minute", reason)
