@@ -38,9 +38,10 @@ def worker_set_queue():
                 time.sleep(5)
                 continue
             
-            logger.info(f'Found {len(videos_ids)} videos')
+            
             videos_ids_new = filter_out_existing_sets(videos_ids)
-            logger.info(f'Found {len(videos_ids_new)} new videos')
+            logger.info(f'Found {len(videos_ids)} videos, {len(videos_ids_new)} new')
+            
             
             if len(videos_ids_new) > 0:
                 logger.info (f'Enqueuing first video in the list : {videos_ids_new[0]}')
