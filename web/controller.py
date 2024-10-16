@@ -26,7 +26,7 @@ from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spo
 from web.lib.utils import as_dict, calculate_avg_properties
 from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
 from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetBrowsingHistory, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from boilersaas.utils.db import db
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -188,6 +188,48 @@ def queue_set_discarded(video_id, reason, existing_entry=None):
     db.session.commit()
     return {'error': reason}
 
+def extract_time_from_reason(reason):
+    # This function extracts time from the reason string
+    # It searches for patterns like "in 2 days", "in 3 hours", or "in 5 minutes"
+    days_match = re.search(r"(\d+)\s*day", reason)
+    hours_match = re.search(r"(\d+)\s*hour", reason)
+    minutes_match = re.search(r"(\d+)\s*minute", reason)
+
+    if days_match:
+        return timedelta(days=int(days_match.group(1)))
+    elif hours_match:
+        return timedelta(hours=int(hours_match.group(1)))
+    elif minutes_match:
+        return timedelta(minutes=int(minutes_match.group(1)))
+    else:
+        return timedelta()  # Default to no additional time if no match found
+
+def queue_set_premiered(video_id, reason, existing_entry=None):
+    # Extract time from the reason (only days, hours, or minutes, not a combination)
+    premiere_duration = extract_time_from_reason(reason)
+
+    # Add 4 hours buffer to the premiere time
+    premiere_ends = datetime.now(timezone.utc) + premiere_duration + timedelta(hours=4)
+    if existing_entry:
+        existing_entry.status = 'premiered'
+        existing_entry.premiere_ends = premiere_ends
+        existing_entry.discarded_reason = reason
+        existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
+        db.session.commit()
+        return existing_entry
+    
+    discarded_entry = SetQueue(
+        video_id=video_id,
+        status='prermiered',
+        premiere_ends=premiere_ends,
+        discarded_reason=reason,
+        updated_at=datetime.now(timezone.utc),  #
+        n_attempts=1  
+    )
+    db.session.add(discarded_entry)
+    db.session.commit()
+    return {'error': reason}
+
 
 def queue_set_to_retry(video_id, reason, existing_entry=None):
     
@@ -283,6 +325,8 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
         video_info['error'] = video_info['error'].lower()
         if 'not a bot' in video_info['error'] or 'bot verification' in video_info['error']:
             return queue_set_to_retry(video_id, video_info['error'],existing_queue_entry)
+        elif 'premieres' in video_info['error'] or 'this live event' in video_info['error']:
+            return queue_set_premiered(video_id,video_info['error'],existing_queue_entry)
         
         return queue_set_discarded(video_id,video_info['error'],existing_queue_entry)
    

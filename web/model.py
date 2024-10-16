@@ -186,6 +186,7 @@ class SetQueue(db.Model):
     status = db.Column(ENUM('premiered','prequeued','pending', 'processing', 'done', 'discarded', 'failed', name='status_enum'), nullable=False, default='prequeued')
     queued_at = db.Column(db.DateTime(timezone=True), nullable=False, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime(timezone=True), nullable=False, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    premiere_ends = db.Column(db.DateTime(timezone=True), nullable=True, default=None) 
     n_attempts = db.Column(db.Integer, nullable=False, default=1)  # New field
     discarded_reason = db.Column(db.String(255))
     video_info_json = db.Column(db.JSON)
