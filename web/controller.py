@@ -861,7 +861,9 @@ def insert_set_from_queue():
     'unable to download video',
     'not a bot',
     'bot verification',
-    'InvalidTextRepresentation'
+    'InvalidTextRepresentation',
+    'StringDataRightTruncation',
+    'not available on this ap'
     ]
     
     premiere_keywords = [
