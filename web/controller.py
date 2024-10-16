@@ -394,8 +394,6 @@ def pre_queue_set(video_id, user_id=None, discard_if_exists=False, send_email=Fa
     send_email = to_bool(send_email)
     play_sound = to_bool(play_sound)
     
-    print(send_email,type(send_email))
-    print(play_sound,type(play_sound))
     
     if is_set_exists(video_id):
         return {'error': 'Set was already here.', 'video_id': video_id}
@@ -818,7 +816,8 @@ def insert_set_from_queue():
     'failed to extract any player response',
     'unable to download video',
     'not a bot',
-    'bot verification'
+    'bot verification',
+    'InvalidTextRepresentation'
     ]
     
     premiere_keywords = [
