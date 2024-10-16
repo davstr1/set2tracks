@@ -26,7 +26,7 @@ from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spo
 from web.lib.utils import as_dict, calculate_avg_properties
 from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
 from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetBrowsingHistory, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from boilersaas.utils.db import db
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -644,6 +644,7 @@ def upsert_setsearch(query, nb_results):
 def get_sets_with_zero_track(page=1):
     query = Set.query.outerjoin(SetQueue, Set.video_id == SetQueue.video_id)
     query = query.filter(Set.nb_tracks==0)
+    query = query.filter(SetQueue.id.isnot(None)) 
     query = query.with_entities(
     Set.id.label('set_id'),  
     SetQueue.id,
@@ -2441,3 +2442,28 @@ def create_apple_playlist_and_add_tracks(dev_token,user_token,playlist_name, tra
         return {"playlist_id":playlist['id'],"apple_playlist_id": playlist_id_apple,"message": f"Apple playlist \"{playlist_name}\" created successfully with {len(track_ids_to_add)} tracks"}
     else:
         return {"playlist_id":playlist['id'],"apple_playlist_id": playlist_id_apple,"message": f"Apple playlist \"{playlist_name}\" updated successfully with {len(track_ids_to_add)} tracks"}
+
+
+
+def update_premiered_to_prequeued():
+    # Get the current time
+    now = datetime.now(timezone.utc)
+
+    # Query to find rows with 'premiered' status and where premiere_ends < now
+    items_to_update = db.session.query(SetQueue).filter(
+        SetQueue.status == 'premiered',
+        SetQueue.premiere_ends < now
+    ).all()
+
+    # Log how many elements were found
+    count = len(items_to_update)
+    logger.info(f"{count} items found to update from 'premiered' to 'prequeued'.")
+
+    # Update each item if any are found
+    if count > 0:
+        for item in items_to_update:
+            item.status = 'prequeued'
+            item.updated_at = now
+
+        # Commit the changes to the database
+        db.session.commit()
