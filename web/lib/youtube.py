@@ -166,7 +166,7 @@ def youbube_video_info(video_id: str, retry_count: int = 10) -> dict:
 
 
 def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
-    ua = UserAgent(platforms='pc')
+   # ua = UserAgent(platforms='pc')
     def my_hook(d):
         if d['status'] == 'downloading':
             logger.debug(f"{d['downloaded_bytes'] / d['total_bytes'] * 100:.2f}% downloaded")
@@ -190,11 +190,11 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
         'nocheckcertificate': True,
         'quiet': True,  # Suppresses most of the output
         'skip-download': False,  # Forces the download without extra checks
-        'headers': {
-            'User-Agent': ua.random,  # Random User-Agent for each request
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.youtube.com',
-        },
+       # 'headers': {
+        #    'User-Agent': ua.random,  # Random User-Agent for each request
+       #     'Accept-Language': 'en-US,en;q=0.9',
+       #     'Referer': 'https://www.youtube.com',
+       # },
     }
     
     yt = f"https://www.youtube.com/watch?v={id}"
