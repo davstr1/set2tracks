@@ -737,7 +737,7 @@ def upsert_set_browsing_history(set_id, user_id):
 def count_sets_with_status(status, include_15min_error=True):
     query = SetQueue.query.filter_by(status=status)
     
-    if not include_15min_error:
+    if not include_15min_error and status == 'discarded': # quick n dirty fix, was giving me extravagant results on "done" sets
         query = query.filter(
         ~SetQueue.discarded_reason.like('%Video shorter than 15m%')   # Exclude '15min'
         )

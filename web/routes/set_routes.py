@@ -181,6 +181,7 @@ def sets_queue():
     my_sets = None
     
     count = count_sets_with_all_statuses(include_15min_error=include_15min_error)
+    print(count)
     
     def get_pagination_url(page):
      params = {}
