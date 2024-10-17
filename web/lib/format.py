@@ -395,7 +395,10 @@ def prepare_track_for_insertion(track_json,db):
     track.uri_apple = track_json.get('uri_apple', None)
     track.album = track_json.get('album', None)
     track.label = track_json.get('label', None)
-    track.release_year = track_json.get('release_year', None)
+    # gave psycopg2.errors.InvalidTextRepresentation
+    # "" stayed that way, erroring, with track_json.get('release_year', None)
+    # apply solution here if reproducing : https://chatgpt.com/c/67113aa0-e35c-8002-8dd3-f3427be785c9
+    track.release_year = track_json.get('release_year') or None 
     track.release_date = parse_date(track_json.get('release_date', None))
     track.genres = set_track_genres(track_json,db)
     track.artist_popularity_spotify = track_json.get('artist_popularity_spotify', 0)
