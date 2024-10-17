@@ -128,11 +128,12 @@ def youbube_video_info(video_id: str, retry_count: int = 10) -> dict:
         'is_live', 'availability', 'error'
     ]
     options = {'quiet': True, 'no_warnings': True, 'noplaylist': True,'nocheckcertificate': True, 'proxy': PROXY_URL_SOCKS5, 
-               'headers': {
+               #'headers': {
               #  'User-Agent': ua.random,  # Random User-Agent for each request
                # 'Accept-Language': 'en-US,en;q=0.9',
               #  'Referer': 'https://www.youtube.com',
-        },}
+        #}
+               }
     print(f'getting vid info with options {options} ')
 
     attempt = 0
@@ -201,8 +202,8 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
     
     for attempt in range(retry_count):
         try:
-            ua = UserAgent(platforms='pc')
-            options['headers']['User-Agent'] = ua.random
+            #ua = UserAgent(platforms='pc')
+            #options['headers']['User-Agent'] = ua.random
             with YoutubeDL(params=options) as ydl:
                 print(f"Downloading with options: {options}")
                 ydl.download([yt])
