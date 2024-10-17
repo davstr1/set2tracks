@@ -1467,6 +1467,9 @@ def get_playlist_last_used_from_user(user_id):
 def get_playlist_with_tracks(playlist_id):
     playlist = Playlist.query.get(playlist_id)
     
+    if not playlist:
+        return None
+    
     tracks= format_db_tracks_for_template(playlist.tracks)
     
     tracks_playlist = db.session.query(TrackPlaylist).filter(TrackPlaylist.playlist_id == playlist_id).all()

@@ -121,6 +121,10 @@ def playlist_create():
 def show_playlist(playlist_id):
     res = get_playlist_with_tracks(playlist_id)
     
+    if  res is None:
+        flash('Playlist not found', 'error')
+        return redirect(url_for('playlist.my_playlists'))
+    
     playlist_author_id = res['playlist'].get('user_id')
     user_id = get_user_id()
     
