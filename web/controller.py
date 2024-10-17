@@ -734,18 +734,26 @@ def upsert_set_browsing_history(set_id, user_id):
     return True
 
 
-def count_sets_with_status(status):
-    return SetQueue.query.filter_by(status=status).count()
+def count_sets_with_status(status, include_15min_error=True):
+    query = SetQueue.query.filter_by(status=status)
+    
+    if not include_15min_error:
+        query = query.filter(
+        ~SetQueue.discarded_reason.like('%Video shorter than 15m%')   # Exclude '15min'
+        )
+    return query.count()
 
-def count_sets_with_all_statuses():
+def count_sets_with_all_statuses(include_15min_error=True):
     #distinct_statuses = SetQueue.query.with_entities(SetQueue.status).distinct().all()
     distinct_statuses = [status for status in SetQueue.__table__.columns['status'].type.enums]
 
-    result = {'all': SetQueue.query.count()}
+    result = {}
     for status in distinct_statuses:
-        result[status] = count_sets_with_status(status) or 0
+        result[status] = count_sets_with_status(status,include_15min_error) or 0
     # Not a proper status, but used to count sets with no tracks
+    result['all'] = sum(result.values())
     result['zero_track'] = Set.query.filter_by(nb_tracks=0).count() or 0
+    
     return result
     
 

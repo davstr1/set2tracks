@@ -180,7 +180,7 @@ def sets_queue():
     #my_sets = get_my_sets_in_queue(user_id=get_user_id())
     my_sets = None
     
-    count = count_sets_with_all_statuses()
+    count = count_sets_with_all_statuses(include_15min_error=include_15min_error)
     
     def get_pagination_url(page):
      params = {}
