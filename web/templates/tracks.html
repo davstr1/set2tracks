@@ -41,14 +41,16 @@
       {% include 'snippets/range_slider.html' %}
       {% endwith %}
 
-
+      {% with min=instrumental_min_default, max=instrumental_max_default, min_val=instrumental_min, max_val=instrumental_max, min_val_name='instrumental_min', max_val_name='instrumental_max', label='Instrumental' %}
+      {% include 'snippets/range_slider.html' %}
+      {% endwith %}
 
 
 
       <script>
         // Adapted from https://www.creative-tim.com/twcomponents/component/multi-range-slider        
-        function range(min, max, minValInput = null, maxValInput = null) {
-          return {
+        function range({ min, max, minValInput = null, maxValInput = null }) {
+          const ret = {
             minVal: minValInput ?? min,
             maxVal: maxValInput ?? max,
             min: min,
@@ -63,14 +65,18 @@
             mintrigger() {
               this.minVal = Math.min(this.minVal, this.maxVal - 1);
               this.minthumb = ((this.minVal - this.min) / (this.max - this.min)) * 100;
+              console.log('mintrigger:',this.minVal, this.minthumb);
 
             },
 
             maxtrigger() {
               this.maxVal = Math.max(this.maxVal, this.minVal + 1);
               this.maxthumb = 100 - (((this.maxVal - this.min) / (this.max - this.min)) * 100);
+              console.log('maxtrigger:',this.maxVal, this.maxthumb);
             },
           }
+          console.log(ret);
+          return ret;
         }
 
         function submitForm() {

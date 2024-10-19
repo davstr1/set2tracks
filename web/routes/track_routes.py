@@ -24,6 +24,8 @@ def tracks():
     year_max = request.args.get('year_max', None, type=int)
     bpm_min = request.args.get('bpm_min', None, type=int)
     bpm_max = request.args.get('bpm_max', None, type=int)
+    instrumental_min = request.args.get('instrumental_min', None, type=int)
+    instrumental_max = request.args.get('instrumental_max', None, type=int)
     order_by = request.args.get('order_by', 'recent', type=str)
     
     min_maxes = get_tracks_min_maxes()
@@ -35,9 +37,13 @@ def tracks():
         bpm_min = None
     if bpm_max == min_maxes['bpm_max']:
         bpm_max = None
+    if instrumental_min == min_maxes['instrumental_min']:
+        instrumental_min = None
+    if instrumental_max == min_maxes['instrumental_max']:
+        instrumental_max = None
     
     
-    tracks,tracks_raw,results_count = get_tracks(search=search, page=page, per_page=PER_PAGE, year_min=year_min, year_max=year_max,bpm_max=bpm_max,bpm_min=bpm_min, order=order_by)
+    tracks,tracks_raw,results_count = get_tracks(search=search, page=page, per_page=PER_PAGE, year_min=year_min, year_max=year_max,bpm_max=bpm_max,bpm_min=bpm_min,instrumental_min=instrumental_min,instrumental_max=instrumental_max, order=order_by)
     l = {
         'page_title' : 'Top 1000 Tracks - ' + Lang.APP_NAME
     }
@@ -68,15 +74,19 @@ def tracks():
     
     is_paginated = tracks_raw.has_next or tracks_raw.has_prev
     
-    min_maxes = get_tracks_min_maxes()
-    if year_min is None:
-        year_min = min_maxes['year_min']
-    if year_max is None:
-        year_max = min_maxes['year_max']
-    if bpm_min is None:
-        bpm_min = min_maxes['bpm_min']
-    if bpm_max is None:
-        bpm_max = min_maxes['bpm_max']
+    
+    if year_min == min_maxes['year_min']:
+        year_min = None
+    if year_max == min_maxes['year_max']:
+        year_max = None
+    if bpm_min == min_maxes['bpm_min']:
+        bpm_min = None
+    if bpm_max == min_maxes['bpm_max']:
+        bpm_max = None
+    if instrumental_min == min_maxes['instrumental_min']:
+        instrumental_min = None
+    if instrumental_max == min_maxes['instrumental_max']:
+        instrumental_max = None
     
     
     return render_template('tracks.html', 
@@ -93,6 +103,10 @@ def tracks():
                             bpm_max=bpm_max,
                             bpm_min_default=min_maxes['bpm_min'],
                             bpm_max_default=min_maxes['bpm_max'],
+                            instrumental_min=instrumental_min,
+                            instrumental_max=instrumental_max,
+                            instrumental_min_default=min_maxes['instrumental_min'],
+                            instrumental_max_default=min_maxes['instrumental_max'],
                            tpl_utils=tpl_utils,
                            l=l,
                            page_name='explore',

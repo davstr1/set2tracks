@@ -62,10 +62,12 @@ def get_tracks_min_maxes():
     year_max = Track.query.with_entities(func.max(Track.release_year)).filter(Track.release_year.isnot(None), Track.release_year != 0).scalar()
     bpm_min = Track.query.with_entities(func.min(Track.tempo)).filter(Track.tempo.isnot(None), Track.tempo != 0).scalar()
     bpm_max = Track.query.with_entities(func.max(Track.tempo)).filter(Track.tempo.isnot(None), Track.tempo != 0).scalar()
-    return {'year_min': year_min, 'year_max': year_max, 'bpm_min': bpm_min, 'bpm_max': bpm_max}
+    instrumental_min = Track.query.with_entities(func.min(Track.instrumentalness)).filter(Track.instrumentalness.isnot(None), Track.instrumentalness != 0).scalar()
+    instrumental_max = Track.query.with_entities(func.max(Track.instrumentalness)).filter(Track.instrumentalness.isnot(None), Track.instrumentalness != 0).scalar()
+    return {'year_min': year_min, 'year_max': year_max, 'bpm_min': bpm_min, 'bpm_max': bpm_max, 'instrumental_min': instrumental_min, 'instrumental_max': instrumental_max}
 
 
-def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None):
+def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None,instrumental_min=None,instrumental_max=None):
     query = Track.query
     if order == 'recent':
         query = query.order_by(Track.id.desc())
@@ -91,6 +93,10 @@ def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_ma
         query = query.filter(Track.release_year >= year_min)
     if year_max:
         query = query.filter(Track.release_year <= year_max)
+    if instrumental_min:
+        query = query.filter(Track.instrumentalness >= instrumental_min)
+    if instrumental_max:
+        query = query.filter(Track.instrumentalness <= instrumental_max)
         
     count = query.count()    
     

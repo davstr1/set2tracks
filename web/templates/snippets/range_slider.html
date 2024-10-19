@@ -1,5 +1,5 @@
 <div class="flex items-center mt-5">
-  <div x-data="range({{min}},{{max}},{{min_val}},{{max_val}})" x-init="mintrigger(); maxtrigger()" class="relative  w-full">
+  <div x-data="range({ min: {{ min }}, max: {{ max }}{% if min_val is not none %}, minValInput: {{ min_val }}{% endif %}{% if max_val is not none %}, maxValInput: {{ max_val }}{% endif %} })" x-init="mintrigger(); maxtrigger()" class="relative  w-full">
     <div class="mb-2">
       <input type="range" step="1" x-bind:min="min" x-bind:max="max" x-on:input="mintrigger" x-on:change="mintrigger(); submitForm()" x-model="minVal" class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer">
       <input type="range" step="1" x-bind:min="min" x-bind:max="max" x-on:input="maxtrigger" x-on:change="mintrigger(); submitForm()" x-model="maxVal" class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer">
