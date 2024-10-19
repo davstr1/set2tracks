@@ -2,10 +2,10 @@ from re import L, sub
 import re
 from flask import Blueprint, Config, redirect, render_template, request, url_for
 from flask_login import current_user
-from web.routes.routes_utils import tpl_utils
+from web.routes.routes_utils import get_user_id, tpl_utils
 
 from lang import Lang
-from web.controller import get_tracks, get_tracks_min_maxes
+from web.controller import get_playlists_from_user, get_tracks, get_tracks_min_maxes
 
 
 
@@ -88,6 +88,12 @@ def tracks():
     if instrumental_max == min_maxes['instrumental_max']:
         instrumental_max = None
     
+    user_id = get_user_id()
+    
+    if user_id:
+        user_playlists = get_playlists_from_user(user_id, order_by='az',page=1,per_page=100)
+    else:
+        user_playlists = []
     
     return render_template('tracks.html', 
                            tracks=tracks,
@@ -95,6 +101,7 @@ def tracks():
                            pagination=pagination,
                            is_paginated=is_paginated,
                            search=search,
+                           user_playlists=user_playlists,
                            year_min=year_min,
                             year_max=year_max,
                             year_min_default=min_maxes['year_min'],
