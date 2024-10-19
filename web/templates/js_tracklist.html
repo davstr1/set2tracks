@@ -185,7 +185,19 @@
     blockInteractions.classList.remove('hidden');
 
     document.addEventListener('click', hideContextMenuOnClick);
-    window.addEventListener('scroll', hideContextMenu);
+    //window.addEventListener('scroll', hideContextMenu);  was too brutal
+
+    let lastScrollPosition = window.scrollY;
+
+    window.addEventListener('scroll', () => { // smoother way to hide context menu
+      let currentScrollPosition = window.scrollY;
+
+      if (Math.abs(currentScrollPosition - lastScrollPosition) > 200) {
+        hideContextMenu();
+        lastScrollPosition = currentScrollPosition;
+      }
+    });
+
   }
 
   function hideContextMenu() {
@@ -215,7 +227,7 @@
       event.preventDefault();
       const playlist_id = this.getAttribute('data-playlist-id');
       if (!trackWithContextMenu) { // Add all tracks from set to playlist
-        
+
         console.log('trackWithContextMenu not found');
         return addAllTracksFromSetToPlaylist({ playlist_id: playlist_id, set_id: setId })
           .then(response => {
