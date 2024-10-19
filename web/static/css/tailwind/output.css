@@ -2948,6 +2948,10 @@ input[type=password]:focus {
   margin: 0.25rem;
 }
 
+.m-0 {
+  margin: 0px;
+}
+
 .-mx-3 {
   margin-left: -0.75rem;
   margin-right: -0.75rem;
@@ -3907,6 +3911,11 @@ input[type=password]:focus {
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .pb-16 {

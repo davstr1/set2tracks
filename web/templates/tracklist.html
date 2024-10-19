@@ -19,7 +19,7 @@
       </div>
       {% else %}
       {% for playlist in user_playlists %}
-      <li><a data-playlist-id="{{playlist.id}}" href="#" class="add-track-to-playlist block p-2 rounded-xl hover:bg-blue-950">{{playlist.title}}</a></li>
+      <li class="flex m-0"><a data-playlist-id="{{playlist.id}}" href="#" class="add-track-to-playlist p-2 rounded-xl hover:bg-blue-950"><span class="line-clamp-1">{{playlist.title}}</span></a></li>
       {% endfor %}
       {% endif %}
     </ul>
@@ -30,7 +30,7 @@
   <!-- Second Section -->
   <div class="overflow-y-auto max-h-40">
     <ul class="space-y-1">
-      <li><a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2 rounded-xl hover:bg-blue-950">Create a Playlist</a></li>
+      <li><a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2  rounded-xl hover:bg-blue-950">Create a Playlist</a></li>
 
     </ul>
   </div>
