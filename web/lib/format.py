@@ -59,10 +59,10 @@ def km_number(value):
         return '0'
     if value >= 1_000_000:
         formatted = value / 1_000_000
-        return f"{formatted:.1f}m" if formatted % 1 != 0 else f"{int(formatted)}m"
+        return f"{formatted:.1f}".rstrip('0').rstrip('.') + 'm'
     elif value >= 1_000:
         formatted = value / 1_000
-        return f"{formatted:.1f}k" if formatted % 1 != 0 else f"{int(formatted)}k"
+        return f"{formatted:.1f}".rstrip('0').rstrip('.') + 'k'
     else:
         return str(value)
     
