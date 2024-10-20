@@ -173,7 +173,7 @@ def is_set_exists(video_id):
     existing_entry = Set.query.filter_by(video_id=video_id,published=True).first()
     return existing_entry is not None
 
-def clean_discarded_reason(reason, video_id=None)
+def clean_discarded_reason(reason, video_id=None):
     # Remove video_id from the reason. like in "n5l6paz89bg: this live event will begin in..."
     if video_id:
         reason = reason.replace(f"{video_id}:", "").strip()
