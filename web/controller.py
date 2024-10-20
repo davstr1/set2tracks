@@ -173,12 +173,21 @@ def is_set_exists(video_id):
     existing_entry = Set.query.filter_by(video_id=video_id,published=True).first()
     return existing_entry is not None
 
-
+def clean_discarded_reason(reason, video_id=None)
+    # Remove video_id from the reason. like in "n5l6paz89bg: this live event will begin in..."
+    if video_id:
+        reason = reason.replace(f"{video_id}:", "").strip()
+    reason = reason.lstrip(":").strip()
+    return cut_to_if_needed(reason, 255)
+    
 
 def queue_set_discarded(video_id, reason, existing_entry=None):
+    
+    reason_cleaned = clean_discarded_reason(reason, video_id)
+    
     if existing_entry:
         existing_entry.status = 'discarded'
-        existing_entry.discarded_reason = reason
+        existing_entry.discarded_reason = reason_cleaned
         existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
         db.session.commit()
         return existing_entry
@@ -186,13 +195,13 @@ def queue_set_discarded(video_id, reason, existing_entry=None):
     discarded_entry = SetQueue(
         video_id=video_id,
         status='discarded',
-        discarded_reason=reason,
+        discarded_reason=reason_cleaned,
         updated_at=datetime.now(timezone.utc),  #
         n_attempts=1  
     )
     db.session.add(discarded_entry)
     db.session.commit()
-    return {'error': reason}
+    return {'error': reason_cleaned}
 
 def extract_time_from_reason(reason):
     # This function extracts time from the reason string
@@ -913,7 +922,7 @@ def insert_set_from_queue():
         
         logger.error(f'Set insertion {pending_entry.status}. Reason: {distarted_reason}')
         pending_entry.n_attempts += 1
-        pending_entry.discarded_reason = cut_to_if_needed(distarted_reason, 255)
+        pending_entry.discarded_reason = clean_discarded_reason(distarted_reason, pending_entry.video_id)
         
 
     # Commit the changes
