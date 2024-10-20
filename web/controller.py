@@ -233,11 +233,13 @@ def queue_set_premiered(video_id, reason, existing_entry=None):
     if 'live event' in reason:
         # Add 4 hours buffer to the live event time
          premiere_ends = premiere_ends + timedelta(hours=4)
+         
+    reason_cleaned = clean_discarded_reason(reason, video_id)
     
     if existing_entry:
         existing_entry.status = 'premiered'
         existing_entry.premiere_ends = premiere_ends
-        existing_entry.discarded_reason = reason
+        existing_entry.discarded_reason = reason_cleaned
         existing_entry.updated_at = datetime.now(timezone.utc)  # Manually update updated_at
         db.session.commit()
         return existing_entry
@@ -246,7 +248,7 @@ def queue_set_premiered(video_id, reason, existing_entry=None):
         video_id=video_id,
         status='premiered',
         premiere_ends=premiere_ends,
-        discarded_reason=reason,
+        discarded_reason=reason_cleaned,
         updated_at=datetime.now(timezone.utc),  #
         n_attempts=1  
     )
