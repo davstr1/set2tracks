@@ -177,6 +177,7 @@ def clean_discarded_reason(reason, video_id=None):
     # Remove video_id from the reason. like in "n5l6paz89bg: this live event will begin in..."
     if video_id:
         reason = reason.replace(f"{video_id}:", "").strip()
+        reason = reason.replace(f"[0;31mERROR:[0m [youtube] ", "").strip()
     reason = reason.lstrip(":").strip()
     return cut_to_if_needed(reason, 255)
     
