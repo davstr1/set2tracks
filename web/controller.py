@@ -898,7 +898,9 @@ def insert_set_from_queue():
     'bot verification',
     'InvalidTextRepresentation',
     'StringDataRightTruncation',
-    'not available on this ap'
+    'not available on this ap',
+    'ffmpeg exited',
+    '[0;31mERROR'
     ]
     
     premiere_keywords = [
