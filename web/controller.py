@@ -351,7 +351,7 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
         video_info['error'] = video_info['error'].lower()
         if 'not a bot' in video_info['error'] or 'bot verification' in video_info['error']:
             return queue_set_to_retry(video_id, video_info['error'],existing_queue_entry)
-        elif 'premiere' in video_info['error'] or 'this live event' in video_info['error']:
+        elif 'premiere' in video_info['error'] : #or 'this live event' in video_info['error']:
             return queue_set_premiered(video_id,video_info['error'],existing_queue_entry)
         
         return queue_set_discarded(video_id,video_info['error'],existing_queue_entry)
@@ -904,7 +904,7 @@ def insert_set_from_queue():
     ]
     
     premiere_keywords = [
-        'live event will begin in ',
+       # 'live event will begin in ',
         'premieres in '
     ]
 
