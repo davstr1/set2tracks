@@ -335,7 +335,9 @@ def add():
         video_id = youtube_video_id_from_url(youtube_url)
         send_email = request.form.get('send_email')
         play_sound = request.form.get('play_sound')
-        return redirect(url_for('set.insert_set_route',video_id=video_id,send_email=send_email,play_sound=play_sound))
+        manually_added = request.form.get('manually_added')
+        
+        return redirect(url_for('set.insert_set_route',video_id=video_id,send_email=send_email,play_sound=play_sound,manually_added=manually_added))
     
     youtube_url = request.args.get('youtube_url', '')
     
@@ -350,11 +352,22 @@ def add():
 @set_bp.route('/insert_set/<video_id>', methods=['GET'])
 def insert_set_route(video_id):
     
+    if not is_connected():
+        return redirect(url_for('users.login', next=url_for('set.add')))
+    
+    # Todo: check if the set already is in queue or discarded
+    
     if (is_set_exists(video_id)):
        return redirect(url_for('set.set',set_id=get_set_id_by_video_id(video_id))) 
    
     send_email = request.args.get('send_email')
     play_sound = request.args.get('play_sound')
+    manually_added = request.args.get('manually_added')
+    
+    # the extension sends us here. 
+    # However we need the user to fill the play sound and send email options
+    if not manually_added:
+        return redirect(url_for('set.add', youtube_url=video_id))
     
     result = pre_queue_set(video_id,get_user_id(),send_email,play_sound) #insert_set(video_id)
    
