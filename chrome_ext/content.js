@@ -23,7 +23,7 @@ async function fetchVideoStatus(videoId) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error:', error);
+    return { error: error.message };
   }
 }
 // Define the display function
@@ -31,15 +31,17 @@ async function displayVideoInfo(videoId) {
   // Example: Update the DOM, or log to console
   console.log('Displaying info for video id:', videoId);
   videoStatus = await fetchVideoStatus(videoId);
+
   displayHelloSquare(videoStatus);
   // You can manipulate the DOM or display information as needed here
 }
 
 function displayHelloSquare(videoStatus) {
   const tryAddHelloSquare = setInterval(() => {
-    const controls = document.querySelector('.html5-video-container');
+    //const controls = document.querySelector('.html5-video-container');
+    const controls = document.querySelector('#above-the-fold');
     if (controls) {
-      const helloSquare = document.createElement('button');
+      const helloSquare = document.createElement('span');
       helloSquare.classList.add('comeonebro');
 
       // Determine the button label and behavior based on videoStatus
@@ -65,16 +67,17 @@ function displayHelloSquare(videoStatus) {
         console.log("Status:", videoStatus.status);
       }
 
-      // Style the button and append it to the video controls
-      helloSquare.style.position = 'absolute';
-      helloSquare.style.top = '20px';
-      helloSquare.style.left = '20px';
-      helloSquare.style.zIndex = '9999';
-      helloSquare.style.cursor = 'pointer';
-
       // Only add the button if it's not an error scenario
       if (!videoStatus.error) {
+        helloSquare.style.float = 'right';
+        helloSquare.style.padding = '10px';
+        helloSquare.style.borderRadius = '25px';  
+        helloSquare.style.border = '1px solid #7480ff';
+        helloSquare.style.cursor = 'pointer';
+
         controls.prepend(helloSquare);
+        const videoTitle = controls.querySelector('#title');
+        videoTitle.style.minHeight = '54px';
         console.log('Hello Square has been added.');
       }
 
@@ -84,37 +87,6 @@ function displayHelloSquare(videoStatus) {
     }
   }, 1000); // checks every 1000 milliseconds (1 second)
 }
-
-
-
-
-// function displayHelloSquare(videoStatus) {
-//   const tryAddHelloSquare = setInterval(() => {
-//     const controls = document.querySelector('.html5-video-container');
-//     if (controls) {
-//       const helloSquare = document.createElement('button');
-//       //helloSquare.classList.add('ytp-button');
-//       helloSquare.classList.add('comeonebro')
-//       helloSquare.textContent = 'Add to Set2Tracks';
-//       helloSquare.style.position = 'absolute';  // Set position to absolute
-//       helloSquare.style.top = '20px';              // Set top to 0
-//       helloSquare.style.right = '20px';
-//       helloSquare.style.zIndex = '9999';
-//       helloSquare.style.cursor = 'pointer';       // Set left to 0       
-//       controls.prepend(helloSquare);
-//       console.log('Hello Square has been added.');
-//       helloSquare.addEventListener('click', function (e) {
-//         e.preventDefault();
-//         e.stopPropagation();
-//         window.open(SET2TRACK_URL + lastKnownVideoId, '_blank');
-//       });
-//       clearInterval(tryAddHelloSquare);
-//     } else {
-//       console.log('Waiting for YouTube video controls...');
-//     }
-//   }, 1000); // checks every 1000 milliseconds (1 second)
-// }
-
 
 
 // Function to setup MutationObserver
