@@ -38,13 +38,13 @@ async function displayVideoInfo(videoId) {
 
 function displayS2tButton(videoStatus) {
   const tryAddS2tButton = setInterval(() => {
-    //const controls = document.querySelector('.html5-video-container');
-    const controls = document.querySelector('#above-the-fold');
+    //const parentEl = document.querySelector('.html5-video-container');
+    const parentEl = document.querySelector('#above-the-fold');
     const s2tButtonAlreadyExists = document.querySelector('#set2Tracks_button');
     if(s2tButtonAlreadyExists) {
       s2tButtonAlreadyExists.remove();
     }
-    if (controls) {
+    if (parentEl) {
       const s2tButton = document.createElement('span');
       s2tButton.id = 'set2Tracks_button';
 
@@ -79,15 +79,15 @@ function displayS2tButton(videoStatus) {
         s2tButton.style.border = '1px solid #7480ff';
         s2tButton.style.cursor = 'pointer';
 
-        controls.prepend(s2tButton);
-        const videoTitle = controls.querySelector('#title');
+        parentEl.prepend(s2tButton);
+        const videoTitle = parentEl.querySelector('#title');
         videoTitle.style.minHeight = '54px';
         console.log('Hello Square has been added.');
       }
 
       clearInterval(tryAddS2tButton); // Stop the interval after successfully adding the button
     } else {
-      console.log('Waiting for YouTube video controls...');
+      console.log('Waiting for YouTube video parentEl...');
     }
   }, 1000); // checks every 1000 milliseconds (1 second)
 }
