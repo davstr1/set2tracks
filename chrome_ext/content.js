@@ -32,34 +32,33 @@ async function displayVideoInfo(videoId) {
   console.log('Displaying info for video id:', videoId);
   videoStatus = await fetchVideoStatus(videoId);
 
-  displayHelloSquare(videoStatus);
+  displayS2tButton(videoStatus);
   // You can manipulate the DOM or display information as needed here
 }
 
-function displayHelloSquare(videoStatus) {
-  const tryAddHelloSquare = setInterval(() => {
+function displayS2tButton(videoStatus) {
+  const tryAddS2tButton = setInterval(() => {
     //const controls = document.querySelector('.html5-video-container');
     const controls = document.querySelector('#above-the-fold');
-    const helloSquareAlreadyExists = document.querySelector('#set2Tracks_button');
-    if(helloSquareAlreadyExists) {
-      helloSquareAlreadyExists.remove();
+    const s2tButtonAlreadyExists = document.querySelector('#set2Tracks_button');
+    if(s2tButtonAlreadyExists) {
+      s2tButtonAlreadyExists.remove();
     }
     if (controls) {
-      const helloSquare = document.createElement('span');
-      helloSquare.classList.add('comeonebro');
-      helloSquare.id = 'set2Tracks_button';
+      const s2tButton = document.createElement('span');
+      s2tButton.id = 'set2Tracks_button';
 
       // Determine the button label and behavior based on videoStatus
       if (videoStatus.status === "not_found") {
-        helloSquare.textContent = 'Add to Set2Tracks';
-        helloSquare.addEventListener('click', function (e) {
+        s2tButton.textContent = 'Add to Set2Tracks';
+        s2tButton.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
           window.open(SET2TRACK_URL + lastKnownVideoId, '_blank');
         });
       } else if (videoStatus.status === "published") {
-        helloSquare.textContent = 'Check on Set2Tracks';
-        helloSquare.addEventListener('click', function (e) {
+        s2tButton.textContent = 'Check on Set2Tracks';
+        s2tButton.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
           window.open(SET2TRACK_URL + lastKnownVideoId, '_blank');
@@ -74,19 +73,19 @@ function displayHelloSquare(videoStatus) {
 
       // Only add the button if it's not an error scenario
       if (!videoStatus.error) {
-        helloSquare.style.float = 'right';
-        helloSquare.style.padding = '10px';
-        helloSquare.style.borderRadius = '25px';  
-        helloSquare.style.border = '1px solid #7480ff';
-        helloSquare.style.cursor = 'pointer';
+        s2tButton.style.float = 'right';
+        s2tButton.style.padding = '10px';
+        s2tButton.style.borderRadius = '25px';  
+        s2tButton.style.border = '1px solid #7480ff';
+        s2tButton.style.cursor = 'pointer';
 
-        controls.prepend(helloSquare);
+        controls.prepend(s2tButton);
         const videoTitle = controls.querySelector('#title');
         videoTitle.style.minHeight = '54px';
         console.log('Hello Square has been added.');
       }
 
-      clearInterval(tryAddHelloSquare); // Stop the interval after successfully adding the button
+      clearInterval(tryAddS2tButton); // Stop the interval after successfully adding the button
     } else {
       console.log('Waiting for YouTube video controls...');
     }
