@@ -40,9 +40,14 @@ function displayHelloSquare(videoStatus) {
   const tryAddHelloSquare = setInterval(() => {
     //const controls = document.querySelector('.html5-video-container');
     const controls = document.querySelector('#above-the-fold');
+    const helloSquareAlreadyExists = document.querySelector('#set2Tracks_button');
+    if(helloSquareAlreadyExists) {
+      helloSquareAlreadyExists.remove();
+    }
     if (controls) {
       const helloSquare = document.createElement('span');
       helloSquare.classList.add('comeonebro');
+      helloSquare.id = 'set2Tracks_button';
 
       // Determine the button label and behavior based on videoStatus
       if (videoStatus.status === "not_found") {
