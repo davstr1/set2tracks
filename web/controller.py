@@ -2017,7 +2017,7 @@ def channel_toggle_visibility(channel_id):
         channel.followable = False
     db.session.commit()
     
-    return {"message": f"Channel visibility toggled to {channel.hidden}"}
+    return {"message": f"Channel visibility toggled to {not channel.hidden}"}
 
 def set_toggle_visibility(set_id):
     set_instance = Set.query.get(set_id)
@@ -2027,7 +2027,7 @@ def set_toggle_visibility(set_id):
     set_instance.hidden = not set_instance.hidden
     db.session.commit()
    
-    return {"message": f"Set visibility toggled to {set_instance.hidden}"}
+    return {"message": f"Set visibility toggled to {not set_instance.hidden}"}
 
 
 def get_channel_by_id(channel_id):
