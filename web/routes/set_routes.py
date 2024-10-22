@@ -172,7 +172,7 @@ def sets_queue():
         include_15min_error = request.args.get('include_15min_error', default=False, type=bool)
     else:
         include_15min_error = True
-        
+    
     if status and status == 'zero_track':
         sets,nb_sets = get_sets_with_zero_track(page=page)
     else:     
@@ -181,7 +181,6 @@ def sets_queue():
     my_sets = None
     
     count = count_sets_with_all_statuses(include_15min_error=include_15min_error)
-    print(count)
     
     def get_pagination_url(page):
      params = {}

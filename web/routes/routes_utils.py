@@ -14,7 +14,7 @@ def is_admin():
     if not is_connected():
         return False
     
-    print( current_user.id, Config.ADMIN_UID)  # 3, 3
+    #print( current_user.id, Config.ADMIN_UID)  # 3, 3
     return str(current_user.id) == str(Config.ADMIN_UID) # False
     
 
