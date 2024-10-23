@@ -66,6 +66,7 @@
     {% if track.danceability %}
     <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (100 - track.instrumentalness) | int }}% vocal" style="height: {{ 100 - track.instrumentalness }}%;">&nbsp;</div>
     <!-- <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.instrumentalness) | int }}% instrumental" style="height: {{ track.instrumentalness }}%;">&nbsp;</div> -->
+    <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.acousticness) | int }}% acoustic" style="height: {{ track.acousticness }}%;">&nbsp;</div>
     <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.speechiness) | int }}% speechy" style="height: {{ track.speechiness }}%;">&nbsp;</div>
     {% endif %}
   </div>
