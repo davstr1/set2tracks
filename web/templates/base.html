@@ -63,7 +63,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
-                
+
                         <!-- Dropdown menu with content-fitting width and text-right alignment -->
                         <div class="absolute hidden group-hover:flex group-hover:flex-col bg-primary-content border-2 border-slate-200 rounded-lg shadow-md mt-0 z-50 w-auto py-2 right-0">
                             {% if current_user.is_authenticated %}
@@ -76,9 +76,9 @@
                         </div>
                     </div>
                 </div>
-                
-                
-                
+
+
+
 
                 <!-- Mobile menu button -->
                 <div class="lg:hidden flex items-center">
@@ -192,7 +192,7 @@
 
 
 
-    {% if is_admin() %}
+    {% if is_admin %}
     <div class="fixed bottom-0 right-0 bg-red-500 text-white p-2 rounded-tl-lg z-50">
         <a href="{{url_for('admin.admin')}}">Admin</a>
 

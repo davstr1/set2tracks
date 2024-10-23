@@ -6,7 +6,7 @@ from web.routes.routes_utils import is_admin
 def inject_globals():
     # Function to inject global variables or functions into templates
     return {
-        'is_admin': is_admin,
+        'is_admin': is_admin(), # Check it once and use it everywhere
         'notif_sound': app.config.get('NOTIF_SOUND'),
         'current_year': datetime.now().year   
         

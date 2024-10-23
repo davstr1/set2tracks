@@ -41,16 +41,16 @@
         </li>
       </ul>
       </ul>
-      {% if is_admin() %}
+      {% if is_admin %}
       <div class="mt-4 text-xs float-right right-0 py-4">
-        {% if  include_15min_error ==1 %}
+        {% if include_15min_error ==1 %}
         <a href="{{url_for('set.sets_queue',status=status,page=page)}}">
           Exclude sets "Video shorter than 15m. errors"
         </a>
         {% else %}
         <a href="{{url_for('set.sets_queue',status=status,page=page,include_15min_error=1)}}">
           Include sets "Video shorter than 15m. errors"
-        </a>     
+        </a>
         {% endif %}
       </div>
       {% endif %}
@@ -65,7 +65,7 @@
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attempts</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queued @</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated @</th>
-            {% if is_admin() %}
+            {% if is_admin %}
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             {% endif %}
           </tr>
@@ -113,7 +113,7 @@
             <td class="px-6 py-4 whitespace-nowrap">
               <p class="text-sm">{{tpl_utils.time_ago(set.updated_at)}}</p>
             </td>
-            {% if is_admin() %}
+            {% if is_admin %}
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex flex-col items-right space-x-4 space-y-2">
                 {% if set.status == 'failed' or set.status == 'processing' %}
