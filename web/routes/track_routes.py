@@ -24,8 +24,14 @@ def tracks():
     year_max = request.args.get('year_max', None, type=int)
     bpm_min = request.args.get('bpm_min', None, type=int)
     bpm_max = request.args.get('bpm_max', None, type=int)
-    instrumental_min = request.args.get('instrumental_min', None, type=int)
-    instrumental_max = request.args.get('instrumental_max', None, type=int)
+    vocal_min = request.args.get('vocal_min', None, type=int)
+    vocal_max = request.args.get('vocal_max', None, type=int)
+    
+    instrumental_min = 100 - vocal_max if vocal_max is not None else None
+    instrumental_max = 100 - vocal_min if vocal_min is not None else None
+    
+    print(instrumental_min,instrumental_max)
+    
     order_by = request.args.get('order_by', 'recent', type=str)
     
     min_maxes = get_tracks_min_maxes()
@@ -87,6 +93,12 @@ def tracks():
         instrumental_min = None
     if instrumental_max == min_maxes['instrumental_max']:
         instrumental_max = None
+        
+    vocal_min = 100 - instrumental_max if instrumental_max is not None else None
+    vocal_max = 100 - instrumental_min if instrumental_min is not None else None
+    vocal_min_default = 100 - min_maxes['instrumental_max']
+    vocal_max_default = 100 - min_maxes['instrumental_min']
+    print(min_maxes)
     
     user_id = get_user_id()
     
@@ -110,10 +122,10 @@ def tracks():
                             bpm_max=bpm_max,
                             bpm_min_default=min_maxes['bpm_min'],
                             bpm_max_default=min_maxes['bpm_max'],
-                            instrumental_min=instrumental_min,
-                            instrumental_max=instrumental_max,
-                            instrumental_min_default=min_maxes['instrumental_min'],
-                            instrumental_max_default=min_maxes['instrumental_max'],
+                            vocal_min=vocal_min,
+                            vocal_max=vocal_max,
+                            vocal_min_default=vocal_min_default,
+                            vocal_max_default=vocal_max_default,
                            tpl_utils=tpl_utils,
                            l=l,
                            page_name='explore',
