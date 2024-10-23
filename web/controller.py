@@ -1359,7 +1359,11 @@ def get_browsing_history(user_id, page=1, per_page=20, order_by='recent', search
 
                     
 def get_playable_sets_number():
-    return Set.query.filter_by(playable_in_embed=True,published=True).count()
+    query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
+                     .join(Set.channel) \
+                     .filter(Set.channel.has(hidden=False)) \
+                     .options(joinedload(Set.channel))
+    return query.count()
                     
 
 
