@@ -2826,6 +2826,18 @@ input[type=password]:focus {
   color: rgb(248 113 113 / var(--tw-text-opacity));
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .pointer-events-none {
   pointer-events: none;
 }
@@ -3056,6 +3068,11 @@ input[type=password]:focus {
   margin-bottom: 1.5rem;
 }
 
+.my-8 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
 .-ml-1 {
   margin-left: -0.25rem;
 }
@@ -3180,6 +3197,10 @@ input[type=password]:focus {
   margin-top: 0.5rem;
 }
 
+.mr-\[18px\] {
+  margin-right: 18px;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -3201,6 +3222,10 @@ input[type=password]:focus {
 
 .flex {
   display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
 }
 
 .table {
@@ -3291,6 +3316,18 @@ input[type=password]:focus {
   height: 1rem;
 }
 
+.h-9 {
+  height: 2.25rem;
+}
+
+.h-\[46px\] {
+  height: 46px;
+}
+
+.h-7 {
+  height: 1.75rem;
+}
+
 .max-h-40 {
   max-height: 10rem;
 }
@@ -3373,6 +3410,26 @@ input[type=password]:focus {
 
 .w-\[1rem\] {
   width: 1rem;
+}
+
+.w-\[60px\] {
+  width: 60px;
+}
+
+.w-9 {
+  width: 2.25rem;
+}
+
+.w-\[82px\] {
+  width: 82px;
+}
+
+.w-1 {
+  width: 0.25rem;
+}
+
+.w-14 {
+  width: 3.5rem;
 }
 
 .min-w-\[200px\] {
@@ -3694,6 +3751,14 @@ input[type=password]:focus {
   border-top-width: 2px;
 }
 
+.border-l {
+  border-left-width: 1px;
+}
+
+.border-r {
+  border-right-width: 1px;
+}
+
 .border-none {
   border-style: none;
 }
@@ -3854,6 +3919,11 @@ input[type=password]:focus {
 .bg-green-300 {
   --tw-bg-opacity: 1;
   background-color: rgb(134 239 172 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#CCCCCE\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(204 204 206 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {
@@ -4370,6 +4440,10 @@ input[type=password]:focus {
 
 .duration-300 {
   transition-duration: 300ms;
+}
+
+.duration-200 {
+  transition-duration: 200ms;
 }
 
 .ease-in-out {
@@ -5236,5 +5310,10 @@ input[type=password]:focus {
   .dark\:text-gray-400 {
     --tw-text-opacity: 1;
     color: rgb(156 163 175 / var(--tw-text-opacity));
+  }
+
+  .dark\:text-white {
+    --tw-text-opacity: 1;
+    color: rgb(255 255 255 / var(--tw-text-opacity));
   }
 }
