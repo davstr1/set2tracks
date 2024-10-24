@@ -3089,6 +3089,21 @@ input[type=password]:focus {
   margin-bottom: 2rem;
 }
 
+.mx-2 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.mx-10 {
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+}
+
 .-ml-1 {
   margin-left: -0.25rem;
 }
@@ -3458,6 +3473,10 @@ input[type=password]:focus {
 
 .w-\[100px\] {
   width: 100px;
+}
+
+.w-5\/6 {
+  width: 83.333333%;
 }
 
 .min-w-\[200px\] {
@@ -4999,6 +5018,14 @@ input[type=password]:focus {
     position: relative;
   }
 
+  .sm\:-inset-4 {
+    inset: -1rem;
+  }
+
+  .sm\:inset-4 {
+    inset: 1rem;
+  }
+
   .sm\:left-auto {
     left: auto;
   }
@@ -5013,6 +5040,10 @@ input[type=password]:focus {
 
   .sm\:bottom-auto {
     bottom: auto;
+  }
+
+  .sm\:-mb-4 {
+    margin-bottom: -1rem;
   }
 
   .sm\:flex {
@@ -5069,12 +5100,45 @@ input[type=password]:focus {
     border-bottom-width: 2px;
   }
 
+  .sm\:border-b {
+    border-bottom-width: 1px;
+  }
+
+  @media (min-width: 640px) {
+    .sm\:sm\:border-b {
+      border-bottom-width: 1px;
+    }
+  }
+
+  .sm\:border-t {
+    border-top-width: 1px;
+  }
+
   .sm\:border-current {
     border-color: currentColor;
   }
 
+  .sm\:border-primary {
+    --tw-border-opacity: 1;
+    border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+  }
+
   .sm\:bg-transparent {
     background-color: transparent;
+  }
+
+  .sm\:bg-primary {
+    --tw-bg-opacity: 1;
+    background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)));
+  }
+
+  .sm\:bg-current {
+    background-color: currentColor;
+  }
+
+  .sm\:bg-primary-content {
+    --tw-bg-opacity: 1;
+    background-color: var(--fallback-pc,oklch(var(--pc)/var(--tw-bg-opacity)));
   }
 
   .sm\:p-5 {
