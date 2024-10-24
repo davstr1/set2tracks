@@ -67,14 +67,20 @@ def get_tracks_min_maxes():
     return {'year_min': year_min, 'year_max': year_max, 'bpm_min': bpm_min, 'bpm_max': bpm_max, 'instrumental_min': instrumental_min, 'instrumental_max': instrumental_max}
 
 
-def get_tracks(order='recent',page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None,instrumental_min=None,instrumental_max=None):
+def get_tracks(page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None,instrumental_min=None,instrumental_max=None,order_by=None,asc=None):
     query = Track.query
-    if order == 'recent':
-        query = query.order_by(Track.id.desc())
-    elif order == 'channel_popularity':
-        query = query.order_by(Track.nb_sets.desc())
+    
+    if order_by == 'recent':
+        order_attr = Track.id
     else:
-        query = query.order_by(Track.id.desc())
+        order_attr = getattr(Track, order_by, None)
+    
+    if order_attr:
+        query = query.filter(order_attr.isnot(None)) 
+        if asc:
+            query = query.order_by(order_attr.asc())
+        else:
+            query = query.order_by(order_attr.desc())
         
     if search and search.strip():
         query = query.filter(

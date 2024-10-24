@@ -2,6 +2,7 @@ from re import L, sub
 import re
 from flask import Blueprint, Config, redirect, render_template, request, url_for
 from flask_login import current_user
+from sqlalchemy import asc
 from web.routes.routes_utils import get_user_id, tpl_utils
 
 from lang import Lang
@@ -30,9 +31,8 @@ def tracks():
     instrumental_min = 100 - vocal_max if vocal_max is not None else None
     instrumental_max = 100 - vocal_min if vocal_min is not None else None
     
-    print(instrumental_min,instrumental_max)
-    
     order_by = request.args.get('order_by', 'recent', type=str)
+    asc = request.args.get('asc', None, type=str)
     
     min_maxes = get_tracks_min_maxes()
     if year_min == min_maxes['year_min']:
@@ -49,7 +49,19 @@ def tracks():
         instrumental_max = None
     
     
-    tracks,tracks_raw,results_count = get_tracks(search=search, page=page, per_page=PER_PAGE, year_min=year_min, year_max=year_max,bpm_max=bpm_max,bpm_min=bpm_min,instrumental_min=instrumental_min,instrumental_max=instrumental_max, order=order_by)
+    tracks,tracks_raw,results_count = get_tracks(
+        search=search, 
+        page=page, 
+        per_page=PER_PAGE, 
+        year_min=year_min, 
+        year_max=year_max,
+        bpm_max=bpm_max,
+        bpm_min=bpm_min,
+        instrumental_min=instrumental_min,
+        instrumental_max=instrumental_max,
+        order_by=order_by,
+        asc=asc
+        )
     l = {
         'page_title' : 'Top 1000 Tracks - ' + Lang.APP_NAME
     }
@@ -126,6 +138,8 @@ def tracks():
                             vocal_max=vocal_max,
                             vocal_min_default=vocal_min_default,
                             vocal_max_default=vocal_max_default,
+                            order_by=order_by,
+                            asc=asc,
                            tpl_utils=tpl_utils,
                            l=l,
                            page_name='explore',
