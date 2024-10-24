@@ -137,18 +137,32 @@
 
 
   document.querySelectorAll('.play-track-preview').forEach(link => {
+    // if previously set in js_tracklist.html
+    if (typeof handlePlayTrackPreview === 'function')
+      link.removeEventListener('click', handlePlayTrackPreview);
     link.addEventListener('click', function (event) {
-      event.preventDefault(); // Prevent the default link behavior
-      event.stopPropagation(); // Prevent the event from bubbling up
+      event.preventDefault();
+      event.stopPropagation();
+      console.log('play-track-preview clicked')
 
-      audioUrl = this.getAttribute('href');
+      const audioUrl = this.getAttribute('href');
 
       if (audioPlayer.getAttribute('src') !== audioUrl) {
         audioPlayer.setAttribute('src', audioUrl);
         audioPlayer.load(); // Load the new audio source
+        audioPlayer.play();
+      } else { // if the audio player is already playing the same track
+
+        if (!audioPlayer.paused) {
+          audioPlayer.pause();
+          event.target.closest('.track').classList.remove('playing');
+        } else {
+          audioPlayer.play();
+          event.target.closest('.track').classList.add('playing');
+        }
       }
-      //audioPlayer.classList.remove('hidden'); // Make the audio player visible
-      audioPlayer.play(); // Start playing the audio
+
+
     });
   });
 
