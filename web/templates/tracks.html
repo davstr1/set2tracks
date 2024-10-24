@@ -44,12 +44,12 @@
       {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocalness' %}
       {% include 'snippets/range_slider.html' %}
       {% endwith %}
-
+      {{order_by}}
       <div class="flex justify-between">
         <div class="relative h-10 w-24 min-w-[200px] my-8">
           <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
             <option value="release_date" {% if order_by=='release_date' %}selected{% endif %}>Released</option>
-            <option value="" {% if order_by=='' %}selected{% endif %}>New Here</option>
+            <option value="" {% if order_by=='' or order_by == null %}selected{% endif %}>New Here</option>
             <option value="tempo" {% if order_by=='tempo' %}selected{% endif %}>BPM</option>
             <option value="vocalness" {% if order_by=='vocalness' %}selected{% endif %}>Vocal</option>
             <option value="acousticness" {% if order_by=='acousticness' %}selected{% endif %}>Acoustic</option>

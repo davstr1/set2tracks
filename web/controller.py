@@ -70,7 +70,7 @@ def get_tracks_min_maxes():
 def get_tracks(page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None,instrumental_min=None,instrumental_max=None,order_by=None,asc=None):
     query = Track.query
     
-    if order_by == 'recent':
+    if order_by == '':
         order_attr = Track.id
     else:
         order_attr = getattr(Track, order_by, None)

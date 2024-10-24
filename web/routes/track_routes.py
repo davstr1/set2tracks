@@ -31,7 +31,7 @@ def tracks():
     instrumental_min = 100 - vocal_max if vocal_max is not None else None
     instrumental_max = 100 - vocal_min if vocal_min is not None else None
     
-    order_by = request.args.get('order_by', 'recent', type=str)
+    order_by = request.args.get('order_by', '', type=str)
     asc = request.args.get('asc', None, type=str)
     
     min_maxes = get_tracks_min_maxes()
