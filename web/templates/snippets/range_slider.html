@@ -15,7 +15,13 @@
       <div class="w-12">
         <input type="text" name="{{min_val_name}}" maxlength="5" x-on:input="mintrigger" x-model="minVal" class="px-1 py-2 border border-primary-content rounded text-center text-xs">
       </div>
-      <div>{{label}}</div>
+      <div class="flex items-center w-[100px]">
+        
+        <svg @click="resetValues();setTimeout(() => submitForm(), 0)" class="inline-block h-5 w-5 rounded-full hover:bg-gray-500 p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span class="ml-2">{{label}} </span>
+      </div>
       <div class="w-12">
         <input type="text" name="{{max_val_name}}" maxlength="5" x-on:input="maxtrigger" x-model="maxVal" class="px-1 py-2 border border-primary-content rounded  text-center text-xs">
       </div>

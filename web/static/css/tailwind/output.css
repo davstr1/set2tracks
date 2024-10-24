@@ -3201,6 +3201,10 @@ input[type=password]:focus {
   margin-right: 18px;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -3430,6 +3434,14 @@ input[type=password]:focus {
 
 .w-14 {
   width: 3.5rem;
+}
+
+.w-\[\] {
+  width: ;
+}
+
+.w-\[100px\] {
+  width: 100px;
 }
 
 .min-w-\[200px\] {
