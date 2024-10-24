@@ -41,7 +41,7 @@
       clearInterval(checkTrackPlayerHead);
       audioPlayer.setAttribute('src', audioUrl);
       audioPlayer.load(); // Load the new audio source
-      audioPlayer.addEventListener('loadedmetadata', function () {
+      audioPlayer.addEventListener('canplaythrough', function () {
         console.log('Duration of the song:', audioPlayer.duration, 'seconds');
         audioPlayer.volume = 0.5; // Set the volume to 50%
         audioPlayer.play();
@@ -65,7 +65,7 @@
       }, 50); // Update every second
 
     } else {
-      if (startPercent > 0) {
+      if (startPercent > 0 && !isNaN(audioPlayer.duration)) {
         audioPlayer.currentTime = audioPlayer.duration * startPercent / 100;
       }
       audioPlayer.play();
@@ -151,5 +151,8 @@
       audioPlayer.play(); // Start playing the audio
     });
   });
+
+
+
 
 </script>
