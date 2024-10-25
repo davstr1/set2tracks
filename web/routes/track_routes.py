@@ -118,6 +118,8 @@ def tracks():
         user_playlists = get_playlists_from_user(user_id, order_by='az',page=1,per_page=100)
     else:
         user_playlists = []
+        
+    current_url = request.url
     
     return render_template('tracks.html', 
                            tracks=tracks,
@@ -142,6 +144,7 @@ def tracks():
                             asc=asc,
                            tpl_utils=tpl_utils,
                            l=l,
+                           current_url=current_url,
                            page_name='explore',
                            subpage_name='tracks',)
 
