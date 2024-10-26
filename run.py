@@ -1,4 +1,5 @@
 import logging
+from pdb import run
 import time
 from web import create_app
 import os, glob
@@ -13,17 +14,8 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 template_files = glob.glob(template_dir + '/**/*.html', recursive=True)
 
 def run_app():
-    try:
-        app.run(debug=True, port=50001, extra_files=template_files, use_reloader=True)
-    except Exception as e:
-        print(f"Error occurred: {e}. Restarting the application in 5 seconds...")
-        time.sleep(5)
-        run_app()
-
+    app.run(debug=True, port=50001, extra_files=template_files, use_reloader=True)
+        
+    
 if __name__ == '__main__':
-    while True:
-        try:
-            run_app()
-        except Exception as e:
-            print(f"Unhandled error: {e}. Restarting the application in 5 seconds...")
-            time.sleep(5)
+        run_app()
