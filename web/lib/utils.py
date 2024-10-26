@@ -4,7 +4,7 @@ import contextlib
 import io
 from pprint import pprint
 from typing import Union
-
+from web.logger import logger
 import numpy as np
 
 
@@ -232,3 +232,33 @@ def calculate_and_sort_tempo_distribution(tracks):
     sorted_tempo_percentages = dict(sorted(tempo_percentages.items(), key=lambda item: item[1], reverse=True))
 
     return sorted_tempo_percentages
+
+
+
+def discarded_reason_to_ux(reason):
+       
+       if '0 unique track' in reason:
+           return 'No track found'
+       if '1 unique track' in reason:
+           return 'Only 1 track found'
+       if 'unique track' in reason:
+           return reason.replace('unique','')
+       if '15m' in reason:
+           return 'shorter than 15 minutes'
+       if 'private' in reason:
+           return 'private'
+       if 'embeddable' in reason:
+           return 'not embeddable'
+       if 'live event' in reason or 'offline' in reason:
+           return 'live event. Come back to the channel when the event is over'
+       if 'Unable to process >4GB files' in reason:
+           return '> 4GB. Right now we cannot process such big files or long videos (more than 3 hours ish)'
+       
+       # Retry errors
+       if 'bot' in reason:
+           return 'Busted as a bot. Queued to rety...'
+       if 'download' in reason:
+           return 'Error downloading the video. Queued to retry...'
+       else:
+            logger.error(f"Unknown discarded reason: {reason}")
+            return reason

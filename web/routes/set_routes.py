@@ -13,7 +13,7 @@ from lang import Lang
 from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, is_set_in_queue, pre_queue_set, queue_set, remove_set_temp_files, upsert_set_browsing_history
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
-from web.lib.utils import calculate_decade_distribution
+from web.lib.utils import calculate_decade_distribution, discarded_reason_to_ux
 from web.lib.youtube import youtube_video_id_from_url, youtube_video_input_is_valid
 from web.model import SetQueue
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected,is_admin
@@ -352,31 +352,7 @@ def add():
 
 @set_bp.route('/insert_set/<video_id>', methods=['GET'])
 def insert_set_route(video_id):
-    
-    def discarded_reason_to_ux(reason):
-        
-        if '0 unique track' in reason:
-            return 'No track found'
-        if '1 unique track' in reason:
-            return 'Only 1 track found'
-        if 'unique track' in reason:
-            return reason.replace('unique','')
-        if '15m' in reason:
-            return 'shorter than 15 minutes'
-        if 'private' in reason:
-            return 'private'
-        if 'embeddable' in reason:
-            return 'not embeddable'
-        if 'live event' in reason or 'offline' in reason:
-            return 'live event. Come back to the channel when the event is over'
-        if 'Unable to process >4GB files' in reason:
-            return '> 4GB. Right now we cannot process such big files or long videos (more than 3 hours ish)'
-        else:
-            logger.error(f"Unknown discarded reason: {reason}")
-            return reason
-        
-        
-    
+     
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('set.add')))
     
