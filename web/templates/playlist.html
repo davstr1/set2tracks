@@ -29,12 +29,12 @@
     <div class="flex flex-col justify-start space-y-4 border b-1 p-4">
 
       <a disabled="true" data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" class="export-sync btn ">
-        <span class="export{% if playlist.playlist_id_spotify %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_spotify %} hidden{% endif %}">Sync with </span>Spotify
+        <span class="export{% if playlist.playlist_id_spotify %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_spotify %} hidden{% endif %}">Update to </span>Spotify
       </a>
 
 
       <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync" >
-        <span class="export{% if playlist.playlist_id_apple %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_apple %} hidden{% endif %}">Sync with </span>Apple Music
+        <span class="export{% if playlist.playlist_id_apple %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_apple %} hidden{% endif %}">Update to </span>Apple Music
       </a>
 
 
