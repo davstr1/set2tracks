@@ -244,21 +244,32 @@ def discarded_reason_to_ux(reason):
        if 'unique track' in reason:
            return reason.replace('unique','')
        if '15m' in reason:
-           return 'shorter than 15 minutes'
+           return 'Shorter than 15 minutes'
        if 'private' in reason:
            return 'private'
        if 'embeddable' in reason:
-           return 'not embeddable'
+           return 'Not embeddable'
        if 'live event' in reason or 'offline' in reason:
-           return 'live event. Come back to the channel when the event is over'
+           return 'Live event. Please retry when it is over'
        if 'Unable to process >4GB files' in reason:
-           return '> 4GB. Right now we cannot process such big files or long videos (more than 3 hours ish)'
+           return "> 4GB. We can't process extra-long videos (typically > 3h)."
+       if 'removed by the uploader' in reason:
+           return 'Removed by the uploader'
+       if 'copyright' in reason:
+           return 'Copyright strike'
+       if 'unavailable' in reason:
+           return 'Content Unavailable'
+       if 'age' in reason:  
+            return 'Age restricted'
        
        # Retry errors
        if 'bot' in reason:
            return 'Busted as a bot. Queued to rety...'
        if 'download' in reason:
            return 'Error downloading the video. Queued to retry...'
+       if 'premiere' in reason:
+              return f'{reason}. Will be queued to retry...'
        else:
-            logger.error(f"Unknown discarded reason: {reason}")
-            return reason
+            msg = f'Unknown discarded reason: {reason}'
+            logger.error(msg)
+            return msg

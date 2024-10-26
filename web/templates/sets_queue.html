@@ -102,7 +102,9 @@
                   <div class="discreet">{{set.video_info_json.channel}}</div>
 
                   {% if set.discarded_reason and set.status != 'done' %}
-                  <div class="text-sm text-red-500 truncate max-w-xs tooltip px-4 pl-0" data-tip="{{set.discarded_reason}}">{{discarded_reason_to_ux(set.discarded_reason)}}</div>
+                  <div class="tooltip" data-tip="{{discarded_reason_to_ux(set.discarded_reason)}}">
+                  <div class="text-sm text-red-500 truncate max-w-xs  px-4 pl-0">{{discarded_reason_to_ux(set.discarded_reason)}}</div>
+                </div>
                   {% endif %}
                 </div>
 

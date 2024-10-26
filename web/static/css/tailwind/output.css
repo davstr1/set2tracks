@@ -4113,6 +4113,10 @@ input[type=password]:focus {
   fill: currentColor;
 }
 
+.fill-red-500 {
+  fill: #ef4444;
+}
+
 .stroke-base-content {
   stroke: var(--fallback-bc,oklch(var(--bc)/1));
 }
