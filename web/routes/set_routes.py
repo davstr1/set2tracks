@@ -2,6 +2,7 @@ from math import e
 from pprint import pprint
 import re
 import stat
+from turtle import st
 from boilersaas.utils.mail import send_email
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -9,7 +10,7 @@ from flask import current_app as app
 from flask_cors import CORS, cross_origin
 from requests import get
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, pre_queue_set, queue_set, remove_set_temp_files, upsert_set_browsing_history
+from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_random_set_searches, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, is_set_in_queue, pre_queue_set, queue_set, remove_set_temp_files, upsert_set_browsing_history
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import calculate_decade_distribution
@@ -17,7 +18,7 @@ from web.lib.youtube import youtube_video_id_from_url, youtube_video_input_is_va
 from web.model import SetQueue
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected,is_admin
 from web.logger import logger
-
+from markupsafe import Markup
 
 set_bp = Blueprint('set', __name__)
 
@@ -312,6 +313,7 @@ def related_tracks(track_id):
 
 
 @set_bp.route('/add', methods=['GET', 'POST'])
+# Shouw the form or just do the basic verification befor inserting the set
 def add():
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('set.add')))
@@ -351,13 +353,52 @@ def add():
 @set_bp.route('/insert_set/<video_id>', methods=['GET'])
 def insert_set_route(video_id):
     
+    def discarded_reason_to_ux(reason):
+        
+        if '0 unique track' in reason:
+            return 'No track found'
+        if '1 unique track' in reason:
+            return 'Only 1 track found'
+        if 'unique track' in reason:
+            return reason.replace('unique','')
+        if '15m' in reason:
+            return 'shorter than 15 minutes'
+        if 'private' in reason:
+            return 'private'
+        if 'embeddable' in reason:
+            return 'not embeddable'
+        if 'live event' in reason or 'offline' in reason:
+            return 'live event. Come back to the channel when the event is over'
+        if 'Unable to process >4GB files' in reason:
+            return '> 4GB. Right now we cannot process such big files or long videos (more than 3 hours ish)'
+        else:
+            logger.error(f"Unknown discarded reason: {reason}")
+            return reason
+        
+        
+    
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('set.add')))
     
-    # Todo: check if the set already is in queue or discarded
+    # check if the set already is in queue or discarded
+    queued_set = is_set_in_queue(video_id)
+    print('queued_set',queued_set)
+    if queued_set and queued_set.status != 'done':
+        if queued_set.status == 'discarded':
+            ux_discarded_reason = discarded_reason_to_ux(queued_set.discarded_reason)
+            flash(Markup(f'This video was discarded : <strong>{ux_discarded_reason}</strong>'), 'error')
+            return redirect(url_for('set.add', youtube_url=video_id))
+        elif queued_set.status == 'premiered':
+            flash(f'This set {queued_set.discarded_reason}. Come back later', 'warning')
+            return redirect(url_for('set.add', youtube_url=video_id))
+        else:
+            flash('This set is already in the queue. Will be published in a moment', 'warning')
+            return redirect(url_for('set.add', youtube_url=video_id))
     
+    # published
     if (is_set_exists(video_id)):
-       return redirect(url_for('set.set',set_id=get_set_id_by_video_id(video_id))) 
+        flash('Yeehaaaa ! the set is already there', 'info')
+        return redirect(url_for('set.set',set_id=get_set_id_by_video_id(video_id))) 
    
     send_email = request.args.get('send_email')
     play_sound = request.args.get('play_sound')
