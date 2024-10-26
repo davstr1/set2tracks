@@ -216,6 +216,7 @@ def sets_queue():
                            status=status,
                           
                            format_set_queue_error=format_set_queue_error,
+                           discarded_reason_to_ux=discarded_reason_to_ux,
                            include_15min_error=include_15min_error,
                            count=count)
     
