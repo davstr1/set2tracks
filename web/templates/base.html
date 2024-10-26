@@ -155,7 +155,7 @@
         /* Define the initial state and the transition */
         #system-message {
             top: -100%;
-            transition: top 0.3s ease-in-out;
+            transition: top 1s ease-in-out;
         }
 
         #system-message.show {
@@ -166,7 +166,7 @@
     {% if messages %}
 
     {% for category, message in messages %}
-    <div id="system-message" class="show fixed w-full z-50  bg-{{category}} text-white p-4 text-center transition-all duration-300">
+    <div id="system-message" class="show fixed w-full z-50  bg-{{category}} text-white p-4 text-center">
 
         <div class="message">{{ message }}</div>
 
@@ -225,11 +225,15 @@
     }
 
     // Add event listener to hide system message when clicking outside
-    document.addEventListener('click', (event) => {
+    function hideSystemMessage(event) {
         if (!systemMessage.contains(event.target) && systemMessage.classList.contains('show')) {
             systemMessage.classList.remove('show');
         }
-    });
+    }
+
+    document.addEventListener('click', hideSystemMessage);
+    document.addEventListener('scroll', hideSystemMessage);
+
 
     function showSystemMessage(message, type = 'info') {
 
