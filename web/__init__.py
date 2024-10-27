@@ -30,10 +30,12 @@ def set_global_exception_handler(app):
     def unhandled_exception(e):
         response = dict()
         error_message = traceback.format_exc()
-        app.logger.error("Caught Exception: {}".format(error_message)) #or whatever logger you use
-        #response["errorMessage"] = error_message
-        #return response, 500
-        return render_template('error.html', error_message=error_message), 500
+        error_type = type(e).__name__
+        error_message = str(e)
+        error_message_basic = f"{error_type}: {error_message}"
+        logger = logging.getLogger("myapp.error_handled")
+        logger.error("Caught Exception: {}".format(error_message_basic)) #or whatever logger you use
+        return render_template('error.html', error_message=error_message,error_message_basic=error_message_basic), 500
 
 def init_extend_app(app):
     app.register_blueprint(basic_bp)
