@@ -18,66 +18,74 @@
   function audioPlayerPlay(track, startPercent = 0) {
     audioUrl = track.getAttribute('data-preview-url');
     if (!audioUrl) {
-      console.log('no audio url');
-      track.classList.remove('active', 'playing');
-      track.style.setProperty('--background-width', `0%`);
-      nextTrack = findNextTrackElement(track);
-      if (nextTrack) {
-
-        nextTrack.classList.add('active', 'playing');
-        audioPlayerPlay(nextTrack);
-        return;
-      } else {
-        console.log('no next track');
-        return;
-      }
-
-
-    }
-
-
-
-    if (audioPlayer.getAttribute('src') !== audioUrl) {
-      clearInterval(checkTrackPlayerHead);
-      audioPlayer.setAttribute('src', audioUrl);
-      audioPlayer.load(); // Load the new audio source
-      audioPlayer.addEventListener('canplaythrough', function () {
-        console.log('Duration of the song:', audioPlayer.duration, 'seconds');
-        audioPlayer.volume = 0.5; // Set the volume to 50%
-        audioPlayer.play();
-        audioPlayer.removeEventListener('loadedmetadata', this);
-      });
-      checkTrackPlayerHead = setInterval(function () {
-        const percentageWidth = parseFloat((audioPlayer.currentTime / audioPlayer.duration * 100).toFixed(2));
-        track.style.setProperty('--background-width', `${percentageWidth}%`);
-        if (percentageWidth >= 100) {
-          clearInterval(checkTrackPlayerHead);
-          nextTrack = findNextTrackElement(track);
-          if (nextTrack) {
-
-            track.classList.remove('active', 'playing');
-            track.style.setProperty('--background-width', `0%`);
+        console.log('no audio url');
+        track.classList.remove('active', 'playing');
+        track.style.setProperty('--background-width', `0%`);
+        const nextTrack = findNextTrackElement(track);
+        if (nextTrack) {
             nextTrack.classList.add('active', 'playing');
             audioPlayerPlay(nextTrack);
-          }
+            return;
+        } else {
+            console.log('no next track');
+            return;
         }
-
-      }, 50); // Update every second
-
-    } else {
-      if (startPercent > 0 && !isNaN(audioPlayer.duration)) {
-        audioPlayer.currentTime = audioPlayer.duration * startPercent / 100;
-      }
-      audioPlayer.play();
-
     }
 
+    // Check if the new source is different from the current one
+    if (audioPlayer.getAttribute('src') !== audioUrl) {
+        clearInterval(checkTrackPlayerHead);
+        audioPlayer.pause(); // Pause first before loading a new source
+        audioPlayer.currentTime = 0; // Reset the player
 
+        audioPlayer.setAttribute('src', audioUrl);
+        audioPlayer.load(); // Load the new audio source
 
+        // Show loading animation or message here if needed
+        const playPromise = audioPlayer.play();
 
-  }
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log('Playback started successfully.');
+                checkTrackPlayerHead = setInterval(function () {
+                    const percentageWidth = parseFloat((audioPlayer.currentTime / audioPlayer.duration * 100).toFixed(2));
+                    track.style.setProperty('--background-width', `${percentageWidth}%`);
+                    if (percentageWidth >= 100) {
+                        clearInterval(checkTrackPlayerHead);
+                        const nextTrack = findNextTrackElement(track);
+                        console.log('track:', track);
+                        console.log('nextTrack:', nextTrack);
+                        if (nextTrack) {
+                            track.classList.remove('active', 'playing');
+                            track.style.setProperty('--background-width', `0%`);
+                            nextTrack.classList.add('active', 'playing');
+                            audioPlayerPlay(nextTrack);
+                        }
+                    }
+                }, 50);
+            }).catch(error => {
+                console.error('Playback failed or was interrupted:', error);
+                // Show paused or error UI if needed
+            });
+        }
+    } else {
+        if (startPercent > 0 && !isNaN(audioPlayer.duration)) {
+            audioPlayer.currentTime = audioPlayer.duration * startPercent / 100;
+        }
+        
+        const playPromise = audioPlayer.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.error('Playback failed or was interrupted:', error);
+                // Handle error UI here if needed
+            });
+        }
+    }
+}
+
 
   function findNextTrackElement(currentElement) {
+    console.log('next sicling:', currentElement.nextElementSibling);
     return currentElement.nextElementSibling ? currentElement.nextElementSibling.closest('.track') : null;
   }
 
