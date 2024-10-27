@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .error-container {
+            position: relative;
+            width: 100%;
+            max-width: 829px;
+        }
+        .error-image {
+            width: 100%;
+            height: auto;
+        }
+        .error-message {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            color: #ffffff;
+            
+            padding: 0.5rem;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="error-container">
+        <img src="{{url_for('static',filename='im/app_error.webp')}}" alt="Error Image" class="error-image">
+       
+    </div>
+    <h1>An unexpected error occurred. Please try again later.</h1>
+</body>
+</html>

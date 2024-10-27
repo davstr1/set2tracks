@@ -1,6 +1,6 @@
 import logging
 import traceback
-from flask import Flask
+from flask import Flask, render_template
 from config import Config
 
 # important to import before. templates takes precedence
@@ -31,8 +31,9 @@ def set_global_exception_handler(app):
         response = dict()
         error_message = traceback.format_exc()
         app.logger.error("Caught Exception: {}".format(error_message)) #or whatever logger you use
-        response["errorMessage"] = error_message
-        return response, 500
+        #response["errorMessage"] = error_message
+        #return response, 500
+        return render_template('error.html', error_message=error_message), 500
 
 def init_extend_app(app):
     app.register_blueprint(basic_bp)
