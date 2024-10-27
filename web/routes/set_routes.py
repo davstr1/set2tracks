@@ -228,11 +228,7 @@ def sets_queue():
 @set_bp.route('/set/<int:set_id>')
 def set(set_id):
     set = get_set_with_tracks(set_id)
-    
-    txt = request.args.get('txt', '', type=str)
-    
-
-    
+     
     if 'error' in set:
         return redirect(url_for('set.sets'))
     
@@ -245,13 +241,8 @@ def set(set_id):
     
     #genres = get_set_genres_by_occurrence(set_id)
     #pprint(genres)
-   
-    
-
    # avg_properties = calculate_avg_properties(set['tracks'])
- 
-    most_common_decades = calculate_decade_distribution(set['tracks'])
-    
+    #most_common_decades = calculate_decade_distribution(set['tracks'])
     #pprint(most_common_decades)
     # most_common_tempos = calculate_and_sort_tempo_distribution(set['tracks'])
     # pprint(avg_properties)
@@ -259,9 +250,6 @@ def set(set_id):
     # print(most_common_decades)
     # print(most_common_tempos)
     #pprint(get_set_avg_characteristics(set_id))
-    
-    if txt:
-        return render_template('set.txt', set=set)
     
     current_url = request.url
     user_id = get_user_id()
