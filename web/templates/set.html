@@ -328,8 +328,6 @@ even where the player is not behind*/
     }
 
     var currentTime = player.getCurrentTime();
-
-    var currentTime = player.getCurrentTime();
     if (currentTime == lastCurrentTime) {
       return;
     }
@@ -343,13 +341,12 @@ even where the player is not behind*/
 
     if (activeTrack !== newActiveTrack) {
 
-      console.log('newActiveTrack', newActiveTrack)
-      console.log('currentTime', currentTime)
+      console.log('new active track motherfuckar')
       if (activeTrack) {
         activeTrack.classList.remove('active', 'playing');
       }
       if (newActiveTrack) {
-        console.log('adding active PLAYING')
+      
         newActiveTrack.classList.add('active', 'playing');
       }
       activeTrack = newActiveTrack;
@@ -370,11 +367,7 @@ even where the player is not behind*/
 
   function stopAndHideAudioPlayer() {
     var audioPlayer = document.getElementById('audio-player');
-    if (audioPlayer.classList.contains('hidden')) {
-      return;
-    }
     audioPlayer.pause();
-    audioPlayer.classList.add('hidden');
   }
 
   function onPlayerReady(e) {
@@ -382,7 +375,7 @@ even where the player is not behind*/
     startActiveTrackChecking();
     var trackList = document.getElementById('tracklist');
     trackList.addEventListener('click', function (event) {
-
+      console.log('tracklist clickedo')
 
 
       stopAndHideAudioPlayer()

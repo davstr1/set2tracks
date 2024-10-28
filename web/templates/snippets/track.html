@@ -1,35 +1,46 @@
 <div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="track hover:bg-blue-950 rounded-lg mb-0 cursor-pointer relative group  ">
 
-  <div class=" flex flex-wrap items-center   sm:pb-4">
-    <div class="action-pause p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12 relative flex items-center justify-center">
-      <div class="track-number">
-        {% if loop_index is defined %}
-        <span class="sm:hidden">#</span>
-        {{ loop_index }}
-        {% endif %}
+  <div class="flex flex-wrap items-center   sm:pb-4">
+    <div class=" p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12  flex items-center justify-center">
+
+      <div class="flex flex-col justify-center items-center h-full">
+
+        <div class="h-6 w-6 relative action-pause">
+          <div class="track-number">
+            {% if loop_index is defined %}
+            <span class="sm:hidden">#</span>
+            {{ loop_index }}
+            {% endif %}
+          </div>
+          <div class="song-play-button absolute align-middle bg-center top-0">
+            <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+              <use xlink:href="#icon-play"></use>
+            </svg>
+          </div>
+          <div class="song-pause-button absolute align-middle bg-center top-0">
+            <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+              <use xlink:href="#icon-pause"></use>
+            </svg>
+          </div>
+          <div class="song-played-indicator absolute align-middle bg-center opacity-55 top-0"><img style="width:24px;height:24px" class="bg-transparent" src="{{url_for('static',filename='im/icons8-audio-wave-white.gif')}}" /></div>
+        </div>
+
+        <div>
+          <div class="w-full flex items-center justify-center sm:pt-2">
+            <a target="_blank" href="{{ track.preview_uri }}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
+              <svg fill="#ffffff" class="w-12 h-12 sm:h-6 sm:w-6 fill-base-content hover:fill-primary">
+                <use xlink:href="#icon-headphones"></use>
+              </svg>
+            </a>
+          </div>
+        </div>
+
       </div>
-      <div class="song-play-button absolute align-middle bg-center">
-        <svg class="w-6 h-6 fill-base-content hover:fill-primary">
-          <use xlink:href="#icon-play"></use>
-        </svg>
-      </div>
-      <div class="song-pause-button absolute align-middle bg-center ">
-        <svg class="w-6 h-6 fill-base-content hover:fill-primary">
-          <use xlink:href="#icon-pause"></use>
-        </svg>
-      </div>
-      <div class="song-played-indicator absolute align-middle bg-center opacity-55"><img style="width:24px;height:24px" class="bg-transparent" src="{{url_for('static',filename='im/icons8-audio-wave-white.gif')}}" /></div>
     </div>
 
 
     <div class="p-2 w-full sm:w-1/6 lg:w-20 flex flex-col items-center relative group ">
-      <div class="absolute inset-0 flex items-center justify-center invisible group-hover:visible">
-        <a target="_blank" href="{{track.preview_uri}}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
-          <svg fill="#ffffff" class="w-12 h-12 sm:h-6 sm:w-6 fill-base-content hover:fill-primary">
-            <use xlink:href="#icon-headphones"></use>
-          </svg>
-        </a>
-      </div>
+
       <img class="h-full " src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
       <div class="h-0 w-16">
         <div class="bg-base-content discreet h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>

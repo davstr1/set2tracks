@@ -5307,6 +5307,10 @@ input[type=password]:focus {
     padding-top: 1rem;
   }
 
+  .sm\:pt-2 {
+    padding-top: 0.5rem;
+  }
+
   .sm\:text-left {
     text-align: left;
   }

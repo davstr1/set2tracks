@@ -9,34 +9,6 @@
     return null;
   }
 
-  function handlePlayTrackPreview(event) {
-    event.preventDefault(); // Prevent the default link behavior
-    event.stopPropagation(); // Prevent the event from bubbling up
-
-    const audioUrl = this.getAttribute('href');
-
-    if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo();
-
-    if (audioPlayer.getAttribute('src') !== audioUrl) {
-      audioPlayer.setAttribute('src', audioUrl);
-      audioPlayer.load(); // Load the new audio source
-      audioPlayer.play();
-    } else { // if the audio player is already playing the same track
-
-      if (!audioPlayer.paused) {
-        audioPlayer.pause();
-        event.target.closest('.track').classList.remove('playing');
-      } else {
-        audioPlayer.play();
-        event.target.closest('.track').classList.add('playing');
-      }
-    }
-  }
-
-  audioPlayer = document.getElementById('audio-player');
-  document.querySelectorAll('.play-track-preview').forEach(link => {
-    link.addEventListener('click', handlePlayTrackPreview);
-  });
 
 
 
@@ -88,7 +60,7 @@
       console.log('song-pause-button clicked')
       event.stopPropagation();
       if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo()
-      audioPlayer.pause();
+      // audioPlayer.pause();
 
     });
   });
@@ -97,32 +69,24 @@
 
   document.querySelectorAll('.track .song-play-button').forEach(link => {
     link.addEventListener('click', function (event) {
-      console.log('song-play-button clicked')
-      if (typeof player !== 'undefined') {
-        event.stopPropagation();
-        var playerState = player.getPlayerState();
-        var track = getClosestParentByClass(this, 'track');
-        var trackIsActive = track.classList.contains('active');
+      event.stopPropagation();
+      if (typeof player === 'undefined') return;
 
-        if (!trackIsActive) {
-          var trackStartTime = track.getAttribute('data-start_time');
-          player.seekTo(trackStartTime);
-        }
 
-        player.playVideo();
-        if (!audioPlayer.paused) {
-          audioPlayer.pause();
-        }
-        // if (playerState === 2 ){ // paused
-        //   player.playVideo()
-        // // }else{ // video not started yet
-        // //   correspondingTrack = this.closest('.track');
-        // //   trackStartTime = correspondingTrack.getAttribute('data-start_time');
-        // //   console.log(trackStartTime);
-        // //   player.seekTo(trackStartTime);
+      var playerState = player.getPlayerState();
+      var track = getClosestParentByClass(this, 'track');
+      var trackIsActive = track.classList.contains('active');
 
-        // }
+      if (!trackIsActive) {
+        var trackStartTime = track.getAttribute('data-start_time');
+        player.seekTo(trackStartTime);
       }
+
+      player.playVideo();
+      if (!audioPlayer.paused) {
+        audioPlayer.pause();
+      }
+
     });
   });
 
