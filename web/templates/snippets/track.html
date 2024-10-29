@@ -50,13 +50,14 @@
 
       <div class="font-bold text-lg  tooltip " data-tip="{{ track.title}} (click to search in tracks)">
         {% if track.title != "Track not found" %}
-        <a class="text-center sm:text-left line-clamp-1" href="{{url_for('track.tracks',s=track.title)}}">{{ track.title }}</a>
+        <a class="text-center sm:text-left line-clamp-1" href="{{url_for('track.tracks',s=track.title)}}">{{track.title}}</a>
         {% endif %}
       </div>
       {% if track.id != 1 %}
       <div class="italic tooltip flex max-w-fit" data-tip="{{ track.artist_name}} (click to search in tracks)">
         {% if track.artist_name %}
         <a class="line-clamp-1 text-center sm:text-left" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
+        <p> {{ track.id }} </p>
         {% else %}
         -
         {% endif %}
@@ -66,7 +67,7 @@
     </div>
 
     <div class="hidden sm:w-1/6 sm:flex"></div>
-    <div class=" discreet bg-primary-content p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
+    <div class=" discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
       {% if track.tempo %}
       <div>{{ track.tempo if track.tempo else '' }}</div>
       {% endif %}
@@ -91,13 +92,14 @@
       {% endif %}
     </div>
 
-    <div class="discreet bg-primary-content p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left">
+    <div class="discreet  p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left">
       <div>{{ track.release_year if track.release_year else '-'}}</div>
+      <div class="-mt-2"><span class="text-xs">{{ track.release_date if track.release_date }}</span></div>
     </div>
 
     <div class="track-ext p-2 flex  space-x-2  buttons absolute bottom-16 w-full justify-center md:w-auto  sm:bottom-auto lg:justify-end  sm:relative lg:right-auto lg:bottom-auto">
       {% if track.artist_name and track.id != 1 %}
-      <div class="sm:visible-hover-track text-center sm:p-0 p-5 bg-primary-content sm:bg-transparent rounded-xl">
+      <div class="sm:visible-hover-track text-center sm:p-0 p-5  sm:bg-transparent rounded-xl">
         <a href="#" class="add-track-to-recent-playlist pr-4 tooltip " data-tip="Add to last used playlist">
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
             <use xlink:href="#icon-plus-circle"></use>

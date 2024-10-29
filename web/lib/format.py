@@ -221,6 +221,16 @@ def set_track_genres(track_json,db):
 
 
 def format_db_track_for_template(track):
+    
+    def strip_year(date_value):
+        if isinstance(date_value, str):
+            date_obj = datetime.strptime(date_value, "%Y-%m-%d")
+        elif isinstance(date_value, (datetime, date)):
+            date_obj = date_value
+        else:
+            return ""  # Return an empty string if the format is unexpected
+        
+        return date_obj.strftime("%m-%d")
 
     try :     
         track_info = {
@@ -237,6 +247,7 @@ def format_db_track_for_template(track):
             'album': track.album,
             'label': track.label,
             'release_year': track.release_year,
+            'release_date': strip_year(track.release_date),
             'artist_popularity_spotify': track.artist_popularity_spotify or 0,
            # 'start_time': track_set.start_time,
             #'end_time': track_set.end_time,
