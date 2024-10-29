@@ -371,7 +371,11 @@ even where the player is not behind*/
   }
 
   function onPlayerReady(e) {
-
+    
+    if(!e.target.videoTitle){
+      console.log('video is unavailable');
+      return;
+    }
     startActiveTrackChecking();
     var trackList = document.getElementById('tracklist');
     trackList.addEventListener('click', function (event) {
