@@ -64,10 +64,42 @@ def get_tracks_min_maxes():
     bpm_max = Track.query.with_entities(func.max(Track.tempo)).filter(Track.tempo.isnot(None), Track.tempo != 0).scalar()
     instrumental_min = Track.query.with_entities(func.min(Track.instrumentalness)).filter(Track.instrumentalness.isnot(None), Track.instrumentalness != 0).scalar()
     instrumental_max = Track.query.with_entities(func.max(Track.instrumentalness)).filter(Track.instrumentalness.isnot(None), Track.instrumentalness != 0).scalar()
-    return {'year_min': year_min, 'year_max': year_max, 'bpm_min': bpm_min, 'bpm_max': bpm_max, 'instrumental_min': instrumental_min, 'instrumental_max': instrumental_max}
+    speech_min = Track.query.with_entities(func.min(Track.speechiness)).filter(Track.speechiness.isnot(None), Track.speechiness != 0).scalar()
+    speech_max = Track.query.with_entities(func.max(Track.speechiness)).filter(Track.speechiness.isnot(None), Track.speechiness != 0).scalar()
+    danceability_min = Track.query.with_entities(func.min(Track.danceability)).filter(Track.danceability.isnot(None), Track.danceability != 0).scalar()
+    danceability_max = Track.query.with_entities(func.max(Track.danceability)).filter(Track.danceability.isnot(None), Track.danceability != 0).scalar()
+    energy_min = Track.query.with_entities(func.min(Track.energy)).filter(Track.energy.isnot(None), Track.energy != 0).scalar()
+    energy_max = Track.query.with_entities(func.max(Track.energy)).filter(Track.energy.isnot(None), Track.energy != 0).scalar()
+    loudness_min = Track.query.with_entities(func.min(Track.loudness)).filter(Track.loudness.isnot(None), Track.loudness != 0).scalar()
+    loudness_max = Track.query.with_entities(func.max(Track.loudness)).filter(Track.loudness.isnot(None), Track.loudness != 0).scalar()
+    valence_min = Track.query.with_entities(func.min(Track.valence)).filter(Track.valence.isnot(None), Track.valence != 0).scalar()
+    valence_max = Track.query.with_entities(func.max(Track.valence)).filter(Track.valence.isnot(None), Track.valence != 0).scalar()
+    return {
+        'year_min': year_min, 'year_max': year_max, 
+        'bpm_min': bpm_min, 'bpm_max': bpm_max, 
+        'instrumental_min': instrumental_min, 'instrumental_max': instrumental_max,
+        'speech_min': speech_min, 'speech_max': speech_max,
+        'danceability_min': danceability_min, 'danceability_max': danceability_max,
+        'energy_min': energy_min, 'energy_max': energy_max,
+        'loudness_min': loudness_min, 'loudness_max': loudness_max,
+        'valence_min': valence_min, 'valence_max': valence_max
+        }
 
 
-def get_tracks(page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min=None,year_max=None,instrumental_min=None,instrumental_max=None,order_by=None,asc=None):
+def get_tracks(
+        page=1,
+        per_page=20,
+        search=None,
+        bpm_min=None,bpm_max=None,
+        year_min=None,year_max=None,
+        instrumental_min=None,instrumental_max=None,
+        speech_min=None,speech_max=None,
+        danceability_min=None,danceability_max=None,
+        energy_min=None,energy_max=None,
+        loudness_min=None,loudness_max=None,
+        valence_min=None,valence_max=None,
+        order_by=None,asc=None):
+    
     query = Track.query
     
     if order_by == '':
@@ -93,8 +125,7 @@ def get_tracks(page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min
     if bpm_min:
         query = query.filter(Track.tempo >= bpm_min)
     if bpm_max:
-        query = query.filter(Track.tempo <= bpm_max)
-        
+        query = query.filter(Track.tempo <= bpm_max)    
     if year_min:
         query = query.filter(Track.release_year >= year_min)
     if year_max:
@@ -103,11 +134,30 @@ def get_tracks(page=1,per_page=20,search=None,bpm_min=None,bpm_max=None,year_min
         query = query.filter(Track.instrumentalness >= instrumental_min)
     if instrumental_max:
         query = query.filter(Track.instrumentalness <= instrumental_max)
+    if speech_min:
+        query = query.filter(Track.speechiness >= speech_min)
+    if speech_max:
+        query = query.filter(Track.speechiness <= speech_max)
+    if danceability_min:
+        query = query.filter(Track.danceability >= danceability_min)
+    if danceability_max:
+        query = query.filter(Track.danceability <= danceability_max)
+    if energy_min:
+        query = query.filter(Track.energy >= energy_min)
+    if energy_max:
+        query = query.filter(Track.energy <= energy_max)
+    if loudness_min:
+        query = query.filter(Track.loudness >= loudness_min)
+    if loudness_max:
+        query = query.filter(Track.loudness <= loudness_max)
+    if valence_min:
+        query = query.filter(Track.valence >= valence_min)
+
         
     count = query.count()    
     
-    year_min = Track.query.with_entities(func.min(Track.release_year)).scalar()
-    year_max = Track.query.with_entities(func.max(Track.release_year)).scalar()
+    # year_min = Track.query.with_entities(func.min(Track.release_year)).scalar()
+    # year_max = Track.query.with_entities(func.max(Track.release_year)).scalar()
         
     ret = query.paginate(page=page, per_page=per_page, error_out=False)
     tracks_for_template  = format_db_tracks_for_template(ret.items)
