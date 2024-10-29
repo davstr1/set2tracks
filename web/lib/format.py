@@ -229,8 +229,12 @@ def format_db_track_for_template(track):
             date_obj = date_value
         else:
             return ""  # Return an empty string if the format is unexpected
-        
-        return date_obj.strftime("%m-%d")
+    
+        # Calculate the difference in days between the current date and the provided date
+        if (datetime.now().date() - date_obj).days < 365:
+            return date_obj.strftime("%m-%d")
+        else:
+            return ""
 
     try :     
         track_info = {
