@@ -264,8 +264,14 @@
         menu.style.top = navbarHeight + 'px';
         menu.classList.toggle('hidden');
     });
-
-    // Setqueue query
+    // Overlay was shown when page is loaded from the browser's back button
+    // When aver having shown it on prev page off course.
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) { // Check if the page was loaded from bfcache
+            document.getElementById('overlay').classList.add('hidden'); // Hide the overlay
+            systemMessage.classList.remove('show');
+        }
+    });
 
 </script>
 
