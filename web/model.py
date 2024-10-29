@@ -60,7 +60,7 @@ class Track(db.Model):
     uri_apple = db.Column(db.String(255))
     release_year = db.Column(db.Integer, index=True)
     release_date = db.Column(db.Date, nullable=True, index=True)
-    artist_popularity_spotify = db.Column(db.Integer)
+    artist_popularity_spotify = db.Column(db.Integer, index=True)
     
     nb_sets = db.Column(db.Integer, default=0, index=True)
     nb_playlists = db.Column(db.Integer, default=0, index=True)
@@ -79,19 +79,19 @@ class Track(db.Model):
     
     # Spotify API fields
     
-    acousticness = db.Column(SmallInteger)
-    danceability = db.Column(SmallInteger)
-    duration_s = db.Column(Integer)  
-    energy = db.Column(SmallInteger)
-    key = db.Column(SmallInteger) # 1-11
-    mode = db.Column(SmallInteger) # 0-1
-    liveness = db.Column(SmallInteger)
-    loudness = db.Column(SmallInteger)
-    instrumentalness = db.Column(SmallInteger)
-    speechiness = db.Column(SmallInteger)
-    tempo = db.Column(SmallInteger)
-    time_signature = db.Column(SmallInteger)
-    valence = db.Column(SmallInteger)
+    acousticness = db.Column(SmallInteger, index=True)
+    danceability = db.Column(SmallInteger, index=True)
+    duration_s = db.Column(Integer, index=True)
+    energy = db.Column(SmallInteger, index=True)
+    key = db.Column(SmallInteger, index=True) # 1-11
+    mode = db.Column(SmallInteger, index=True) # 0-1
+    liveness = db.Column(SmallInteger, index=True)
+    loudness = db.Column(SmallInteger, index=True)
+    instrumentalness = db.Column(SmallInteger, index=True)
+    speechiness = db.Column(SmallInteger, index=True)
+    tempo = db.Column(SmallInteger, index=True)
+    time_signature = db.Column(SmallInteger, index=True)
+    valence = db.Column(SmallInteger, index=True)
     
     search_vector = db.Column(TSVectorType('title', 'artist_name'))
     
