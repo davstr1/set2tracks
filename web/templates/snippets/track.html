@@ -26,7 +26,7 @@
         </div>
 
         <div>
-          <div class="w-full flex items-center justify-center sm:pt-2">
+          <div class="w-full flex items-center justify-center sm:pt-2 song-preview-button">
             <a target="_blank" href="{{ track.preview_uri }}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
               <svg fill="#ffffff" class="w-12 h-12 sm:h-6 sm:w-6 fill-base-content hover:fill-primary">
                 <use xlink:href="#icon-headphones"></use>
