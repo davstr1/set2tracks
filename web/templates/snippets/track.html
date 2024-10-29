@@ -57,7 +57,6 @@
       <div class="italic tooltip flex max-w-fit" data-tip="{{ track.artist_name}} (click to search in tracks)">
         {% if track.artist_name %}
         <a class="line-clamp-1 text-center sm:text-left" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
-        <p> {{ track.id }} </p>
         {% else %}
         -
         {% endif %}
@@ -66,7 +65,7 @@
       {% endif %}
     </div>
 
-    <div class="hidden sm:w-1/6 sm:flex"></div>
+    
     <div class=" discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
       {% if track.tempo %}
       <div>{{ track.tempo if track.tempo else '' }}</div>
