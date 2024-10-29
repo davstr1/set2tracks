@@ -50,13 +50,13 @@
 
       <div class="font-bold text-lg  tooltip " data-tip="{{ track.title}} (click to search in tracks)">
         {% if track.title != "Track not found" %}
-        <a class="text-center sm:text-left line-clamp-1" href="{{url_for('track.tracks',s=track.title)}}">{{track.title}}</a>
+        <a class="text-center sm:text-left line-clamp-1 hover:underline" href="{{url_for('track.tracks',s=track.title)}}">{{track.title}}</a>
         {% endif %}
       </div>
       {% if track.id != 1 %}
       <div class="italic tooltip flex max-w-fit" data-tip="{{ track.artist_name}} (click to search in tracks)">
         {% if track.artist_name %}
-        <a class="line-clamp-1 text-center sm:text-left" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
+        <a class="line-clamp-1 text-center sm:text-left hover:underline" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
         {% else %}
         -
         {% endif %}
