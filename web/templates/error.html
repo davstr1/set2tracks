@@ -16,9 +16,14 @@
             height: 100vh;
             margin: 0;
             text-align: center;
+            padding: 5%;
         }
         h1 {
             font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        h2{
+            font-size: 1.5rem;
             margin-bottom: 1rem;
         }
         .error-container {
@@ -40,6 +45,16 @@
             padding: 0.5rem;
             box-sizing: border-box;
         }
+        .traceback{
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            color: #ffffff;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            overflow: auto;
+            max-height: 300px;
+            margin-bottom: 50px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -48,6 +63,16 @@
         <img src="{{url_for('static',filename='im/app_error.webp')}}" alt="Error Image" class="error-image">
        
     </div>
-    <h1>An unexpected error occurred. Please try again later.</h1>
+    <h1 class="mb-5">An unexpected error occurred. Please try again later.</h1>
+
+    {% if is_admin %}
+    <div class="error-container" >
+        <div class="traceback">
+            <strong>{{error_message}}</strong>
+            <pre>{{traceback_formated|safe}}</pre>
+            
+        </div>
+    </div>
+    {% endif %}
 </body>
 </html>

@@ -29,13 +29,21 @@ def set_global_exception_handler(app):
     @app.errorhandler(Exception)
     def unhandled_exception(e):
         response = dict()
-        error_message = traceback.format_exc()
+        
+        #traceback_formated = "<br>".join(traceback_full.splitlines())
+        error_message = str(e)
         error_type = type(e).__name__
         error_message = str(e)
-        error_message_basic = f"{error_type}: {error_message}"
+        error_message = f"{error_type}: {error_message}"
+        
+        traceback_full = traceback.format_exc()
+        traceback_formated = traceback_full.replace("Traceback (most recent call last):", "")
+        traceback_formated = traceback_formated.replace(error_message, "")
+        traceback_formated = traceback_formated.replace("\n", "<br>")   
+        
         logger = logging.getLogger("myapp.error_handled")
-        logger.error("Caught Exception: {}".format(error_message_basic)) #or whatever logger you use
-        return render_template('error.html', error_message=error_message,error_message_basic=error_message_basic), 500
+        logger.error("Caught Exception: {}".format(error_message)) #or whatever logger you use
+        return render_template('error.html', error_message=error_message,traceback_formated=traceback_formated), 500
 
 def init_extend_app(app):
     app.register_blueprint(basic_bp)
