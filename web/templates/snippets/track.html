@@ -91,7 +91,7 @@
       {% endif %}
     </div>
 
-    <div class="discreet  p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left">
+    <div class="discreet  p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left tooltip " data-tip ="Released {{ 'the ' + track.release_date + '-' +  (track.release_year | string) if track.release_date else ('in ' + (track.release_year | string) if track.release_year else 'date unknown') }}">
       <div>{{ track.release_year if track.release_year else '-'}}</div>
       <div class="-mt-2"><span class="text-xs">{{ track.release_date if track.release_date }}</span></div>
     </div>
