@@ -1,3 +1,4 @@
+from itertools import islice
 import json
 import os
 from platform import release
@@ -397,7 +398,11 @@ def ensure_valid_token():
     return token_info['access_token']
 
 
-
+def chunked(iterable, size):
+    """Yield successive chunks from iterable."""
+    iterator = iter(iterable)
+    for first in iterator:
+        yield [first, *islice(iterator, size - 1)]
 
 def create_spotify_playlist(playlist_name, playlist_description='Created Set2Tracks'):
     
@@ -410,8 +415,11 @@ def create_spotify_playlist(playlist_name, playlist_description='Created Set2Tra
 
     return playlist
 
+def track_uris_from_track_ids(track_ids):
+    return [f'spotify:track:{track_id}' for track_id in track_ids]
 
-def add_tracks_to_spotify_playlist(playlist_id, track_uris_list):
+
+def add_tracks_to_spotify_playlist(playlist_id, track_ids_list):
     token_info = session.get('token_info')
     if not token_info:
         return jsonify({'error': 'No Spotify token information found in session'}), 400
@@ -419,8 +427,11 @@ def add_tracks_to_spotify_playlist(playlist_id, track_uris_list):
     try:
         sp = spotipy.Spotify(auth=token_info['access_token'])
         user_id = sp.me()['id']
-
-        response = sp.user_playlist_add_tracks(user_id, playlist_id, track_uris_list)
+       
+        track_uris_list = [f'spotify:track:{track_id}' for track_id in track_ids_list]
+       
+        for chunk in chunked(track_uris_list, 100):
+            sp.playlist_add_items(playlist_id, chunk)
         
       
        
@@ -439,7 +450,7 @@ def add_tracks_to_spotify_playlist(playlist_id, track_uris_list):
         return jsonify({'error': f'Unexpected error: {e}'}), 500
 
 
-def get_spotify_playlist_tracks_ids(playlist_id):
+def get_spotify_playlist_tracks_ids(playlist_id):#
     token_info = session.get('token_info')
     if not token_info:
         return jsonify({'error': 'No Spotify token information found in session'}), 400
@@ -451,13 +462,20 @@ def get_spotify_playlist_tracks_ids(playlist_id):
         if 'id' not in playlist:
             return jsonify({'error': 'Playlist not found'}), 404
         
-        #print(f"Playlist: {playlist}")  # Debugging line
-        #return jsonify({'error': 'wtf'})
-        results = sp.playlist_tracks(playlist_id, fields='items(track(id,))')
-        #print(f"Results: {results}")  # Debugging line
-        return [item["track"]["id"] for item in results["items"]]
+        track_ids = []
+        offset = 0
+        limit = 100
+        while True:
+            results = sp.playlist_tracks(playlist_id, fields='items(track(id)),total', offset=offset, limit=limit)
+            track_ids.extend(item["track"]["id"] for item in results["items"])
+            
+            if len(results["items"]) < limit:
+                break
+            
+            offset += limit
         
-        return jsonify(results), 200
+        return track_ids
+        
 
     except spotipy.exceptions.SpotifyException as e:
         return jsonify({'error': f'Spotify API error: {e}'}), 500

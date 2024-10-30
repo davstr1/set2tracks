@@ -274,7 +274,7 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
             
         else:
             spotify_playlist_tracks_ids = get_spotify_playlist_tracks_ids(playlist_id_spotify)
-            local_tracks_ids = [track['key_track_spotify'] for track in tracks]
+            local_tracks_ids = [track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
             tracks_to_add = list(set(local_tracks_ids) - set(spotify_playlist_tracks_ids))
             tracks_to_add = [item for item in tracks_to_add if item not in (None, '')]
             if not len(tracks_to_add):

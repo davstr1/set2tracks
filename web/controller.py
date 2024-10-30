@@ -1986,7 +1986,8 @@ def sync_playlist_with_spotify():
     pass
 
 
-
+def spotify_tracks_uris_from_tracks(tracks):    
+    return ['spotify:track:'+track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
 
 
 def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
@@ -2021,6 +2022,7 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
     try:
         # Extract track IDs
         track_ids = [track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
+        
         if not track_ids:
             return {"error": "No valid track IDs found in the provided tracks"}
 
