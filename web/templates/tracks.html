@@ -33,42 +33,77 @@
         {% endif %}
       </div>
 
+
+
+
+
+      <div class="mb-4 mt-2 text-xs">
+        {% with min=year_min_default, max=year_max_default, min_val=year_min, max_val=year_max,min_val_name='year_min', max_val_name='year_max', label='Year' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=bpm_min_default, max=bpm_max_default, min_val=bpm_min, max_val=bpm_max, min_val_name='bpm_min', max_val_name='bpm_max', label='BPM' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocal' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=speech_min_default, max=speech_max_default, min_val=speech_min, max_val=speech_max, min_val_name='speech_min', max_val_name='speech_max', label='Speechy' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=energy_min_default, max=energy_max_default, min_val=energy_min, max_val=energy_max, min_val_name='energy_min', max_val_name='energy_max', label='Energic' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=loudness_min_default, max=loudness_max_default, min_val=loudness_min, max_val=loudness_max, min_val_name='loudness_min', max_val_name='loudness_max', label='Loud' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=valence_min_default, max=valence_max_default, min_val=valence_min, max_val=valence_max, min_val_name='valence_min', max_val_name='valence_max', label='Happy' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+      </div>
+
+
       {% with min=year_min_default, max=year_max_default, min_val=year_min, max_val=year_max, min_val_name='year_min', max_val_name='year_max', label='Year' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
       {% with min=bpm_min_default, max=bpm_max_default, min_val=bpm_min, max_val=bpm_max, min_val_name='bpm_min', max_val_name='bpm_max', label='BPM' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
       {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocal' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
       {% with min=speech_min_default, max=speech_max_default, min_val=speech_min, max_val=speech_max, min_val_name='speech_min', max_val_name='speech_max', label='Speechy' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
       {% with min=energy_min_default, max=energy_max_default, min_val=energy_min, max_val=energy_max, min_val_name='energy_min', max_val_name='energy_max', label='Energic' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
       {% with min=loudness_min_default, max=loudness_max_default, min_val=loudness_min, max_val=loudness_max, min_val_name='loudness_min', max_val_name='loudness_max', label='Loud' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
       {% with min=valence_min_default, max=valence_max_default, min_val=valence_min, max_val=valence_max, min_val_name='valence_min', max_val_name='valence_max', label='Happy' %}
-      {% include 'snippets/range_slider.html' %}
+      {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
-    
+
 
       {{order_by}}
       <div class="flex justify-between">
         <div class="relative h-10 w-24 min-w-[200px] my-8">
           <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
             <option value="release_date" {% if order_by=='release_date' %}selected{% endif %}>Released</option>
-            <option value="" {% if order_by=='' or order_by == null %}selected{% endif %}>New Here</option>
+            <option value="" {% if order_by=='' or order_by==null %}selected{% endif %}>New Here</option>
             <option value="tempo" {% if order_by=='tempo' %}selected{% endif %}>BPM</option>
             <option value="speechness" {% if order_by=='vocalness' %}selected{% endif %}>Vocal</option>
             <option value="acousticness" {% if order_by=='acousticness' %}selected{% endif %}>Acoustic</option>
@@ -98,6 +133,42 @@
       </div>
 
       <script>
+
+        function displayFilterText({ label, minValName, maxValName, min, max, minVal = null, maxVal = null }) {
+          console.log(min, max, minVal, minVal);
+          return {
+            minVal: minVal ?? min,
+            maxVal: maxVal ?? max,
+            min: min,
+            max: max,
+            minthumb: 0,
+            maxthumb: 0,
+            label: label,
+            resetValues() {
+              this.minVal = this.min;
+              this.maxVal = this.max;
+
+              const minInput = document.querySelector(`[name="${minValName}"]`);
+              const maxInput = document.querySelector(`[name="${maxValName}"]`);
+
+              if (minInput) minInput.value = this.min;
+              if (maxInput) maxInput.value = this.max;
+            },
+            get display() {
+              console.log(this.min, this.max, this.minVal, this.maxVal);
+              if (this.min === this.minVal && this.max === this.maxVal) return "";
+              if(this.minVal === this.maxVal) return `${this.label}: ${this.maxVal}`;
+              if (this.min === this.minVal) return `${this.label}: <= ${this.maxVal}`;
+              if (this.max === this.maxVal) return `${this.label}: >= ${this.minVal}`;
+              if (this.min === this.max) return `${this.label}: ${this.minVal}`;
+              return `${this.label}: ${this.minVal}-${this.maxVal}`;
+            }
+
+
+          }
+        }
+
+
         // Adapted from https://www.creative-tim.com/twcomponents/component/multi-range-slider        
         function range({ min, max, minValInput = null, maxValInput = null }) {
           const ret = {
@@ -105,22 +176,18 @@
             maxVal: maxValInput ?? max,
             min: min,
             max: max,
-            // minVal: 100,
-            // maxVal: 10000,
-            // min: 100,
-            // max: 10000,
             minthumb: 0,
             maxthumb: 0,
 
             mintrigger() {
-              this.minVal = Math.min(this.minVal, this.maxVal ); // -1 to disalow both values to be the same
+              this.minVal = Math.min(this.minVal, this.maxVal); // -1 to disalow both values to be the same
               this.minthumb = ((this.minVal - this.min) / (this.max - this.min)) * 100;
               console.log('mintrigger:', this.minVal, this.minthumb);
 
             },
 
             maxtrigger() {
-              this.maxVal = Math.max(this.maxVal, this.minVal ); // + 1 to disalow both values to be the same
+              this.maxVal = Math.max(this.maxVal, this.minVal); // + 1 to disalow both values to be the same
               this.maxthumb = 100 - (((this.maxVal - this.min) / (this.max - this.min)) * 100);
               console.log('maxtrigger:', this.maxVal, this.maxthumb);
             },

@@ -1,0 +1,4 @@
+
+  <template x-if="display" x-data="displayFilterText({label:'{{label}}',minValName:'{{min_val_name}}',maxValName:'{{max_val_name}}',min:{{min}},max:{{max}}{% if min_val is not none %}, minVal: {{ min_val }}{% endif %}{% if max_val is not none %}, maxVal: {{ max_val }}{% endif %} })">
+    <span x-text="display" class="p-2 border rounded-xl mr-1 border-primary text-primary cursor-pointer hover:border-gray-400 hover:text-gray-400 hover:line-through" @click="resetValues();submitForm()"></span>
+  </template>
