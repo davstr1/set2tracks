@@ -113,14 +113,14 @@
             maxthumb: 0,
 
             mintrigger() {
-              this.minVal = Math.min(this.minVal, this.maxVal - 1);
+              this.minVal = Math.min(this.minVal, this.maxVal ); // -1 to disalow both values to be the same
               this.minthumb = ((this.minVal - this.min) / (this.max - this.min)) * 100;
               console.log('mintrigger:', this.minVal, this.minthumb);
 
             },
 
             maxtrigger() {
-              this.maxVal = Math.max(this.maxVal, this.minVal + 1);
+              this.maxVal = Math.max(this.maxVal, this.minVal ); // + 1 to disalow both values to be the same
               this.maxthumb = 100 - (((this.maxVal - this.min) / (this.max - this.min)) * 100);
               console.log('maxtrigger:', this.maxVal, this.maxthumb);
             },
