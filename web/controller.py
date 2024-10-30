@@ -2035,7 +2035,7 @@ def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
     except TypeError as e:
         return {"error": f"Type error encountered: {str(e)}"}
     except Exception as e:
-        return {"error": f"Error adding tracks to playlist: {str(e)}"}
+        return {"error": f"Error adding tracks to tracklist: {str(e)}"}
 
     return {"playlist_id":playlist_id,"spotify_playlist_id": new_playlist['id'],"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
 
@@ -2529,7 +2529,7 @@ def create_apple_playlist_and_add_tracks(dev_token,user_token,playlist_name, tra
     except TypeError as e:
         return {"error": f"Type error encountered: {str(e)}"}
     except Exception as e:
-        return {"error": f"Error adding tracks to playlist: {str(e)}"}
+        return {"error": f"Error adding tracks to tracklist: {str(e)}"}
 
     if is_new_playlist:
         return {"playlist_id":playlist['id'],"apple_playlist_id": playlist_id_apple,"message": f"Apple playlist \"{playlist_name}\" created successfully with {len(track_ids_to_add)} tracks"}

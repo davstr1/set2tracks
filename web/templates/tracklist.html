@@ -1,4 +1,3 @@
-
 {% include 'snippets/track_css.html' %}
 {% include 'snippets/track_svg.html' %}
 
@@ -8,7 +7,7 @@
 
 <div class="w-64  bg-primary-content p-4 m-4 rounded-xl shadow-xl border-2 absolute z-50 invisible" id="track-options-contextual-menu">
   <!-- First Title -->
-  <h2 class="text-lg font-semibold mb-2 text-primary">Add to playlist...</h2>
+  <h2 class="text-lg font-semibold mb-2 text-primary">Add to tracklist...</h2>
   <!-- First Section -->
   <div class="overflow-y-auto max-h-40 mb-4">
 
@@ -30,7 +29,7 @@
   <!-- Second Section -->
   <div class="overflow-y-auto max-h-40">
     <ul class="space-y-1">
-      <li><a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2  rounded-xl hover:bg-blue-950">Create a Playlist</a></li>
+      <li><a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2  rounded-xl hover:bg-blue-950">Create a Tracklist</a></li>
 
     </ul>
   </div>

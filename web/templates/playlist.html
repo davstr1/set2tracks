@@ -33,28 +33,28 @@
       </a>
 
 
-      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync" >
+      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync">
         <span class="export{% if playlist.playlist_id_apple %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_apple %} hidden{% endif %}">Update to </span>Apple Music
       </a>
 
 
       <hr class="my-4">
       {% if playlist.set_id %}
-      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="tooltip" data-tip="The set from which playlist was created">
-        View set from playlist </a>
+      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="tooltip" data-tip="The set from which tracklist was created">
+        View set from tracklist </a>
 
       {% endif %}
 
       {% if playlist.playlist_id_spotify %}
       <a target="_blank" href="https://open.spotify.com/playlist/{{playlist.playlist_id_spotify}}" class="tooltip">See on Spotify <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
-        <use xlink:href="#icon-link-external"></use>
-      </svg></a>
+          <use xlink:href="#icon-link-external"></use>
+        </svg></a>
       {% endif %}
 
-      {% if playlist.playlist_id_apple %} 
+      {% if playlist.playlist_id_apple %}
       <a target="_blank" href="https://music.apple.com/library/playlist/{{playlist.playlist_id_apple}}" class="tooltip">See on Apple <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
-        <use xlink:href="#icon-link-external"></use>
-      </svg></a>
+          <use xlink:href="#icon-link-external"></use>
+        </svg></a>
       {% endif %}
 
 
@@ -88,7 +88,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.export-sync').forEach(function (element) {
-      
+
       element.removeAttribute('disabled');
       element.addEventListener('click', function (e) {
 
@@ -99,7 +99,7 @@
         console.log('target uri', uri);
         e.preventDefault();
         e.stopPropagation();
-        
+
 
         return processAjax(uri, 'GET', {}, (res) => {
           if (res?.error) {

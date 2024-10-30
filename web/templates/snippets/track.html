@@ -65,7 +65,7 @@
       {% endif %}
     </div>
 
-    
+
     <div class=" discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
       {% if track.tempo %}
       <div>{{ track.tempo if track.tempo else '' }}</div>
@@ -91,7 +91,7 @@
       {% endif %}
     </div>
 
-    <div class="discreet  p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left tooltip " data-tip ="Released {{ 'the ' + track.release_date + '-' +  (track.release_year | string) if track.release_date else ('in ' + (track.release_year | string) if track.release_year else 'date unknown') }}">
+    <div class="discreet  p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left tooltip " data-tip="Released {{ 'the ' + track.release_date + '-' +  (track.release_year | string) if track.release_date else ('in ' + (track.release_year | string) if track.release_year else 'date unknown') }}">
       <div>{{ track.release_year if track.release_year else '-'}}</div>
       <div class="-mt-2"><span class="text-xs">{{ track.release_date if track.release_date }}</span></div>
     </div>
@@ -104,7 +104,7 @@
             <use xlink:href="#icon-plus-circle"></use>
           </svg>
         </a>
-        <a href="#" class="remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from playlist">
+        <a href="#" class="remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from tracklist">
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
             <use xlink:href="#icon-minus-circle"></use>
           </svg>
@@ -140,7 +140,7 @@
           </svg>
           <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-md bg-base-content  hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
-        <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="text-lg font-semibold cursor-pointer tooltip trigger-track-contextual-menu lg:relative lg:top-auto lg:right-auto">
+        <a target="_blank" href="#" data-tip="Add to tracklists and other options..." class="text-lg font-semibold cursor-pointer tooltip trigger-track-contextual-menu lg:relative lg:top-auto lg:right-auto">
           <svg class="lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary">
             <use xlink:href="#icon-plus"></use>
           </svg>

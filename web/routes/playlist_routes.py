@@ -18,7 +18,7 @@ from web.logger import logger
 playlist_bp = Blueprint('playlist', __name__)
 
 
-@playlist_bp.route('/playlists')
+@playlist_bp.route('/tracklists/me')
 def my_playlists():
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('playlist.my_playlists')))
@@ -57,7 +57,7 @@ def my_playlists():
     is_paginated = has_next or has_prev
 
     l = {
-        'page_title': 'My Playlists' + ' - ' + Lang.APP_NAME, 
+        'page_title': 'My Tracklists' + ' - ' + Lang.APP_NAME, 
     }
 
     return render_template(
@@ -76,7 +76,7 @@ def my_playlists():
     )
 
 
-@playlist_bp.route('/playlist/create', methods=['GET', 'POST'])
+@playlist_bp.route('/tracklist/create', methods=['GET', 'POST'])
 def playlist_create():
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('playlist.playlist_create', next=request.args.get('next'))))
@@ -111,13 +111,13 @@ def playlist_create():
     next = request.args.get('next') or ''
     
     l = {
-        'page_title': 'Create a Playlist' + ' - ' + Lang.APP_NAME, 
+        'page_title': 'Create a Tracklist' + ' - ' + Lang.APP_NAME, 
     }
     
     return render_template('playlist_create.html', next=next, l=l)
 
 
-@playlist_bp.route('/playlist/<int:playlist_id>', methods=['GET', 'POST'])
+@playlist_bp.route('/tracklist/<int:playlist_id>', methods=['GET', 'POST'])
 def show_playlist(playlist_id):
     res = get_playlist_with_tracks(playlist_id)
     
@@ -149,7 +149,7 @@ def show_playlist(playlist_id):
 
 
 
-@playlist_bp.route('/playlist/<int:playlist_id>/edit', methods=['GET', 'POST'])
+@playlist_bp.route('/tracklist/<int:playlist_id>/edit', methods=['GET', 'POST'])
 def playlist_edit(playlist_id):
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('playlist.playlist_edit', playlist_id=playlist_id)))
@@ -197,7 +197,7 @@ def playlist_edit(playlist_id):
             return render_template('playlist_edit.html',playlist=res['playlist'],l=l)
     
     
-@playlist_bp.route('/playlist/<int:playlist_id>/delete')
+@playlist_bp.route('/tracklist/<int:playlist_id>/delete')
 def playlist_delete(playlist_id):
     if not is_connected():
         return redirect(url_for('users.login', next=url_for('playlist.playlist_delete', playlist_id=playlist_id)))
