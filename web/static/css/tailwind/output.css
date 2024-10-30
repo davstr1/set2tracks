@@ -3248,6 +3248,10 @@ input[type=password]:focus {
   margin-left: 0.5rem;
 }
 
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -3658,6 +3662,10 @@ input[type=password]:focus {
   cursor: pointer;
 }
 
+.cursor-default {
+  cursor: default;
+}
+
 .select-none {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -3985,10 +3993,21 @@ input[type=password]:focus {
   border-color: var(--fallback-pc,oklch(var(--pc)/var(--tw-border-opacity)));
 }
 
+.border-primary {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+}
+
 .border-x-primary-content {
   --tw-border-opacity: 1;
   border-left-color: var(--fallback-pc,oklch(var(--pc)/var(--tw-border-opacity)));
   border-right-color: var(--fallback-pc,oklch(var(--pc)/var(--tw-border-opacity)));
+}
+
+.border-x-primary {
+  --tw-border-opacity: 1;
+  border-left-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+  border-right-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
 }
 
 .border-t-transparent {
@@ -4312,6 +4331,10 @@ input[type=password]:focus {
 
 .pb-5 {
   padding-bottom: 1.25rem;
+}
+
+.pr-1 {
+  padding-right: 0.25rem;
 }
 
 .text-left {
@@ -4926,6 +4949,16 @@ input[type=password]:focus {
   border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
 }
 
+.hover\:border-white:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
+.hover\:border-gray-400:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity));
+}
+
 .hover\:bg-blue-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(29 78 216 / var(--tw-bg-opacity));
@@ -4998,8 +5031,22 @@ input[type=password]:focus {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.hover\:text-gray-400:hover {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity));
+}
+
+.hover\:text-black:hover {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+}
+
 .hover\:underline:hover {
   text-decoration-line: underline;
+}
+
+.hover\:line-through:hover {
+  text-decoration-line: line-through;
 }
 
 .hover\:opacity-100:hover {

@@ -29,7 +29,7 @@
 
           <div class="flex space-x-2">
             {% for search in inspiration_searches %}
-            <div class="bg-gray-700 text-gray-400 px-4 py-2 rounded-md whitespace-nowrap cursor-pointer search-inspiration">
+            <div class="bg-gray-700 text-gray-400 px-4 py-2 rounded-md whitespace-nowrap cursor-pointer search-inspiration hover:bg-primary hover:text-black">
               {{ search.query }}
             </div>
             {% endfor %}
@@ -37,14 +37,14 @@
 
         </div>
         {% endif %}
-        <div id="left-arrow" class="hidden absolute left-0 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10">
+        <div id="left-arrow" class="hidden absolute left-0 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10 hover:bg-primary hover:text-black">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
           </svg>
         </div>
         <!-- Right Arrow -->
         <!--  when implementing tag page link, change to right-14 -->
-        <div id="right-arrow" class="hidden absolute right-0 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10">
+        <div id="right-arrow" class="hidden absolute right-0 mt-3 flex items-center justify-center bg-gray-700 p-2 rounded-md cursor-pointer transform -translate-y-1/2 top-6 z-10 hover:bg-primary hover:text-black">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
           </svg>
