@@ -96,7 +96,7 @@
     return currentElement.nextElementSibling ? currentElement.nextElementSibling.closest('.track') : null;
   }
 
-  function trackListEvent(event) {
+  function trackListEvent(event, startPercent = undefined) {
 
     if (typeof player !== 'undefined') {
       // Cancel the event as soon as we detect a video
@@ -114,8 +114,10 @@
 
       if (target.classList.contains('playing')) {
         console.log('playing the same track')
-        const mouseX = event.clientX;
-        var startPercent = getStartPercentFromMousePosition(target, mouseX);
+        if (typeof(startPercent) === 'undefined') {
+          const mouseX = event.clientX;
+          startPercent = getStartPercentFromMousePosition(target, event.clientX);
+        }
         audioPlayerPlay(target, startPercent)
         console.log('startPercent:', startPercent);
       } else {
@@ -125,7 +127,7 @@
           track.style.setProperty('--background-width', `0%`);
         });
         target.classList.add('active', 'playing');
-        audioPlayerPlay(target);
+        audioPlayerPlay(target,startPercent);
 
       }
 
@@ -138,13 +140,13 @@
   var trackList = document.getElementById('tracklist');
   var topTrack = document.getElementById('track');
   console.log('tyopo player:', typeof player);
-  
-    
-    trackList.addEventListener('click', trackListEvent);
-    if (topTrack) {
-      topTrack.addEventListener('click', trackListEvent);
-    }
-  
+
+
+  trackList.addEventListener('click', trackListEvent);
+  if (topTrack) {
+    topTrack.addEventListener('click', trackListEvent);
+  }
+
 
 
   document.querySelectorAll('.play-track-preview').forEach(link => {
@@ -154,27 +156,29 @@
       event.stopPropagation();
       console.log('play-track-preview clicked')
 
-      if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo();
+      //if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo();
 
       const audioUrl = this.getAttribute('href');
 
-      if (audioPlayer.getAttribute('src') !== audioUrl) {
-        audioPlayer.setAttribute('src', audioUrl);
-        audioPlayer.load(); // Load the new audio source
-        audioPlayer.play();
-      } else { // if the audio player is already playing the same track
+      // if (audioPlayer.getAttribute('src') !== audioUrl) {
+      //   audioPlayer.setAttribute('src', audioUrl);
+      //   audioPlayer.load(); // Load the new audio source
+      //   audioPlayer.play();
+      // } else { // if the audio player is already playing the same track
 
-        if (!audioPlayer.paused) {
-          audioPlayer.pause();
-          event.target.closest('.track').classList.remove('playing');
-          console.log(player.getPlayerState());
-          if (typeof player !== 'undefined' && player.getPlayerState() === 2) player.playVideo();
-        } else {
-          audioPlayer.play();
-          event.target.closest('.track').classList.add('playing');
-          if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo();
-        }
+      if (!audioPlayer.paused) {
+        audioPlayer.pause();
+        event.target.closest('.track').classList.remove('playing');
+        
+        if (typeof player !== 'undefined' && player.getPlayerState() === 2) player.playVideo();
+        return;
+      } else {
+        // audioPlayer.play();
+        // event.target.closest('.track').classList.add('playing');
+        if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo();
+        trackListEvent(event, 0);
       }
+      // }
 
 
     });

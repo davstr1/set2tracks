@@ -5,13 +5,23 @@
 
       <div class="flex flex-col justify-center items-center h-full">
 
-        <div class="h-6 w-6 relative action-pause">
+        <div class="h-6 w-6  p-2">
           <div class="track-number">
             {% if loop_index is defined %}
             <span class="sm:hidden">#</span>
             {{ loop_index }}
             {% endif %}
           </div>
+          <div class="absolute top-0 left-0 song-preview-button h-6 w-6 p-2 ">
+            <a target="_blank" href="{{ track.preview_uri }}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
+              <svg fill="#ffffff" class="w-12 h-12 sm:h-6 sm:w-6 fill-base-content hover:fill-primary active">
+                <use xlink:href="#icon-headphones"></use>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="h-6 w-6 relative action-pause mt-2">
           <div class="song-play-button absolute align-middle bg-center top-0">
             <svg class="w-6 h-6 fill-base-content hover:fill-primary">
               <use xlink:href="#icon-play"></use>
@@ -23,16 +33,7 @@
             </svg>
           </div>
           <div class="song-played-indicator absolute align-middle bg-center opacity-55 top-0"><img style="width:24px;height:24px" class="bg-transparent" src="{{url_for('static',filename='im/icons8-audio-wave-white.gif')}}" /></div>
-        </div>
 
-        <div>
-          <div class="w-full flex items-center justify-center sm:pt-2 song-preview-button">
-            <a target="_blank" href="{{ track.preview_uri }}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
-              <svg fill="#ffffff" class="w-12 h-12 sm:h-6 sm:w-6 fill-base-content hover:fill-primary">
-                <use xlink:href="#icon-headphones"></use>
-              </svg>
-            </a>
-          </div>
         </div>
 
       </div>
