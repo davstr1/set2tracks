@@ -16,10 +16,10 @@
   var audioPlayer = document.getElementById('audio-player');
 
   function audioPlayerPlay(track, startPercent = 0) {
-    if (typeof player !== 'undefined') {
-      console.log('set page deccted');
-      return;
-    }
+    // if (typeof player !== 'undefined') {
+    //   console.log('set page deccted');
+    //   return;
+    // }
     audioUrl = track.getAttribute('data-preview-url');
     if (!audioUrl) {
       console.log('no audio url');
@@ -98,12 +98,12 @@
 
   function trackListEvent(event, startPercent = undefined) {
 
-    if (typeof player !== 'undefined') {
-      // Cancel the event as soon as we detect a video
-      // Have to do this because this script is loaded before the video script
-      removeEventListener('click', trackListEvent);
-      return;
-    }
+    // if (typeof player !== 'undefined') {
+    //   // Cancel the event as soon as we detect a video
+    //   // Have to do this because this script is loaded before the video script
+    //   removeEventListener('click', trackListEvent);
+    //   return;
+    // }
 
     var target = event.target.closest('div.track');
 
@@ -114,12 +114,12 @@
 
       if (target.classList.contains('playing')) {
         console.log('playing the same track')
-        if (typeof(startPercent) === 'undefined') {
+        if (typeof (startPercent) === 'undefined') {
           const mouseX = event.clientX;
           startPercent = getStartPercentFromMousePosition(target, event.clientX);
         }
         audioPlayerPlay(target, startPercent)
-        console.log('startPercent:', startPercent);
+
       } else {
         console.log('playing a new track')
         document.querySelectorAll('.track').forEach(track => {
@@ -127,7 +127,7 @@
           track.style.setProperty('--background-width', `0%`);
         });
         target.classList.add('active', 'playing');
-        audioPlayerPlay(target,startPercent);
+        audioPlayerPlay(target, startPercent);
 
       }
 
@@ -167,11 +167,22 @@
       // } else { // if the audio player is already playing the same track
 
       if (!audioPlayer.paused) {
-        audioPlayer.pause();
-        event.target.closest('.track').classList.remove('playing');
-        
-        if (typeof player !== 'undefined' && player.getPlayerState() === 2) player.playVideo();
-        return;
+        // audio is playing. are we playing the same track?
+        // if yes, just pause. if no, pause the current track and play the new one
+        var target = event.target.closest('div.track');
+        console.log('target:', target);
+        if (target.classList.contains('playing')) {
+          audioPlayer.pause();
+          event.target.closest('.track').classList.remove('playing');
+          if (typeof player !== 'undefined' && player.getPlayerState() === 2) player.playVideo();
+
+          return;
+        } else {
+          console.log('playing a new track')
+          trackListEvent(event, 0);
+          audioPlayerPlay(target, 0);
+          return
+        }
       } else {
         // audioPlayer.play();
         // event.target.closest('.track').classList.add('playing');
