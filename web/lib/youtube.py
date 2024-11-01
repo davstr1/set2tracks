@@ -15,6 +15,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)
 PROXY_URL = os.getenv('SHAZAM_PROXY_URL')
 PROXY_URL_SOCKS5 = os.getenv('PROXY_URL_SOCKS5')
+PROXY_URL_HTTP = os.getenv('PROXY_URL_HTTP')
 
 logger = logging.getLogger('root')
 
@@ -127,7 +128,7 @@ def youbube_video_info(video_id: str, retry_count: int = 10) -> dict:
         'chapters', 'channel_follower_count', 'like_count', 'view_count', 
         'is_live', 'availability', 'error'
     ]
-    options = {'quiet': True, 'no_warnings': True, 'noplaylist': True,'nocheckcertificate': True, 'proxy': PROXY_URL_SOCKS5, 
+    options = {'quiet': True, 'no_warnings': True, 'noplaylist': True,'nocheckcertificate': True, 'proxy': PROXY_URL_HTTP, 
                #'headers': {
               #  'User-Agent': ua.random,  # Random User-Agent for each request
                # 'Accept-Language': 'en-US,en;q=0.9',
@@ -173,7 +174,7 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
             logger.debug(f"{d['downloaded_bytes'] / d['total_bytes'] * 100:.2f}% downloaded")
     
     options = {
-        'proxy': PROXY_URL_SOCKS5,
+        'proxy': PROXY_URL_HTTP,
         'progress_hooks': [my_hook],
         #'write-thumbnail': True,
         'format': 'bestaudio/best',
