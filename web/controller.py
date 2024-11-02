@@ -118,7 +118,8 @@ def get_tracks(
         query = query.filter(
              or_(
             Track.title.ilike(f"%{search}%"),
-            Track.artist_name.ilike(f"%{search}%")
+            Track.artist_name.ilike(f"%{search}%"),
+            Track.label.ilike(f"%{search}%"),
         )
         )
     

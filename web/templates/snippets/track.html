@@ -1,5 +1,4 @@
-<div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" 
-class="track hover:bg-blue-950 rounded-lg mb-1 cursor-pointer relative group  ">
+<div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="track hover:bg-blue-950 rounded-lg mb-1 cursor-pointer relative group  ">
 
   <div class="flex flex-wrap items-center   sm:pb-4">
     <div class=" p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12  flex items-center justify-center">
@@ -62,8 +61,14 @@ class="track hover:bg-blue-950 rounded-lg mb-1 cursor-pointer relative group  ">
         {% else %}
         -
         {% endif %}
-
       </div>
+        {% if track.label %}
+        <div class="flex max-w-fit tooltip" data-tip="click to search track with label">
+          <a class="text-xs text-gray-500 hover:text-primary" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+        </div>
+        {% endif %}
+
+      
       {% endif %}
     </div>
 
