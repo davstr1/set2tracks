@@ -7,6 +7,8 @@ import asyncio
 import os
 import json
 import dotenv
+
+from web.lib.utils import safe_get
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)
 
@@ -33,6 +35,27 @@ def transform_shazam_data(data):
         result.append(transformed_track)
     return result
 
+async def shazam_track_add_label(track):
+   
+  shazam = Shazam()
+  print(f'Getting label for track {track["title"]}')
+  about_track = await shazam.track_about(track_id=track['key_track_shazam'], proxy=PROXY_URL) 
+  track['label'] = safe_get(about_track, ['sections', 0, 'metadata', 1, 'text'])
+  return track
+
+async def shazam_add_tracks_label(tracks):
+    """
+    Add label info to a list of tracks from Shazam.
+    
+    Parameters:
+    tracks (list): A list of track IDs from Shazam.
+    
+    Returns:
+    list: A list of tracks with added label info.
+    """
+    logger.info(f"shazam_add_tracks_label for {len(tracks)} tracks")
+    tasks = [shazam_track_add_label(track) for track in tracks]
+    return await asyncio.gather(*tasks)
 
 async def shazam_related_tracks(track_id, limit=20):
     """
@@ -61,11 +84,13 @@ async def shazam_related_tracks(track_id, limit=20):
         
         related = await shazam.related_tracks(track_id=track_id, limit=limit, proxy=PROXY_URL)
         logger.info(f'Received related tracks from Shazam {related}')
-        
         transformed = transform_shazam_data(related)
         logger.info('Transformed related tracks data')
         
-        return transformed
+        logger.debug(f"Get label info for tracks")
+        tracks = await shazam_add_tracks_label([track for track in transformed])
+        
+        return tracks
     
     except FailedDecodeJson as json_error:
         logger.error(f"FailedDecodeJson error in shazam_related_tracks for track id {track_id} : {json_error}")
