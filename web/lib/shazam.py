@@ -35,26 +35,40 @@ def transform_shazam_data(data):
         result.append(transformed_track)
     return result
 
-async def shazam_track_add_label(track):
-   
-  shazam = Shazam()
-  print(f'Getting label for track {track["title"]}')
-  about_track = await shazam.track_about(track_id=track['key_track_shazam'], proxy=PROXY_URL) 
-  track['label'] = safe_get(about_track, ['sections', 0, 'metadata', 1, 'text'])
-  return track
+async def shazam_track_add_label(track, semaphore, MAX_RETRIES=3, RETRY_DELAY=0):
+    async with semaphore:
+        shazam = Shazam()
+        logger.info(f"Getting label for track {track['title']}")
+        
+        retries = 0
+        while retries < MAX_RETRIES:
+            try:
+                about_track = await asyncio.wait_for(
+                    shazam.track_about(track_id=track['key_track_shazam'], proxy=PROXY_URL), 
+                    timeout=3  # Set a 10-second timeout
+                )
+                track['label'] = safe_get(about_track, ['sections', 0, 'metadata', 1, 'text'])
+                return track  # Exit if successful
 
-async def shazam_add_tracks_label(tracks):
-    """
-    Add label info to a list of tracks from Shazam.
-    
-    Parameters:
-    tracks (list): A list of track IDs from Shazam.
-    
-    Returns:
-    list: A list of tracks with added label info.
-    """
+            except asyncio.TimeoutError:
+                logger.error(f"Timeout getting label for track {track['title']}")
+            except Exception as e:
+                logger.error(f"Error getting label for track {track['title']}: {e}")
+                
+            retries += 1
+            if retries < MAX_RETRIES:
+                backoff_delay = RETRY_DELAY * (2 ** (retries - 1))  # Exponential backoff
+                logger.info(f"Retrying... attempt {retries + 1} in {backoff_delay} seconds.")
+                await asyncio.sleep(backoff_delay)  # Wait before retrying
+
+        # If all retries fail, handle the case for a missing label
+        track['label'] = None
+        return track
+
+async def shazam_add_tracks_label(tracks, MAX_CONCURRENT_REQUESTS=10):
     logger.info(f"shazam_add_tracks_label for {len(tracks)} tracks")
-    tasks = [shazam_track_add_label(track) for track in tracks]
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    tasks = [shazam_track_add_label(track, semaphore) for track in tracks]
     return await asyncio.gather(*tasks)
 
 async def shazam_related_tracks(track_id, limit=20):
