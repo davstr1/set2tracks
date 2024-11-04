@@ -3,7 +3,7 @@
   var audioUrl = '';
   var checkTrackPlayerHead = null;
 
-  
+
 
 
   function getStartPercentFromMousePosition(track, mouseX) {
@@ -99,7 +99,10 @@
   }
 
   function trackListEvent(event, startPercent = undefined) {
-
+    // deactivate on video pages
+    const tracklist = document.getElementById('tracklist');
+    if (tracklist.classList.contains('video-tracklist'))
+      return;
     // if (typeof player !== 'undefined') {
     //   // Cancel the event as soon as we detect a video
     //   // Have to do this because this script is loaded before the video script
@@ -109,8 +112,8 @@
 
     let linkElement = event.target.closest('a'); // Find the closest <a> tag
     if (linkElement && !linkElement.classList.contains('play-track-preview')) {
-        event.stopPropagation();
-        return;
+      event.stopPropagation();
+      return;
     }
 
     var target = event.target.closest('div.track');

@@ -121,6 +121,9 @@ even where the player is not behind*/
 
   const setId = '{{set.id}}';
 
+  const tracklist = document.getElementById('tracklist');
+  trackList.classList.add('video-tracklist');
+
   audioPlayer = document.getElementById('audio-player');
   const draggable = document.getElementById('draggable');
   const modifyLeftMargin = document.getElementById('modifyLeftMargin');
@@ -391,23 +394,33 @@ even where the player is not behind*/
       var target = event.target.closest('div.track');
 
       if (target) {
-        if (target.classList.contains('playing')) {
+        //if (target.classList.contains('playing')) { // can't be trusted. Is set before elsewhere
+        // Instead, check if the playing position is between the start and end time of the track
+        if (player.getCurrentTime() >= parseFloat(target.getAttribute('data-start_time')) && player.getCurrentTime() <= parseFloat(target.getAttribute('data-end_time'))) {
+          console.log('playing the same track (already playing)')
           const mouseX = event.clientX;
           var startTime = getStartTimeFromMousePosition(target, mouseX);
         } else if (target.classList.contains('active')) {
           var startTime = player.getCurrentTime();
 
         } else {
+          console.log('playing a new track')
           var startTime = parseFloat(target.getAttribute('data-start_time'));
         }
 
         if (e.target && e.target.seekTo) {
-
+          
           function checkAndSeek() {
             audioPlayer.pause();
+           
+  
             const playerState = e.target.getPlayerState();
+            console.log('playerState', playerState, YT.PlayerState.PAUSED)
             if (playerState === YT.PlayerState.PAUSED) {
-              e.target.playVideo();
+              console.log('paused')
+              player.seekTo(startTime, true);
+              player.playVideo();
+              return;
             } else if (playerState === YT.PlayerState.CUED) {
               // first time, a straight seekTo doesn't do it
               // video will start from a prev point if ever consulted
@@ -419,7 +432,9 @@ even where the player is not behind*/
             }
 
             player.seekTo(startTime, true);
-
+            
+           
+            //player.playVideo();
           }
 
           // Start the check-and-seek process
