@@ -379,7 +379,12 @@ even where the player is not behind*/
     startActiveTrackChecking();
     var trackList = document.getElementById('tracklist');
     trackList.addEventListener('click', function (event) {
-      console.log('tracklist clickedo')
+
+      let linkElement = event.target.closest('a'); // Find the closest <a> tag
+      if (linkElement && !linkElement.classList.contains('play-track-preview')) {
+        event.stopPropagation();
+        return;
+      }
 
 
       stopAndHideAudioPlayer()

@@ -3,6 +3,8 @@
   var audioUrl = '';
   var checkTrackPlayerHead = null;
 
+  
+
 
   function getStartPercentFromMousePosition(track, mouseX) {
 
@@ -104,6 +106,12 @@
     //   removeEventListener('click', trackListEvent);
     //   return;
     // }
+
+    let linkElement = event.target.closest('a'); // Find the closest <a> tag
+    if (linkElement && !linkElement.classList.contains('play-track-preview')) {
+        event.stopPropagation();
+        return;
+    }
 
     var target = event.target.closest('div.track');
 
