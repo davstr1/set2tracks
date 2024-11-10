@@ -1,103 +1,156 @@
 <script>
-  function getClosestParentByClass(element, className) {
-    while (element && element !== document) {
-      if (element.classList.contains(className)) {
-        return element;
-      }
-      element = element.parentElement;
+
+  const previewPlayer = document.getElementById('previewPlayer');
+  const tracklist = document.getElementById('tracklist');
+  let mouseX = 0;
+
+  // Track mouse position whenever it moves
+  document.addEventListener('mousemove',  (event) => mouseX = event.clientX);
+
+
+  document.querySelector('#tracklist').addEventListener('click', trackListOnClick);
+
+  const trackTheyAreRelatedTo = document.querySelector('#trackTheyAreRelatedTo');
+  if (trackTheyAreRelatedTo)
+    trackTheyAreRelatedTo.addEventListener('click', trackListOnClick); // track from related tracks
+
+
+  function trackListOnClick(event) {
+
+    let target = event.target;
+    // action for stuff we make a js action for
+    while (target && (!target.classList || !(target.classList.contains('js-action') || target.classList.contains('normal-link') || target.classList.contains('track')))) {
+      target = target.parentElement;
     }
-    return null;
+    const classList = target.classList;
+    // no js-action for normal links
+    if (classList.contains('normal-link')) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (classList.contains('playVideoTrack')) return playVideo(target);
+    if (classList.contains('pauseVideoTrack')) return pauseVideo(target);
+    if (classList.contains('openRelatedTracks')) return openRelatedTracks(target);
+    if (classList.contains('addTrackToRecentPlaylist')) return addTrackToRecentPlaylist(target);
+    if (classList.contains('showTrackContextMenu')) return showContextMenu(target);
+    if (classList.contains('playPreview')) return playPreview(target);
+    if (classList.contains('pausePreview')) return pausePreview(target);
+
+    // If none of the aboe, then we are clicking on a track
+    const track = target;
+    if (!track) {
+      console.log('no target found for click');
+      return;
+    }
+
+    if (inVideoMode()) {
+      playVideo(track);
+    } else {
+      playPreview(track);
+    }
+
+    // Same track
+
+
+
+
+  }
+
+  // =====================================
+  //           Tracklist button actions
+  // =====================================
+
+  function isVideoTrackCurrent(track){
+    if(yt.player.getCurrentTime() === 0) return false; // video not started, consider it not current
+    return yt.player.getCurrentTime() >= parseFloat(track.getAttribute('data-start_time')) && yt.player.getCurrentTime() <= parseFloat(track.getAttribute('data-end_time'))
+  }
+
+  function playVideo(target) {
+
+    const track = target.closest('.track');
+
+    if (!track)
+      return;
+    setVideoMode();
+    var startTime = 0;
+
+    if (isVideoTrackCurrent(track)) {
+      // Called from the play button -> plyay from current time
+      if(target.classList.contains('playVideoTrack')){
+        startTime = yt.player.getCurrentTime();
+      }else{
+        // Called from the track itself -> play from mouse start time
+        startTime = getVideoTimeFromMousePosition(track);
+      }
+
+    } else {
+      // new track. Play it from start
+      startTime = parseFloat(track.getAttribute('data-start_time'));
+    }
+
+    function checkAndSeek() {
+
+      const playerState = yt.player.getPlayerState();
+      if (playerState === YT.PlayerState.PAUSED) {
+        console.log('paused')
+        yt.player.seekTo(startTime, true);
+        yt.player.playVideo();
+        return;
+      } else if (playerState === YT.PlayerState.CUED) {
+        // first time, a straight seekTo doesn't do it
+        // video will start from a prev point if ever consulted
+        // Api bug probably
+        setTimeout(function () {
+          yt.player.seekTo(startTime, true);
+        }, 300); //
+
+      }
+
+      yt.player.seekTo(startTime, true);
+
+    }
+
+    // Start the check-and-seek process
+    checkAndSeek();
+
+    //}
+
+  }
+
+
+  function pauseVideo(target) {
+    if (typeof yt.player !== 'undefined' && yt.player.getPlayerState() === 1) yt.player.pauseVideo()
+  }
+
+
+
+  function openRelatedTracks(target) {
+    document.getElementById('overlay').classList.remove('hidden');
+    const relatedTracksUrl = target.getAttribute('data-related-tracks-url');
+    const relatedTracksCheckUrl = target.getAttribute('data-related_tracks-check-url');
+
+    const onSuccess = (response) => {
+      window.location.href = relatedTracksUrl;
+    }
+    const onError = (error) => {
+      document.getElementById('overlay').classList.add('hidden');
+    }
+
+    return processAjax(relatedTracksCheckUrl, 'POST', { 'caller_url': window.location.href }, onSuccess, onError)
+  }
+
+  function addTrackToRecentPlaylist(target) {
+    const trackId = target.closest('.track').getAttribute('data-track-id');
+    return addTrackToPlaylistLastUsed({ track_id: trackId })
   }
 
 
 
 
-  document.querySelectorAll('.track .openRelatedTracks').forEach(link => {
-    link.addEventListener('click', function (event) {
-      event.stopPropagation();
-      event.preventDefault();
-      document.getElementById('overlay').classList.remove('hidden');
-      const relatedTracksUrl = this.getAttribute('data-related-tracks-url');
-      const relatedTracksCheckUrl = this.getAttribute('data-related_tracks-check-url');
-
-      const onSuccess = (response) => {
-        window.location.href = relatedTracksUrl;
-      }
-      const onError = (error) => {
-        document.getElementById('overlay').classList.add('hidden');
-      }
-
-
-
-      return processAjax(relatedTracksCheckUrl, 'POST', { 'caller_url': window.location.href }, onSuccess, onError)
-
-
-    });
-  });
-
-  document.querySelectorAll('.track .openTrackOnPlatform').forEach(link => {
-    link.addEventListener('click', function (event) {
-      event.stopPropagation();
-
-    });
-  });
-
-
-  document.querySelectorAll('.track .add-track-to-recent-playlist').forEach(link => {
-    link.addEventListener('click', function (event) {
-      event.stopPropagation();
-      event.preventDefault();
-      const trackId = this.closest('.track').getAttribute('data-track-id');
-      return addTrackToPlaylistLastUsed({ track_id: trackId })
-
-    });
-  });
-
-
-  //song-pause-button
-  document.querySelectorAll('.track .song-pause-button').forEach(link => {
-    link.addEventListener('click', function (event) {
-      console.log('song-pause-button clicked')
-      event.stopPropagation();
-      if (typeof player !== 'undefined' && player.getPlayerState() === 1) player.pauseVideo()
-      // audioPlayer.pause();
-
-    });
-  });
-
-
-
-  document.querySelectorAll('.track .song-play-button').forEach(link => {
-    link.addEventListener('click', function (event) {
-      event.stopPropagation();
-      if (typeof player === 'undefined') return;
-
-
-      var playerState = player.getPlayerState();
-      var track = getClosestParentByClass(this, 'track');
-      var trackIsActive = track.classList.contains('active');
-
-      if (!trackIsActive) {
-        var trackStartTime = track.getAttribute('data-start_time');
-        player.seekTo(trackStartTime);
-      }
-
-      player.playVideo();
-      if (!audioPlayer.paused) {
-        audioPlayer.pause();
-      }
-
-    });
-  });
-
-  document.querySelectorAll('.track .trigger-track-contextual-menu').forEach(link => {
-    link.addEventListener('click', function (event) {
-      event.stopPropagation();
-      event.preventDefault();
-      showContextMenu(event, this);
-    });
-  });
-
+  // =====================================
+  //           Context Menu Stuff
+  // =====================================
 
 
   let trackWithContextMenu = null;
@@ -105,11 +158,11 @@
 
   const menu = document.getElementById('track-options-contextual-menu');
   const blockInteractions = document.getElementById('block-interactions');
-  function showContextMenu(event, caller) {
+  function showContextMenu(target) {
     event.preventDefault();
 
 
-    const rect = event.target.getBoundingClientRect();
+    const rect = target.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     const bodyWidth = document.body.offsetWidth;
@@ -149,7 +202,7 @@
     menu.classList.add('block');
 
     // Is this called by a track, or by "add all tracks to tracklist" button?
-    trackWithContextMenu = caller.closest('.track');
+    trackWithContextMenu = target.closest('.track');
     if (trackWithContextMenu) {
       trackWithContextMenu.classList.add('ring-2', 'ring-primary');
     } else {
@@ -233,25 +286,412 @@
   });
 
   function addTrackToPlaylist(payload) {
-
     return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
-
   }
 
   function addAllTracksFromSetToPlaylist(payload) {
-
     return processAjax('{{ url_for("playlist.jax_add_all_set_tracks_to_playlist") }}', 'POST', payload)
-
   }
 
   function addTrackToPlaylistLastUsed(payload) {
-
     payload.caller_url = window.location.href;
     return processAjax('{{ url_for("playlist.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
+  }
 
+
+
+  // =====================================
+  //           Audio Player Stuff
+  // =====================================
+
+
+  var audioUrl = '';
+  var checkTrackPlayerHead = null;
+
+
+
+
+  function getStartPercentFromMousePosition(track) {
+    const trackRect = track.getBoundingClientRect();
+    const relativeMouseX = mouseX - trackRect.left;
+    const percentagePosition = relativeMouseX / trackRect.width * 100 //parseFloat((relativeMouseX / trackRect.width * 100).toFixed(2));
+    return percentagePosition;
+  }
+
+  function findNextTrackElement(currentElement) {
+    return currentElement.nextElementSibling ? currentElement.nextElementSibling.closest('.track') : null;
+  }
+
+  function deactivateTrack() {
+    const activeTrack = document.querySelector('.track.active');
+    if (!activeTrack) return;
+    activeTrack.classList.remove('active', 'playing');
+    activeTrack.style.setProperty('--background-width', `0%`);
+  }
+
+  function activateTrack(track) {
+    track.classList.add('active', 'playing');
+    track.style.setProperty('--background-width', `0%`);
+  }
+
+  function monitorTrackProgress(track) {
+    const checkTrackPlayerHead = setInterval(function () {
+      if (inVideoMode()){
+        clearInterval(checkTrackPlayerHead);
+        return;       
+      }
+      const percentageWidth = parseFloat((previewPlayer.currentTime / previewPlayer.duration * 100).toFixed(2));
+      track.style.setProperty('--background-width', `${percentageWidth}%`);
+
+      if (percentageWidth >= 100) {
+        clearInterval(checkTrackPlayerHead);
+        playNextTrack();
+      }
+    }, 50);
+
+    return checkTrackPlayerHead;
+  }
+
+
+  function playNextTrack(track = null) {
+
+    if (!track) {
+      track = document.querySelector('.track.active');
+      if (!track) return;
+    }
+
+    const nextTrack = findNextTrackElement(track);
+    if (!nextTrack) return;
+
+    // No audio, skip to next track
+    audioUrl = nextTrack.getAttribute('data-preview-url');
+    if (!audioUrl) return playNextTrack(nextTrack);
+
+    playPreview(nextTrack);
+  }
+
+  function pausePreview(track) {
+   
+    // called from the playPreview button
+    if (!track.classList.contains('track')) {
+      track = track.closest('.track');
+    }
+    if(!track.classList.contains('playing')){
+      console.log('no track')
+      return;
+    } 
+    previewPlayer.pause();
+    track.classList.remove('playing');
+  }
+
+  function playPreview(target, startPercent = 0) {
+    // called from the playPreview button
+    let track = null;
+    if (!target.classList.contains('track')) {
+      track = target.closest('.track');
+    } else {
+      track = target;
+    }
+
+    if (!track) {
+      console.log('no track');
+      return;
+    }
+    deactivateTrack();
+    track.classList.add('playing');
+    track.classList.add('active');
+
+    setPreviewMode();
+
+    audioUrl = track.getAttribute('data-preview-url');
+    if (!audioUrl) {
+      console.log('no audio url');
+      return playNextTrack(track);
+    }
+
+    monitorTrackProgress(track);
+    // New track
+    if (previewPlayer.getAttribute('src') !== audioUrl) {
+      clearInterval(checkTrackPlayerHead);
+      deactivateTrack();
+      activateTrack(track);
+
+      previewPlayer.setAttribute('src', audioUrl);
+      previewPlayer.load();
+
+      const playPromise = previewPlayer.play();
+
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          
+        }).catch(error => {
+          console.error('Playback failed or was interrupted:', error);
+        });
+      }
+      return;
+    }
+    
+    // Same track
+    if (target.classList.contains('playPreview')) {
+      previewPlayer.play();
+      return;
+    }
+
+    if (startPercent > 0 && !isNaN(previewPlayer.duration)) {
+      previewPlayer.currentTime = previewPlayer.duration * startPercent / 100;
+    } else {
+      const startPercent = getStartPercentFromMousePosition(track);
+      return playPreview(track, startPercent)
+    }
+
+    const playPromise = previewPlayer.play();
+    playPromise.then(() => {
+      track.classList.add('playing');
+    }).catch(error => {
+      console.error('Playback failed or was interrupted:', error);
+      // Handle error UI here if needed
+    });
 
   }
 
+
+  ////////////////////////////////////////
+  // Video player functions
+  ////////////////////////////////////////
+
+  let yt = {};
+
+  const isSetPage = initYoutubePlayer(onYoutubeReady, onYoutubeStateChange);
+  var checkYoutubeActiveTrackIntervalId = null;
+
+
+  var playMode = isSetPage ? 'video' : 'preview';
+  isSetPage ? setVideoMode() : setPreviewMode();
+
+  function inVideoMode() {
+    return playMode === 'video';
+  }
+  function inPreviewMode() {
+    return playMode === 'preview';
+  }
+  function setVideoMode() {
+    // if (!startYoutubeActiveTrackChecking.intervalId) {
+    //   startYoutubeActiveTrackChecking();
+    // }
+    playMode = 'video';
+    previewPlayer.pause();
+    switchTracklistClass('video', 'preview');
+    checkYoutubeActiveTrackIntervalId = setInterval(checkYoutubeActiveTrack, 50);
+  }
+
+
+  function setPreviewMode() {
+    if (typeof yt.player !== 'undefined') {
+      yt.player.pauseVideo();
+      //if (startYoutubeActiveTrackChecking.intervalId) clearInterval(startYoutubeActiveTrackChecking.intervalId);
+    }
+    playMode = 'preview';
+    switchTracklistClass('preview', 'video');
+    clearInterval(checkYoutubeActiveTrackIntervalId);
+  }
+
+  function onYoutubeStateChange(event) {
+    if(inPreviewMode()) return;
+
+    if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
+      //clearInterval(startYoutubeActiveTrackChecking.intervalId);
+      if (yt.activeTrack) {
+        yt.activeTrack.classList.remove('playing');
+      }
+
+    } else if (event.data == YT.PlayerState.PLAYING) {
+      setVideoMode();
+
+      //yt.player.addEventListener('timeupdate', checkYoutubeActiveTrack);
+
+      if (yt.activeTrack) {
+        yt.activeTrack.classList.add('playing');
+      }
+
+    }
+
+  }
+
+  function getYoutubeNewActiveTrack(currentTime) {
+
+    const tracks = document.querySelectorAll('#tracklist .track');
+    for (let i = tracks.length - 1; i >= 0; i--) {
+      let track = tracks[i];
+      var startTime = parseInt(track.getAttribute('data-start_time'), 10);
+      var endTime = parseInt(track.getAttribute('data-end_time'), 10);
+
+      if (currentTime >= startTime && currentTime < endTime) {
+        return track;
+      }
+    }
+
+    return null;
+  }
+
+
+
+
+  function getVideoTimeFromMousePosition(track) {
+
+    const startTime = parseInt(track.getAttribute('data-start_time'));
+    const endTime = parseInt(track.getAttribute('data-end_time'));
+    const totalTime = endTime - startTime;
+
+    const trackRect = track.getBoundingClientRect();
+    const relativeMouseX = mouseX - trackRect.left;
+    const percentagePosition = relativeMouseX / trackRect.width;
+    const correspondingTime = startTime + (percentagePosition * totalTime);
+    return correspondingTime;
+  }
+
+  function checkYoutubeActiveTrack() {
+    if (inPreviewMode()) return;
+    if (typeof yt.player?.getCurrentTime !== 'function') {
+      console.log('no youtube player');
+      return;
+    }
+
+    yt.currentTime = yt.player.getCurrentTime();
+    if (yt.currentTime == yt.lastCurrentTime) {
+      return;
+    }
+
+    yt.lastCurrentTime = yt.currentTime;
+
+    yt.activeTrack = document.querySelector('#tracklist .track.active');
+    var youtubeNewActiveTrack = getYoutubeNewActiveTrack(yt.currentTime);
+
+
+
+    if (yt.activeTrack !== youtubeNewActiveTrack) {
+
+      if (yt.activeTrack) {
+        yt.activeTrack.classList.remove('active', 'playing');
+      }
+      if (youtubeNewActiveTrack) {
+
+        youtubeNewActiveTrack.classList.add('active', 'playing');
+      }
+      yt.activeTrack = youtubeNewActiveTrack;
+
+    }
+
+
+    if (youtubeNewActiveTrack) {
+      // Get the start time and end time from the new active track's data attributes
+      var startTime = parseInt(youtubeNewActiveTrack.getAttribute('data-start_time'));
+      var endTime = parseInt(youtubeNewActiveTrack.getAttribute('data-end_time'));
+
+      // Set the background width based on the current time
+      setTrackBackgroundWidth(youtubeNewActiveTrack, startTime, endTime, yt.currentTime);
+    }
+  }
+
+
+  function onYoutubeReady(e) {
+
+    if (!e.target.videoTitle) {
+      console.error('video is unavailable');
+      return;
+    }
+    console.log('youtube player ready')
+
+  }
+
+
+
+
+  // This code loads the IFrame Player API code asynchronously.
+  function initYoutubePlayer(onReady, onStateChange) {
+    if (!document.getElementById('youtubePlayer')) {
+      console.error('no Youtube player element in the page');
+      return false;
+    }
+
+    yt.onReady = onReady; //  Cannot set properties of undefined (setting 'onReady')
+    yt.onStateChange = onStateChange;
+    yt.player = null;
+    yt.activeTrack = null;
+    yt.lastCurrentTime = 0;
+    yt.currentTime = 0;
+
+
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    return true;
+  }
+
+
+  function onYouTubeIframeAPIReady() {
+    yt.player = new YT.Player('youtubePlayer', {
+      height: '100%',
+      width: '100%',
+      videoId: '{{set.video_id if set else ""}}',
+      playerVars: {
+        start: 0,
+      },
+      events: {
+        'onReady': yt.onReady,
+        'onStateChange': yt.onStateChange
+      }
+    });
+  }
+
+
+
+
+
+
+
+  function setTrackBackgroundWidth(track, startTime, endTime, position) {
+    if ((inPreviewMode())) return;
+    // Calculate the percentage width based on the position within the time range
+    const totalTime = endTime - startTime;
+    const percentageWidth = ((position - startTime) / totalTime) * 100;
+
+    // Set the custom property for background width
+    const tracklist = document.getElementById('tracklist');
+
+    if (tracklist.classList.contains('preview-playing')) {
+      const previewBg = track.querySelector('.bg-preview');
+      previewBg.style.setProperty('--background-width', `${percentageWidth}%`);
+    } else {
+      track.style.setProperty('--background-width', `${percentageWidth}%`);
+    }
+
+  }
+
+
+
+
+
+
+  // =====================================
+  //           Helper Functions
+  // =====================================
+
+  function getClosestParentByClass(element, className) {
+    while (element && element !== document) {
+      if (element.classList.contains(className)) {
+        return element;
+      }
+      element = element.parentElement;
+    }
+    return null;
+  }
+
+  function switchTracklistClass(classToAdd, classToRemove) {
+    var tracklist = document.getElementById('tracklist');
+    tracklist.classList.add(classToAdd);
+    tracklist.classList.remove(classToRemove);
+  }
 
 
 

@@ -4,52 +4,48 @@
   }
 
 
+  .track:hover .playVideoTrack,
+  .track:hover .playPreview ,
+  .track:hover .visible-hover-track ,
+  .video .track.playing .song-played-indicator,
+  .track.active .playVideoTrack,
+  .track.active .playPreview,
+  .preview .track.playing .preview-actions:hover .pausePreview,
+  .video .track.playing .video-actions:hover .pauseVideoTrack
+    {
+    visibility: visible;
+  }
 
+  .track.active .track-number,
+  .track:hover .track-number,
   .song-played-indicator,
-  .song-play-button,
-  .song-pause-button,
-  .song-preview-button
+  .playVideoTrack,
+  .pauseVideoTrack,
+  .playPreview,
+  .pausePreview,
+  .preview .track.playing .preview-actions:hover .playPreview,
+  .video .track.playing .playVideoTrack,
+  .track.playing .video-actions:hover .song-played-indicator,
+  .track .visible-hover-track
    {
     visibility: hidden;
   }
 
-  .track:hover .song-play-button,
-  .track:hover .song-preview-button{
-    visibility: visible;
+  .preview .track.active.playing .playPreview svg {
+    animation: spin 4s linear infinite;
   }
 
-  .track.active.playing .song-played-indicator {
-    visibility: visible;
-  }
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
 
-  .track.active.playing .song-play-button {
-    visibility: hidden;
-  }
-
-  .track.playing .action-pause:hover .song-played-indicator {
-    visibility: hidden;
-  }
-
-  .track.playing .action-pause:hover .song-pause-button {
-    visibility: visible;
-  }
-
-  .track .visible-hover-track {
-    visibility: hidden;
-  }
-
-  .track:hover .visible-hover-track {
-    visibility: visible;
+    to {
+      transform: rotate(360deg);
+    }
   }
 
 
-
-
-
-  .track.active .track-number,
-  .track:hover .track-number {
-    visibility: hidden;
-  }
 
   track.active::before {
     content: '';
@@ -66,7 +62,8 @@
     /* Ensures the pseudo-element respects the border-radius of the parent */
   }
 
-  .track.active::after {
+  .track.active::after,
+  .track.active .bg-preview {
     transition: all 20ms;
     content: '';
     position: absolute;

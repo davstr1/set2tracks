@@ -1,38 +1,48 @@
 <div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="track hover:bg-blue-950 rounded-lg mb-1 cursor-pointer relative group  ">
+  <div class="bg-preview absolute bottom-0 left-0 w-full h-3 ">
 
+  </div>
   <div class="flex flex-wrap items-center   sm:pb-4">
-    <div class=" p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12  flex items-center justify-center">
+    <div class="p-2 px-5 text-lg w-full sm:w-1/6 lg:w-12  flex items-center justify-center">
 
       <div class="flex flex-col justify-center items-center h-full">
 
-        <div class="h-6 w-6  p-2">
+        <div class="h-6 w-6  p-2 preview-actions">
           <div class="track-number">
             {% if loop_index is defined %}
             <span class="sm:hidden">#</span>
             {{ loop_index }}
             {% endif %}
           </div>
-          <div class="absolute top-0 left-0 song-preview-button h-6 w-6 p-2 ">
-            <a target="_blank" href="{{ track.preview_uri }}" data-tip="Listen to Track preview" class="p-1 bg-blue-950 rounded-full tooltip {{ 'play-track-preview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
+          <div class="absolute top-0 left-0 h-6 w-6 p-2 ">
+            <a target="_blank" href="{{ track.preview_uri }}" data-tip="Listen to Track preview" class="js-action p-1 bg-blue-950 rounded-full tooltip {{ 'playPreview' if track.preview_uri and track.preview_uri is not none else 'opacity-10 pointer-events-none' }}">
               <svg fill="#ffffff" class="w-12 h-12 sm:h-6 sm:w-6 fill-base-content hover:fill-primary active">
                 <use xlink:href="#icon-headphones"></use>
               </svg>
             </a>
           </div>
-        </div>
-
-        <div class="h-6 w-6 relative action-pause mt-2">
-          <div class="song-play-button absolute align-middle bg-center top-0">
-            <svg class="w-6 h-6 fill-base-content hover:fill-primary">
-              <use xlink:href="#icon-play"></use>
-            </svg>
-          </div>
-          <div class="song-pause-button absolute align-middle bg-center top-0">
+          <div class="js-action absolute top-1 left-1  h-6 w-6 p-2 tooltip {{ 'pausePreview' if track.preview_uri and track.preview_uri is not none else 'hidden pointer-events-none' }}"
+          data-tip="Pause track preview">
             <svg class="w-6 h-6 fill-base-content hover:fill-primary">
               <use xlink:href="#icon-pause"></use>
             </svg>
           </div>
-          <div class="song-played-indicator absolute align-middle bg-center opacity-55 top-0"><img style="width:24px;height:24px" class="bg-transparent" src="{{url_for('static',filename='im/icons8-audio-wave-white.gif')}}" /></div>
+        </div>
+
+        <div class="h-6 w-6 relative video-actions mt-2">
+          <div class="js-action playVideoTrack absolute align-middle bg-center top-0 tooltip {{ 'opacity-10 pointer-events-none' if not set}}"
+          data-tip="Play track in set">
+            <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+              <use xlink:href="#icon-play"></use>
+            </svg>
+          </div>
+          <div class="js-action pauseVideoTrack absolute align-middle bg-center top-0 tooltip {{  ' hidden pointer-events-none' if not set }}"
+          data-tip="Pause track in set">
+            <svg class="w-6 h-6 fill-base-content hover:fill-primary">
+              <use xlink:href="#icon-pause"></use>
+            </svg>
+          </div>
+          <div class="song-played-indicator absolute align-middle bg-center opacity-55 top-0 {{  ' hidden pointer-events-none' if not set }}"><img style="width:24px;height:24px" class="bg-transparent" src="{{url_for('static',filename='im/icons8-audio-wave-white.gif')}}" /></div>
 
         </div>
 
@@ -51,24 +61,24 @@
 
       <div class="font-bold text-lg  tooltip " data-tip="{{ track.title}} (click to search in tracks)">
         {% if track.title != "Track not found" %}
-        <a class="text-center sm:text-left line-clamp-1 hover:underline" href="{{url_for('track.tracks',s=track.title)}}">{{track.title}}</a>
+        <a class="normal-link text-center sm:text-left line-clamp-1 hover:underline" href="{{url_for('track.tracks',s=track.title)}}">{{track.title}}</a>
         {% endif %}
       </div>
       {% if track.id != 1 %}
       <div class="italic tooltip flex max-w-fit" data-tip="{{ track.artist_name}} (click to search in tracks)">
         {% if track.artist_name %}
-        <a class="line-clamp-1 text-center sm:text-left hover:underline" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
+        <a class="normal-link line-clamp-1 text-center sm:text-left hover:underline" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
         {% else %}
         -
         {% endif %}
       </div>
-        {% if track.label %}
-        <div class="flex max-w-fit tooltip" data-tip="click to search track with label">
-          <a class="text-xs text-gray-500 hover:text-primary" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
-        </div>
-        {% endif %}
+      {% if track.label %}
+      <div class="flex max-w-fit tooltip" data-tip="click to search track with label">
+        <a class="normal-link text-xs text-gray-500 hover:text-primary" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+      </div>
+      {% endif %}
 
-      
+
       {% endif %}
     </div>
 
@@ -106,12 +116,12 @@
     <div class="track-ext p-2 flex  space-x-2  buttons absolute bottom-16 w-full justify-center md:w-auto  sm:bottom-auto lg:justify-end  sm:relative lg:right-auto lg:bottom-auto">
       {% if track.artist_name and track.id != 1 %}
       <div class="sm:visible-hover-track text-center sm:p-0 p-5  sm:bg-transparent rounded-xl">
-        <a href="#" class="add-track-to-recent-playlist pr-4 tooltip " data-tip="Add to last used playlist">
+        <a href="#" class="js-action addTrackToRecentPlaylist pr-4 tooltip " data-tip="Add to last used playlist">
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
             <use xlink:href="#icon-plus-circle"></use>
           </svg>
         </a>
-        <a href="#" class="remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from tracklist">
+        <a href="#" class="js-action remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from tracklist">
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
             <use xlink:href="#icon-minus-circle"></use>
           </svg>
@@ -119,15 +129,14 @@
 
 
         {% if track.nb_sets > 0 %}
-        <a class="relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="Check sets with this track" href="{{url_for('set.sets',s='trackid:'~ track.id)}}">
-
+        <a class="normal-link relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="Check sets with this track" href="{{url_for('set.sets',s='trackid:'~ track.id)}}">
           <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content discreet hover:bg-primary absolute z-0 text-primary-content text-xs flex items-center justify-center">{{ track.nb_sets}}</div>
         </a>
         {% else %}
         <div class="relative inline-block lg:w-6 lg:h-6 bg-base-content discreet bg-transparent "></div>
         {% endif %}
 
-        <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="lg:w-6 lg:h-6 h-12 w-12 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
+        <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="js-action lg:w-6 lg:h-6 h-12 w-12 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
           <svg class=" lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary{{ ' border-b-2 border-t-2 border-current' if track.has_related_tracks }}">
             <use xlink:href="#icon-related-tracks"></use>
           </svg>
@@ -135,19 +144,19 @@
 
 
 
-        <a class="relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" href="{{tpl_utils.spotify_track_url(track)}}">
+        <a class="normal-link relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" target="_blank" href="{{tpl_utils.spotify_track_url(track)}}">
           <svg class="pointer-events-none lg:w-6 lg:h-6 h-12 w-12 absolute z-20 fill-base">
             <use xlink:href="#icon-spotify-no-circle"></use>
           </svg>
           <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content  hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
-        <a class="lg:w-6 lg:h-6 h-12 w-12  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" href="{{tpl_utils.apple_track_url(track)}}">
+        <a class="normal-link lg:w-6 lg:h-6 h-12 w-12  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" target="_blank" href="{{tpl_utils.apple_track_url(track)}}">
           <svg class="lg:w-6 lg:h-6 h-12 w-12  pointer-events-none absolute z-20 fill-base ">
             <use xlink:href="#icon-apple-no-square"></use>
           </svg>
           <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-md bg-base-content  hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
-        <a target="_blank" href="#" data-tip="Add to tracklists and other options..." class="text-lg font-semibold cursor-pointer tooltip trigger-track-contextual-menu lg:relative lg:top-auto lg:right-auto">
+        <a target="_blank" href="#" data-tip="Add to tracklists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
           <svg class="lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary">
             <use xlink:href="#icon-plus"></use>
           </svg>

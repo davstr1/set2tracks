@@ -10,9 +10,6 @@ even where the player is not behind*/
     pointer-events: none;
     max-width: 100vw !important;
   }
-
-
-
   #playerWrap {
     max-width: 85vw !important;
     pointer-events: auto;
@@ -73,7 +70,7 @@ even where the player is not behind*/
       </div>
 
       <div id="videoWrap" class="relative  overflow-auto  p-2">
-        <div id="youtube-player" class="aspect-video"></div>
+        <div id="youtubePlayer" class="aspect-video"></div>
       </div>
 
     </div>
@@ -91,7 +88,9 @@ even where the player is not behind*/
 
 
 {% set tracks = set.tracks %}
-{% include 'tracklist.html' %}
+<div id="tracklist-in-set">
+  {% include 'tracklist.html' %}
+</div>
 
 <script>
   document.querySelector('#add_all_tracks_to_playlist').addEventListener('click', function (event) {
@@ -120,11 +119,6 @@ even where the player is not behind*/
 <script>
 
   const setId = '{{set.id}}';
-
-  const tracklist = document.getElementById('tracklist');
-  trackList.classList.add('video-tracklist');
-
-  audioPlayer = document.getElementById('audio-player');
   const draggable = document.getElementById('draggable');
   const modifyLeftMargin = document.getElementById('modifyLeftMargin');
   // @TODO : wrap classes are totally confusing
@@ -147,9 +141,6 @@ even where the player is not behind*/
   const playerFixedClasses = ['items-end', 'fixed', 'right-0'] // ,'animate-center-to-end'k'w-48', 'h-28', 'fixed', 'top-2', 'right-2'
   const playerScrolledClasses = ['items-center', 'sticky'] // ,'animate-end-to-center' ''right-2'','w-3/6', 'relative'
 
-
-  var trackList = document.querySelectorAll('#tracklist .track');
-  var activeTrack = null;
 
 
 
@@ -254,245 +245,8 @@ even where the player is not behind*/
     }
   });
 
-  function onPlayerStateChange(event) {
 
-    // If the player is not playing, stop the active track checking
-    if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
-      clearInterval(startActiveTrackChecking.intervalId);
-      if (activeTrack) {
-        activeTrack.classList.remove('playing');
-      }
-
-    } else if (event.data == YT.PlayerState.PLAYING) {
-      // If playing, make sure the interval is running
-      stopAndHideAudioPlayer()
-      if (!startActiveTrackChecking.intervalId) {
-        startActiveTrackChecking();
-      }
-      if (activeTrack) {
-        activeTrack.classList.add('playing');
-      }
-
-    }
-
-  }
-
-  function startActiveTrackChecking() {
-    setInterval(checkActiveTrack, 100); // Update every second
-  }
-
-
-  function getNewActiveTrack(currentTime) {
-
-    for (let i = trackList.length - 1; i >= 0; i--) {
-      let track = trackList[i];
-      var startTime = parseInt(track.getAttribute('data-start_time'), 10);
-      var endTime = parseInt(track.getAttribute('data-end_time'), 10);
-
-      // var nextTrack = trackList[i + 1];
-
-      // var nextStartTime = nextTrack ? parseInt(nextTrack.getAttribute('data-start_time'), 10) : Infinity; // Treat no next track as beyond any current time
-
-      if (currentTime >= startTime && currentTime < endTime) {
-        return track;
-      }
-    }
-
-    return null;
-  }
-
-
-
-
-  function getStartTimeFromMousePosition(track, mouseX) {
-    // Get the start time and end time from the track's data attributes
-    const startTime = parseInt(track.getAttribute('data-start_time'));
-    const endTime = parseInt(track.getAttribute('data-end_time'));
-    const totalTime = endTime - startTime;
-
-    // Get the bounding rectangle of the track element
-    const trackRect = track.getBoundingClientRect();
-
-    // Calculate the mouse position relative to the track element
-    const relativeMouseX = mouseX - trackRect.left;
-
-    // Calculate the percentage position of the mouse within the track element
-    const percentagePosition = relativeMouseX / trackRect.width;
-
-    // Calculate the corresponding time within the track's duration
-    const correspondingTime = startTime + (percentagePosition * totalTime);
-
-    return correspondingTime;
-  }
-
-  function checkActiveTrack() {
-    if (!player) {
-      return;
-    }
-
-    var currentTime = player.getCurrentTime();
-    if (currentTime == lastCurrentTime) {
-      return;
-    }
-
-    lastCurrentTime = currentTime;
-
-    activeTrack = document.querySelector('#tracklist .track.active');
-    var newActiveTrack = getNewActiveTrack(currentTime);
-
-
-
-    if (activeTrack !== newActiveTrack) {
-
-      console.log('new active track motherfuckar')
-      if (activeTrack) {
-        activeTrack.classList.remove('active', 'playing');
-      }
-      if (newActiveTrack) {
-
-        newActiveTrack.classList.add('active', 'playing');
-      }
-      activeTrack = newActiveTrack;
-
-    }
-
-
-    if (newActiveTrack) {
-      // Get the start time and end time from the new active track's data attributes
-      var startTime = parseInt(newActiveTrack.getAttribute('data-start_time'));
-      var endTime = parseInt(newActiveTrack.getAttribute('data-end_time'));
-
-      // Set the background width based on the current time
-      setTrackBackgroundWidth(newActiveTrack, startTime, endTime, currentTime);
-    }
-  }
-
-
-  function stopAndHideAudioPlayer() {
-    var audioPlayer = document.getElementById('audio-player');
-    audioPlayer.pause();
-  }
-
-  function onPlayerReady(e) {
-
-    if (!e.target.videoTitle) {
-      console.log('video is unavailable');
-      return;
-    }
-    startActiveTrackChecking();
-    var trackList = document.getElementById('tracklist');
-    trackList.addEventListener('click', function (event) {
-
-      let linkElement = event.target.closest('a'); // Find the closest <a> tag
-      if (linkElement && !linkElement.classList.contains('play-track-preview')) {
-        event.stopPropagation();
-        return;
-      }
-
-
-      stopAndHideAudioPlayer()
-      var target = event.target.closest('div.track');
-
-      if (target) {
-        //if (target.classList.contains('playing')) { // can't be trusted. Is set before elsewhere
-        // Instead, check if the playing position is between the start and end time of the track
-        if (player.getCurrentTime() >= parseFloat(target.getAttribute('data-start_time')) && player.getCurrentTime() <= parseFloat(target.getAttribute('data-end_time'))) {
-          console.log('playing the same track (already playing)')
-          const mouseX = event.clientX;
-          var startTime = getStartTimeFromMousePosition(target, mouseX);
-        } else if (target.classList.contains('active')) {
-          var startTime = player.getCurrentTime();
-
-        } else {
-          console.log('playing a new track')
-          var startTime = parseFloat(target.getAttribute('data-start_time'));
-        }
-
-        if (e.target && e.target.seekTo) {
-          
-          function checkAndSeek() {
-            audioPlayer.pause();
-           
   
-            const playerState = e.target.getPlayerState();
-            console.log('playerState', playerState, YT.PlayerState.PAUSED)
-            if (playerState === YT.PlayerState.PAUSED) {
-              console.log('paused')
-              player.seekTo(startTime, true);
-              player.playVideo();
-              return;
-            } else if (playerState === YT.PlayerState.CUED) {
-              // first time, a straight seekTo doesn't do it
-              // video will start from a prev point if ever consulted
-              // Api bug probably
-              setTimeout(function () {
-                player.seekTo(startTime, true);
-              }, 300); //
-
-            }
-
-            player.seekTo(startTime, true);
-            
-           
-            //player.playVideo();
-          }
-
-          // Start the check-and-seek process
-          checkAndSeek();
-
-        }
-      } else {
-        console.log('no target');
-      }
-    });
-  }
-
-
-  // This code loads the IFrame Player API code asynchronously.
-  var tag = document.createElement('script');
-  tag.src = "https://www.youtube.com/iframe_api";
-  var firstScriptTag = document.getElementsByTagName('script')[0];
-  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  var lastCurrentTime = 0;
-  var currentTime = 0;
-  var player;
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player('youtube-player', {
-      height: '100%',
-      width: '100%',
-      videoId: '{{set.video_id}}',
-
-      playerVars: {
-        start: 0,
-        //'modestbranding':1 // not seeing any difference
-      },
-      // modestbranding: 1,
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
-        //'onStateChange': onPlayerStateChange
-      }
-    });
-
-
-
-  }
-
-  function setTrackBackgroundWidth(track, startTime, endTime, position) {
-    // Calculate the percentage width based on the position within the time range
-    const totalTime = endTime - startTime;
-    const percentageWidth = ((position - startTime) / totalTime) * 100;
-
-    // Set the custom property for background width
-    track.style.setProperty('--background-width', `${percentageWidth}%`);
-  }
-
-  // no youtube player, set the tracks to play preview on click
-  if (typeof player !== 'undefined') {
-    player.addEventListener('timeupdate', checkActiveTrack);
-  }
-
-
   const createPlaylistButton = document.getElementById('create-playlist-from-set-tracks');
 
   if (createPlaylistButton) {

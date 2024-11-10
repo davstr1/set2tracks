@@ -79,9 +79,9 @@
 <script>
   //var tracks = document.querySelectorAll('.track');
   PLAYLIST_ID = '{{ playlist.id }}';
+  const trackList = document.getElementById('tracklist');
 
-
-  document.querySelectorAll('.track .add-track-to-recent-playlist').forEach((element, index) => {
+  document.querySelectorAll('.track .addTrackToRecentPlaylist').forEach((element, index) => {
     element.classList.add('hidden');
   });
 
@@ -121,21 +121,7 @@
     });
   });
 
-  // document.querySelector('#playlist_sync_spotify').addEventListener('click', function (e) {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   e.target.setAttribute('disabled', true);
-  //   const uri = e.target.getAttribute('data-href');
-  //   return processAjax(uri, 'GET', {}, (res) => {
-  //     e.target.removeAttribute('disabled');
-  //     if (res?.error) {
-  //       console.log(res.message);
 
-  //       return;
-  //     }
-  //     console.log(res.message);
-  //   });
-  // });
 
 
   document.querySelectorAll('.track .remove-track-from-playlist').forEach((element, index) => {
