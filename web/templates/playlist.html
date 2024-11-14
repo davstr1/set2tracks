@@ -40,8 +40,8 @@
 
       <hr class="my-4">
       {% if playlist.set_id %}
-      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="tooltip" data-tip="The set from which tracklist was created">
-        View set from tracklist </a>
+      <a href="{{ url_for('set.set', set_id=playlist.set_id) }}" class="tooltip" data-tip="The set from which playlist was created">
+        View set from playlist </a>
 
       {% endif %}
 
@@ -79,7 +79,7 @@
 <script>
   //var tracks = document.querySelectorAll('.track');
   PLAYLIST_ID = '{{ playlist.id }}';
-  const trackList = document.getElementById('tracklist');
+  const trackList = document.getElementById('playlist');
 
   document.querySelectorAll('.track .addTrackToRecentPlaylist').forEach((element, index) => {
     element.classList.add('hidden');

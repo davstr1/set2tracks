@@ -10,6 +10,7 @@ even where the player is not behind*/
     pointer-events: none;
     max-width: 100vw !important;
   }
+
   #playerWrap {
     max-width: 85vw !important;
     pointer-events: auto;
@@ -21,7 +22,7 @@ even where the player is not behind*/
 <div class="md:flex md:justify-between md:items-start p-4 pl-0 pr-0">
   <div class="pl-2">
 
-    <h1 class="lg:text-2xl"><span class="discreet block">Tracklist from</span>
+    <h1 class="lg:text-2xl"><span class="discreet block">Playlist from</span>
       <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
         <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
           <use xlink:href="#icon-link-external"></use>
@@ -50,11 +51,11 @@ even where the player is not behind*/
     </a>
     {% else %}
     <a href="{{url_for('playlist.show_playlist',playlist_id=set.playlist_id)}}" class="btn">
-      View tracklist created from set tracks
+      View playlist created from set tracks
     </a>
     {% endif %}
     <a href="" id="add_all_tracks_to_playlist" class="btn ">
-      Add all tracks to tracklist
+      Add all tracks to playlist
     </a>
   </div>
 </div>
@@ -80,7 +81,7 @@ even where the player is not behind*/
 </div>
 
 <div id="containerUnderPlayer">
-  <h1 class="text-xl font-semibold mt-8 ">Tracklist from Set</h1>
+  <h1 class="text-xl font-semibold mt-8 ">Playlist from Set</h1>
 </div>
 
 <p class="discreet italic">Timestamps are {% if not set.has_chapters %}approximate and{% endif %} auto-detected. <br />Accuracy may vary by genre, so relax and enjoy the surprises—sometimes it gets creative!</p>
@@ -88,7 +89,7 @@ even where the player is not behind*/
 
 
 {% set tracks = set.tracks %}
-<div id="tracklist-in-set">
+<div id="playlist-in-set">
   {% include 'tracklist.html' %}
 </div>
 
@@ -246,7 +247,7 @@ even where the player is not behind*/
   });
 
 
-  
+
   const createPlaylistButton = document.getElementById('create-playlist-from-set-tracks');
 
   if (createPlaylistButton) {

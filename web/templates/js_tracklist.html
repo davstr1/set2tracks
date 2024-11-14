@@ -1,14 +1,14 @@
 <script>
 
   const previewPlayer = document.getElementById('previewPlayer');
-  const tracklist = document.getElementById('tracklist');
+  const playlist = document.getElementById('playlist');
   let mouseX = 0;
 
   // Track mouse position whenever it moves
-  document.addEventListener('mousemove',  (event) => mouseX = event.clientX);
+  document.addEventListener('mousemove', (event) => mouseX = event.clientX);
 
 
-  document.querySelector('#tracklist').addEventListener('click', trackListOnClick);
+  document.querySelector('#playlist').addEventListener('click', trackListOnClick);
 
   const trackTheyAreRelatedTo = document.querySelector('#trackTheyAreRelatedTo');
   if (trackTheyAreRelatedTo)
@@ -58,11 +58,11 @@
   }
 
   // =====================================
-  //           Tracklist button actions
+  //           Playlist button actions
   // =====================================
 
-  function isVideoTrackCurrent(track){
-    if(yt.player.getCurrentTime() === 0) return false; // video not started, consider it not current
+  function isVideoTrackCurrent(track) {
+    if (yt.player.getCurrentTime() === 0) return false; // video not started, consider it not current
     return yt.player.getCurrentTime() >= parseFloat(track.getAttribute('data-start_time')) && yt.player.getCurrentTime() <= parseFloat(track.getAttribute('data-end_time'))
   }
 
@@ -77,9 +77,9 @@
 
     if (isVideoTrackCurrent(track)) {
       // Called from the play button -> plyay from current time
-      if(target.classList.contains('playVideoTrack')){
+      if (target.classList.contains('playVideoTrack')) {
         startTime = yt.player.getCurrentTime();
-      }else{
+      } else {
         // Called from the track itself -> play from mouse start time
         startTime = getVideoTimeFromMousePosition(track);
       }
@@ -201,7 +201,7 @@
     menu.classList.remove('invisible');
     menu.classList.add('block');
 
-    // Is this called by a track, or by "add all tracks to tracklist" button?
+    // Is this called by a track, or by "add all tracks to playlist" button?
     trackWithContextMenu = target.closest('.track');
     if (trackWithContextMenu) {
       trackWithContextMenu.classList.add('ring-2', 'ring-primary');
@@ -336,9 +336,9 @@
 
   function monitorTrackProgress(track) {
     const checkTrackPlayerHead = setInterval(function () {
-      if (inVideoMode()){
+      if (inVideoMode()) {
         clearInterval(checkTrackPlayerHead);
-        return;       
+        return;
       }
       const percentageWidth = parseFloat((previewPlayer.currentTime / previewPlayer.duration * 100).toFixed(2));
       track.style.setProperty('--background-width', `${percentageWidth}%`);
@@ -371,15 +371,15 @@
   }
 
   function pausePreview(track) {
-   
+
     // called from the playPreview button
     if (!track.classList.contains('track')) {
       track = track.closest('.track');
     }
-    if(!track.classList.contains('playing')){
+    if (!track.classList.contains('playing')) {
       console.log('no track')
       return;
-    } 
+    }
     previewPlayer.pause();
     track.classList.remove('playing');
   }
@@ -423,14 +423,14 @@
 
       if (playPromise !== undefined) {
         playPromise.then(() => {
-          
+
         }).catch(error => {
           console.error('Playback failed or was interrupted:', error);
         });
       }
       return;
     }
-    
+
     // Same track
     if (target.classList.contains('playPreview')) {
       previewPlayer.play();
@@ -480,7 +480,7 @@
     // }
     playMode = 'video';
     previewPlayer.pause();
-    switchTracklistClass('video', 'preview');
+    switchPlaylistClass('video', 'preview');
     checkYoutubeActiveTrackIntervalId = setInterval(checkYoutubeActiveTrack, 50);
   }
 
@@ -491,12 +491,12 @@
       //if (startYoutubeActiveTrackChecking.intervalId) clearInterval(startYoutubeActiveTrackChecking.intervalId);
     }
     playMode = 'preview';
-    switchTracklistClass('preview', 'video');
+    switchPlaylistClass('preview', 'video');
     clearInterval(checkYoutubeActiveTrackIntervalId);
   }
 
   function onYoutubeStateChange(event) {
-    if(inPreviewMode()) return;
+    if (inPreviewMode()) return;
 
     if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
       //clearInterval(startYoutubeActiveTrackChecking.intervalId);
@@ -519,7 +519,7 @@
 
   function getYoutubeNewActiveTrack(currentTime) {
 
-    const tracks = document.querySelectorAll('#tracklist .track');
+    const tracks = document.querySelectorAll('#playlist .track');
     for (let i = tracks.length - 1; i >= 0; i--) {
       let track = tracks[i];
       var startTime = parseInt(track.getAttribute('data-start_time'), 10);
@@ -563,7 +563,7 @@
 
     yt.lastCurrentTime = yt.currentTime;
 
-    yt.activeTrack = document.querySelector('#tracklist .track.active');
+    yt.activeTrack = document.querySelector('#playlist .track.active');
     var youtubeNewActiveTrack = getYoutubeNewActiveTrack(yt.currentTime);
 
 
@@ -657,9 +657,9 @@
     const percentageWidth = ((position - startTime) / totalTime) * 100;
 
     // Set the custom property for background width
-    const tracklist = document.getElementById('tracklist');
+    const playlist = document.getElementById('playlist');
 
-    if (tracklist.classList.contains('preview-playing')) {
+    if (playlist.classList.contains('preview-playing')) {
       const previewBg = track.querySelector('.bg-preview');
       previewBg.style.setProperty('--background-width', `${percentageWidth}%`);
     } else {
@@ -687,10 +687,10 @@
     return null;
   }
 
-  function switchTracklistClass(classToAdd, classToRemove) {
-    var tracklist = document.getElementById('tracklist');
-    tracklist.classList.add(classToAdd);
-    tracklist.classList.remove(classToRemove);
+  function switchPlaylistClass(classToAdd, classToRemove) {
+    var playlist = document.getElementById('playlist');
+    playlist.classList.add(classToAdd);
+    playlist.classList.remove(classToRemove);
   }
 
 

@@ -21,8 +21,7 @@
               </svg>
             </a>
           </div>
-          <div class="js-action absolute top-1 left-1  h-6 w-6 p-2 tooltip {{ 'pausePreview' if track.preview_uri and track.preview_uri is not none else 'hidden pointer-events-none' }}"
-          data-tip="Pause track preview">
+          <div class="js-action absolute top-1 left-1  h-6 w-6 p-2 tooltip {{ 'pausePreview' if track.preview_uri and track.preview_uri is not none else 'hidden pointer-events-none' }}" data-tip="Pause track preview">
             <svg class="w-6 h-6 fill-base-content hover:fill-primary">
               <use xlink:href="#icon-pause"></use>
             </svg>
@@ -30,14 +29,12 @@
         </div>
 
         <div class="h-6 w-6 relative video-actions mt-2">
-          <div class="js-action playVideoTrack absolute align-middle bg-center top-0 tooltip {{ 'opacity-10 pointer-events-none' if not set}}"
-          data-tip="Play track in set">
+          <div class="js-action playVideoTrack absolute align-middle bg-center top-0 tooltip {{ 'opacity-10 pointer-events-none' if not set}}" data-tip="Play track in set">
             <svg class="w-6 h-6 fill-base-content hover:fill-primary">
               <use xlink:href="#icon-play"></use>
             </svg>
           </div>
-          <div class="js-action pauseVideoTrack absolute align-middle bg-center top-0 tooltip {{  ' hidden pointer-events-none' if not set }}"
-          data-tip="Pause track in set">
+          <div class="js-action pauseVideoTrack absolute align-middle bg-center top-0 tooltip {{  ' hidden pointer-events-none' if not set }}" data-tip="Pause track in set">
             <svg class="w-6 h-6 fill-base-content hover:fill-primary">
               <use xlink:href="#icon-pause"></use>
             </svg>
@@ -121,7 +118,7 @@
             <use xlink:href="#icon-plus-circle"></use>
           </svg>
         </a>
-        <a href="#" class="js-action remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from tracklist">
+        <a href="#" class="js-action remove-track-from-playlist pr-4 tooltip hidden" data-tip="remove from playlist">
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-12 w-12 ">
             <use xlink:href="#icon-minus-circle"></use>
           </svg>
@@ -156,7 +153,7 @@
           </svg>
           <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-md bg-base-content  hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
-        <a target="_blank" href="#" data-tip="Add to tracklists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
+        <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
           <svg class="lg:w-6 lg:h-6 h-12 w-12  fill-base-content hover:fill-primary">
             <use xlink:href="#icon-plus"></use>
           </svg>

@@ -157,7 +157,7 @@
             get display() {
               console.log(this.min, this.max, this.minVal, this.maxVal);
               if (this.min === this.minVal && this.max === this.maxVal) return "";
-              if(this.minVal === this.maxVal) return `${this.label}: ${this.maxVal}`;
+              if (this.minVal === this.maxVal) return `${this.label}: ${this.maxVal}`;
               if (this.min === this.minVal) return `${this.label}: <= ${this.maxVal}`;
               if (this.max === this.maxVal) return `${this.label}: >= ${this.minVal}`;
               if (this.min === this.max) return `${this.label}: ${this.minVal}`;
