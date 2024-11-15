@@ -1142,7 +1142,7 @@ def insert_set(video_info,delete_temp_files=True):
       
             
             songs = remove_small_unidentified_segments(songs, 90)
-            json.dump(songs,open('shazam_songs.json','w'),indent=4)
+            #json.dump(songs,open('shazam_songs.json','w'),indent=4)
             nb_unique_tracks = count_unique_tracks(songs)
             logger.debug(f'Found {nb_unique_tracks} unique tracks.')
             if nb_unique_tracks < 5:
