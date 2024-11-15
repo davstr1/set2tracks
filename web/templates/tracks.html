@@ -50,6 +50,10 @@
         {% include 'snippets/tracks_display_filter.html' %}
         {% endwith %}
 
+        {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocal' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
         {% with min=speech_min_default, max=speech_max_default, min_val=speech_min, max_val=speech_max, min_val_name='speech_min', max_val_name='speech_max', label='Speechy' %}
         {% include 'snippets/tracks_display_filter.html' %}
         {% endwith %}
@@ -77,6 +81,10 @@
       {% endwith %}
 
       {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocal' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=acoustic_min_default, max=acoustic_max_default, min_val=acoustic_min, max_val=acoustic_max, min_val_name='acoustic_min', max_val_name='acoustic_max', label='Acoustic' %}
       {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 

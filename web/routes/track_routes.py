@@ -27,6 +27,8 @@ def tracks():
     bpm_max = request.args.get('bpm_max', None, type=int)
     vocal_min = request.args.get('vocal_min', None, type=int)
     vocal_max = request.args.get('vocal_max', None, type=int)
+    acoustic_min = request.args.get('acoustic_min', None, type=int)
+    acoustic_max = request.args.get('acoustic_max', None, type=int)
     speech_min = request.args.get('speech_min', None, type=int)
     speech_max = request.args.get('speech_max', None, type=int)
     danceability_min = request.args.get('danceability_min', None, type=int)
@@ -57,6 +59,10 @@ def tracks():
         instrumental_min = None
     if instrumental_max == min_maxes['instrumental_max']:
         instrumental_max = None
+    if acoustic_min == min_maxes['acoustic_min']:
+        acoustic_min = None
+    if acoustic_max == min_maxes['acoustic_max']:
+        acoustic_max = None
     if speech_min == min_maxes['speech_min']:
         speech_min = None
     if speech_max == min_maxes['speech_max']:
@@ -89,6 +95,8 @@ def tracks():
         bpm_min=bpm_min,
         instrumental_min=instrumental_min,
         instrumental_max=instrumental_max,
+        acoustic_min=acoustic_min,
+        acoustic_max=acoustic_max,
         danceability_min=danceability_min,
         danceability_max=danceability_max,
         energy_min=energy_min,
@@ -126,6 +134,10 @@ def tracks():
             params['instrumental_min'] = instrumental_min
         if instrumental_max is not None:
             params['instrumental_max'] = instrumental_max
+        if acoustic_min is not None:
+            params['acoustic_min'] = acoustic_min
+        if acoustic_max is not None:
+            params['acoustic_max'] = acoustic_max
         if speech_min is not None:
             params['speech_min'] = speech_min
         if speech_max is not None:
@@ -194,6 +206,10 @@ def tracks():
                             vocal_max=vocal_max,
                             vocal_min_default=vocal_min_default,
                             vocal_max_default=vocal_max_default,
+                            acoustic_min=acoustic_min,
+                            acoustic_max=acoustic_max,
+                            acoustic_min_default=min_maxes['acoustic_min'],
+                            acoustic_max_default=min_maxes['acoustic_max'],
                             speech_min=speech_min,
                             speech_max=speech_max,
                             speech_min_default=min_maxes['speech_min'],

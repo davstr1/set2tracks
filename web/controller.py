@@ -64,6 +64,8 @@ def get_tracks_min_maxes():
     bpm_max = Track.query.with_entities(func.max(Track.tempo)).filter(Track.tempo.isnot(None), Track.tempo != 0).scalar()
     instrumental_min = Track.query.with_entities(func.min(Track.instrumentalness)).filter(Track.instrumentalness.isnot(None), Track.instrumentalness != 0).scalar()
     instrumental_max = Track.query.with_entities(func.max(Track.instrumentalness)).filter(Track.instrumentalness.isnot(None), Track.instrumentalness != 0).scalar()
+    acoustic_min = Track.query.with_entities(func.min(Track.acousticness)).filter(Track.acousticness.isnot(None), Track.acousticness != 0).scalar()
+    acoustic_max = Track.query.with_entities(func.max(Track.acousticness)).filter(Track.acousticness.isnot(None), Track.acousticness != 0).scalar()
     speech_min = Track.query.with_entities(func.min(Track.speechiness)).filter(Track.speechiness.isnot(None), Track.speechiness != 0).scalar()
     speech_max = Track.query.with_entities(func.max(Track.speechiness)).filter(Track.speechiness.isnot(None), Track.speechiness != 0).scalar()
     danceability_min = Track.query.with_entities(func.min(Track.danceability)).filter(Track.danceability.isnot(None), Track.danceability != 0).scalar()
@@ -78,6 +80,7 @@ def get_tracks_min_maxes():
         'year_min': year_min, 'year_max': year_max, 
         'bpm_min': bpm_min, 'bpm_max': bpm_max, 
         'instrumental_min': instrumental_min, 'instrumental_max': instrumental_max,
+        'acoustic_min': acoustic_min, 'acoustic_max': acoustic_max,
         'speech_min': speech_min, 'speech_max': speech_max,
         'danceability_min': danceability_min, 'danceability_max': danceability_max,
         'energy_min': energy_min, 'energy_max': energy_max,
@@ -93,6 +96,7 @@ def get_tracks(
         bpm_min=None,bpm_max=None,
         year_min=None,year_max=None,
         instrumental_min=None,instrumental_max=None,
+        acoustic_min=None,acoustic_max=None,
         speech_min=None,speech_max=None,
         danceability_min=None,danceability_max=None,
         energy_min=None,energy_max=None,
@@ -135,6 +139,10 @@ def get_tracks(
         query = query.filter(Track.instrumentalness >= instrumental_min)
     if instrumental_max:
         query = query.filter(Track.instrumentalness <= instrumental_max)
+    if acoustic_min:
+        query = query.filter(Track.acousticness >= acoustic_min)
+    if acoustic_max:
+        query = query.filter(Track.acousticness <= acoustic_max)
     if speech_min:
         query = query.filter(Track.speechiness >= speech_min)
     if speech_max:
