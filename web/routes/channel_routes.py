@@ -23,7 +23,7 @@ def channels(page=1):
     # Filter each channel's sets to only include ones where set.hidden is False
     for channel in channels:
         channel.sets_visible = sorted(
-            [set_item for set_item in channel.sets if not set_item.hidden],
+            [set_item for set_item in channel.sets if (not set_item.hidden and set_item.published)],
             key=lambda set_item: set_item.publish_date,
             reverse=True
         )
