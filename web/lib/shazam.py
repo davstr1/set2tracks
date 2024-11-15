@@ -65,7 +65,7 @@ async def shazam_track_add_label(track, semaphore, MAX_RETRIES=3, RETRY_DELAY=0)
         track['label'] = None
         return track
 
-async def shazam_add_tracks_label(tracks, MAX_CONCURRENT_REQUESTS=10):
+async def shazam_add_tracks_label(tracks, MAX_CONCURRENT_REQUESTS=30):
     logger.info(f"shazam_add_tracks_label for {len(tracks)} tracks")
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
     tasks = [shazam_track_add_label(track, semaphore) for track in tracks]
