@@ -49,7 +49,7 @@
 
     <div class="p-2 w-full sm:w-1/6 lg:w-20 flex flex-col items-center relative group ">
 
-      <img class="h-full " src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
+      <img src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
       <div class="h-0 w-16">
         <div class="bg-base-content discreet h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>
       </div>
