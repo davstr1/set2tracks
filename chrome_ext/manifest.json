@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Video Checker",
+  "name": "Set2Tracks - Turn Youtube DJ sets to tracklists",
   "version": "1.0",
   "permissions": [
     "webNavigation",
