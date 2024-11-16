@@ -3,6 +3,7 @@
 
 import dis
 import json
+from math import e
 from nis import cat
 import os
 import re
@@ -356,11 +357,12 @@ def get_set_status(youtube_video_id:str) -> dict:
         dict: A dictionary containing the status of the set. If the set exists, the status is returned. If the set is in the queue, the status of the queue entry is returned. If the set is not found, 'not_found' is returned.
     """
     existing_set = Set.query.filter_by(video_id=youtube_video_id).first()
-    if existing_set:
-        return {'status': 'published' if existing_set.published else 'unpublished'}
+    if existing_set and existing_set.published:
+        return {'status': 'published'}
+    
     existing_queue_entry = is_set_in_queue(youtube_video_id)
     if existing_queue_entry:
-        return {'status': existing_queue_entry.status}
+        return {'status': existing_queue_entry.status,'discarded_reason':existing_queue_entry.discarded_reason}
     return {'status': 'not_found'}
 
 def filter_out_existing_sets(video_ids):

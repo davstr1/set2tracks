@@ -21,6 +21,7 @@ async function fetchVideoStatus(videoId) {
   try {
     const response = await fetch(VIDEO_STATUS_URL + videoId);
     const data = await response.json();
+    console.log('Video status:', data);
     return data;
   } catch (error) {
     return { error: error.message };
@@ -32,11 +33,43 @@ async function displayVideoInfo(videoId) {
   console.log('Displaying info for video id:', videoId);
   videoStatus = await fetchVideoStatus(videoId);
 
-  displayS2tButton(videoStatus);
+  // Analyse the videoStatus and display the button accordingly
+  const videoStatusInfo = analyseVideoStatus(videoStatus);
+  displayS2tButton(videoStatusInfo);
   // You can manipulate the DOM or display information as needed here
 }
 
-function displayS2tButton(videoStatus) {
+function analyseVideoStatus(videoStatus) {
+
+  const status = videoStatus.status;
+  const error = videoStatus.discarded_reason;
+
+  const queuedStatuses = ["prequeued", "queued", "processing"];
+
+  const isProcessing = queuedStatuses.some(str => status.includes(str));
+
+  if (isProcessing) {
+    return {'action': 'wait', 'label': 'Processing on Set2Tracks...'};
+  }
+
+  if (status === "not_found") {
+    return {'action': 'add', 'label': 'Add to Set2Tracks'};
+  }
+
+  if (status === "published") {
+    return {'action': 'check', 'label': 'Check on Set2Tracks'};
+  }
+
+  if (error) {
+    if (error.includes("live")) {
+      return {'action': 'add', 'label': 'Add to Set2Tracks'};
+    }
+    return {'action': 'error', 'label': error};
+  }
+
+}
+
+function displayS2tButton(videoStatusInfo) {
   const tryAddS2tButton = setInterval(() => {
     //const parentEl = document.querySelector('.html5-video-container');
     const parentEl = document.querySelector('#above-the-fold');
@@ -47,43 +80,45 @@ function displayS2tButton(videoStatus) {
     if (parentEl) {
       const s2tButton = document.createElement('span');
       s2tButton.id = 'set2Tracks_button';
+      console.log('Video status:', videoStatusInfo);
+      const action = videoStatusInfo.action;
 
-      // Determine the button label and behavior based on videoStatus
-      if (videoStatus.status === "not_found") {
-        s2tButton.textContent = 'Add to Set2Tracks';
+      if (action !== 'error' && action !== 'wait') {
+        s2tButton.textContent = videoStatusInfo.label;
         s2tButton.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
           window.open(SET2TRACK_URL + lastKnownVideoId, '_blank');
         });
-      } else if (videoStatus.status === "published") {
-        s2tButton.textContent = 'Check on Set2Tracks';
-        s2tButton.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          window.open(SET2TRACK_URL + lastKnownVideoId, '_blank');
-        });
-      } else if (videoStatus.error) {
-        // Display the error message without adding any button
-        console.error("Error:", videoStatus.error);
-      } else {
-        // For any other status, just display it as a console log
-        console.log("Status:", videoStatus.status);
+
       }
 
-      // Only add the button if it's not an error scenario
-      if (!videoStatus.error) {
+      
+        s2tButton.textContent = videoStatusInfo.label;
+      
+      
+        
+
+      // Determine the button label and behavior based on videoStatus
+     
+
+      
+    
         s2tButton.style.float = 'right';
         s2tButton.style.padding = '10px';
         s2tButton.style.borderRadius = '25px';  
+        if(action !== 'error' && action !== 'wait') {
         s2tButton.style.border = '1px solid #7480ff';
         s2tButton.style.cursor = 'pointer';
+        } else {
+          s2tButton.style.border = '1px solid #ff0000';
+        }
 
         parentEl.prepend(s2tButton);
         const videoTitle = parentEl.querySelector('#title');
         videoTitle.style.minHeight = '54px';
-        console.log('Hello Square has been added.');
-      }
+        console.log('Set2Tracks button has been added.');
+      
 
       clearInterval(tryAddS2tButton); // Stop the interval after successfully adding the button
     } else {

@@ -3,6 +3,7 @@ from pprint import pprint
 import re
 import stat
 from turtle import st
+from xml.etree.ElementInclude import include
 from boilersaas.utils.mail import send_email
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
@@ -351,8 +352,9 @@ def insert_set_route(video_id):
     if queued_set and queued_set.status != 'done':
         if queued_set.status == 'discarded':
             ux_discarded_reason = discarded_reason_to_ux(queued_set.discarded_reason)
-            flash(Markup(f'This video was discarded : <strong>{ux_discarded_reason}</strong>'), 'error')
-            return redirect(url_for('set.add', youtube_url=video_id))
+            if 'live' not in ux_discarded_reason.lower(): # live sets can be retried
+                flash(Markup(f'This video was discarded : <strong>{ux_discarded_reason}</strong>'), 'error')
+                return redirect(url_for('set.add', youtube_url=video_id))
         elif queued_set.status == 'premiered':
             flash(f'This set {queued_set.discarded_reason}. Come back later', 'warning')
             return redirect(url_for('set.add', youtube_url=video_id))
