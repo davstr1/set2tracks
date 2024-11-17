@@ -56,15 +56,15 @@
     </div>
     <div class="p-2 lg:flex-1 w-full sm:w-4/6 lg:w-auto text-center sm:text-left">
 
-      <div class="font-bold text-lg  tooltip " data-tip="{{ track.title}} (click to search in tracks)">
+      <div class="font-bold text-lg  tooltip" data-tip="{{ track.title}} (click to search in tracks)">
         {% if track.title != "Track not found" %}
         <a class="normal-link text-center sm:text-left line-clamp-1 hover:underline" href="{{url_for('track.tracks',s=track.title)}}">{{track.title}}</a>
         {% endif %}
       </div>
       {% if track.id != 1 %}
-      <div class="italic tooltip flex max-w-fit" data-tip="{{ track.artist_name}} (click to search in tracks)">
+      <div class="italic tooltip flex max-w-fit -mt-2" data-tip="{{ track.artist_name}} (click to search in tracks)">
         {% if track.artist_name %}
-        <a class="normal-link line-clamp-1 text-center sm:text-left hover:underline" href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
+        <a class="normal-link line-clamp-1 text-center sm:text-left hover:underline " href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
         {% else %}
         -
         {% endif %}
@@ -75,9 +75,9 @@
       </div>
       {% endif %}
       {% if track.genres %}
-      <div class="flex max-w-fit tooltip" data-tip="Search tracks with genre">
+      <div class="flex max-w-fit flex-wrap max-h[2rem] overflow-hidden tooltip" data-tip="Search tracks with genre">
         {% for genre in track.genres %}
-        <a class="normal-link text-xs text-gray-500 hover:text-primary" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
+        <a class="normal-link text-xs text-gray-500 hover:text-primary opacity-70 hover:opacity-100" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
         {% if not loop.last %} <span class="text-xs w-2"></span>{% endif %}
         {% endfor %}
       </div>

@@ -3301,6 +3301,22 @@ input[type=password]:focus {
   height: 100%;
 }
 
+.h-\[2\.5rem\] {
+  height: 2.5rem;
+}
+
+.h-\[2rem\] {
+  height: 2rem;
+}
+
+.h-\[1rem\] {
+  height: 1rem;
+}
+
+.h-\[1\.5rem\] {
+  height: 1.5rem;
+}
+
 .max-h-40 {
   max-height: 10rem;
 }
@@ -4099,6 +4115,10 @@ input[type=password]:focus {
   padding-top: 1rem;
 }
 
+.pb-0 {
+  padding-bottom: 0px;
+}
+
 .text-left {
   text-align: left;
 }
@@ -4315,6 +4335,10 @@ input[type=password]:focus {
 
 .opacity-75 {
   opacity: 0.75;
+}
+
+.opacity-70 {
+  opacity: 0.7;
 }
 
 .shadow-md {
