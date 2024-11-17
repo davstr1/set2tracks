@@ -191,6 +191,8 @@ def tracks():
             params['valence_max'] = valence_max
         if keys:
             params['keys'] = keys
+        if genre:
+            params['genre'] = genre
             
         return url_for('track.tracks', **params)
 
