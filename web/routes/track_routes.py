@@ -2,7 +2,7 @@ from re import L, sub
 import re
 from turtle import mode
 from anyio import key
-from flask import Blueprint, Config, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Config, flash, g, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import asc
 from web.lib.utils import get_compatible_keys
@@ -266,6 +266,7 @@ def tracks():
                             valence_min_default=min_maxes['valence_min'],
                             valence_max_default=min_maxes['valence_max'],
                             keys=keys,
+                            genre=genre,
                             order_by=order_by,
                             asc=asc,
                            tpl_utils=tpl_utils,

@@ -20,6 +20,7 @@
 </style>
 
 <form id="search_tracks" action="{{ url_for('track.tracks') }}">
+  <input type="hidden" name="genre" value="{{ genre }}">
 
   <div class="flex space-y-1">
     <!-- Left side with the search field -->
