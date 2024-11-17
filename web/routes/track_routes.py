@@ -1,5 +1,6 @@
 from re import L, sub
 import re
+from anyio import key
 from flask import Blueprint, Config, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import asc
@@ -42,6 +43,9 @@ def tracks():
     
     instrumental_min = 100 - vocal_max if vocal_max is not None else None
     instrumental_max = 100 - vocal_min if vocal_min is not None else None
+    
+    keys = request.args.get('keys', '', type=str)
+    
     
     order_by = request.args.get('order_by', '', type=str)
     asc = request.args.get('asc', None, type=str)
@@ -108,6 +112,7 @@ def tracks():
         speech_min=speech_min,
         speech_max=speech_max,
         order_by=order_by,
+        keys=keys,
         asc=asc
         )
     l = {
@@ -158,6 +163,8 @@ def tracks():
             params['valence_min'] = valence_min
         if valence_max is not None:
             params['valence_max'] = valence_max
+        if keys:
+            params['keys'] = keys
             
         return url_for('track.tracks', **params)
 
@@ -230,6 +237,7 @@ def tracks():
                             valence_max=valence_max,
                             valence_min_default=min_maxes['valence_min'],
                             valence_max_default=min_maxes['valence_max'],
+                            keys=keys,
                             order_by=order_by,
                             asc=asc,
                            tpl_utils=tpl_utils,

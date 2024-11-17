@@ -130,12 +130,107 @@
       <div id="close-panel" class="absolute top-0 right-2 mt-4 px-4 py-2 text-discreet cursor-pointer text-xs rounded hover:bg-gray-600 ">
         Hide
       </div>
-      <h2 class=" text-lg font-semibold mb-4"> 
+      <h2 class=" text-lg font-semibold mb-4">
         <svg class="lg:w-6 lg:h-6 h-12 w-12 inline ">
-        <use xlink:href="#icon-filters"></use>
+          <use xlink:href="#icon-filters"></use>
         </svg> Filters
       </h2>
 
+
+      <div class="space-y-4" >
+        <!-- A Row -->
+        <div class="text-center">Keys</div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold">A</span>
+          <div class="grid grid-cols-12 gap-1 row" data-row="A">
+            <!-- Numbers -->
+            <span class="w-6 h-6 text-center text-xs border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">1</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">2</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">3</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">4</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">5</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">6</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">7</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">8</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">9</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">10</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">11</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">12</span>
+
+          </div>
+        </div>
+
+        <!-- B Row -->
+        <div class="flex items-center space-x-2">
+          <span class="font-bold">B</span>
+          <div class="grid grid-cols-12 gap-1 row" data-row="B">
+            <!-- Numbers -->
+            <span class="w-6 h-6 text-center text-xs  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">1</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">2</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">3</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">4</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">5</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">6</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">7</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">8</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">9</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">10</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">11</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">12</span>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" name="keys" value="{{keys}}">
+      <script>
+        function toggleSelection(button) {
+          // Toggle the selected state
+          button.classList.toggle("bg-primary");
+          button.classList.toggle("text-white");
+          button.classList.toggle("selected");
+
+          // Update the hidden input field
+          updateHiddenField();
+          submitForm();
+        }
+
+        function updateHiddenField() {
+          const selectedValues = [];
+
+          // Loop through all rows and gather selections
+          document.querySelectorAll(".row").forEach(row => {
+            const rowId = row.getAttribute("data-row"); // A or B
+            const selectedButtons = row.querySelectorAll(".selected");
+            
+            selectedButtons.forEach(button => {
+              const value = `${rowId}${button.textContent.trim()}`; // Combine row and number
+              console.log(value);
+              selectedValues.push(value);
+            });
+          });
+          console.table(selectedValues);
+          // Update the hidden input
+          document.querySelector("input[name='keys']").value = selectedValues.join(",");
+        }
+
+        function initializeSelections() {
+          const hiddenInput = document.querySelector("input[name='keys']");
+          const selectedValues = hiddenInput.value.split(",").map(val => val.trim());
+
+          // Preselect based on hidden input
+          document.querySelectorAll(".row").forEach(row => {
+            const rowId = row.getAttribute("data-row"); // A or B
+            const buttons = row.querySelectorAll("span");
+            buttons.forEach(button => {
+              const value = `${rowId}${button.textContent.trim()}`;
+              if (selectedValues.includes(value)) {
+                button.classList.add("bg-primary", "text-white", "selected");
+              }
+            });
+          });
+        }
+
+        document.addEventListener("DOMContentLoaded", initializeSelections);
+      </script>
 
 
 

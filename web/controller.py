@@ -14,7 +14,7 @@ from flask import url_for
 from flask_login import current_user
 import jwt
 import requests
-from sqlalchemy import  func,  or_
+from sqlalchemy import  and_, func,  or_
 from sqlalchemy.ext.mutable import MutableDict
 
 from web.lib.apple import add_apple_track_data_from_json
@@ -103,7 +103,8 @@ def get_tracks(
         energy_min=None,energy_max=None,
         loudness_min=None,loudness_max=None,
         valence_min=None,valence_max=None,
-        order_by=None,asc=None):
+        order_by=None,asc=None,
+        keys=''):
     
     query = Track.query
     
@@ -127,6 +128,23 @@ def get_tracks(
             Track.label.ilike(f"%{search}%"),
         )
         )
+    
+    if keys:
+        # Parse the comma-separated string into individual keys
+        parsed_keys = keys.split(",")  # Example: "A1,B2,A2" -> ["A1", "B2", "A2"]
+        key_conditions = []
+    
+        for key in parsed_keys:
+            mode = 0 if key[0] == 'A' else 1  # A = 0, B = 1
+            key_number = int(key[1:])  # Extract the numeric value (e.g., "1" from "A1")
+            
+            # Create condition for exact match of key and mode
+            key_conditions.append(and_(Track.mode == mode, Track.key == key_number))
+    
+        # Combine all conditions for an exact match
+        query = query.filter(or_(*key_conditions))
+
+        
     
     if bpm_min:
         query = query.filter(Track.tempo >= bpm_min)
