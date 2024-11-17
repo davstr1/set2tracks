@@ -255,6 +255,7 @@ def format_db_track_for_template(track):
             'artist_popularity_spotify': track.artist_popularity_spotify or 0,
            # 'start_time': track_set.start_time,
             #'end_time': track_set.end_time,
+            'genres2': [genre.name for genre in track.genres],
             'tempo': track.tempo,
             'key': track.key,
             'mode': track.mode,

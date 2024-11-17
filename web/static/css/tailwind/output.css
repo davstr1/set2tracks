@@ -3393,6 +3393,10 @@ input[type=password]:focus {
   width: 25%;
 }
 
+.w-2 {
+  width: 0.5rem;
+}
+
 .min-w-\[200px\] {
   min-width: 200px;
 }

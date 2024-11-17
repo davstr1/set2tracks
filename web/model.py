@@ -27,6 +27,8 @@ class Genre(db.Model):
     track_count = db.Column(db.Integer, default=0, nullable=False)
     tracks = db.relationship('Track', secondary='track_genres', back_populates='genres')
     
+    def __repr__(self):
+        return f"<Genre {self.id}: {self.name}>"
 
 class RelatedTracks(db.Model):
     __tablename__ = 'related_tracks'

@@ -104,6 +104,7 @@ def get_tracks(
         loudness_min=None,loudness_max=None,
         valence_min=None,valence_max=None,
         order_by=None,asc=None,
+        genre=None,
         keys=''):
     
     query = Track.query
@@ -119,6 +120,9 @@ def get_tracks(
             query = query.order_by(order_attr.asc())
         else:
             query = query.order_by(order_attr.desc())
+            
+    if genre:
+        query = query.join(Track.genres).filter(Genre.name.ilike(f"%{genre}%"))
         
     if search and search.strip():
         query = query.filter(

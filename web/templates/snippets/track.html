@@ -70,8 +70,16 @@
         {% endif %}
       </div>
       {% if track.label %}
-      <div class="flex max-w-fit tooltip" data-tip="click to search track with label">
+      <div class="flex max-w-fit tooltip" data-tip="Search tracks from label">
         <a class="normal-link text-xs text-gray-500 hover:text-primary" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+      </div>
+      {% endif %}
+      {% if track.genres %}
+      <div class="flex max-w-fit tooltip" data-tip="Search tracks with genre">
+        {% for genre in track.genres %}
+        <a class="normal-link text-xs text-gray-500 hover:text-primary" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
+        {% if not loop.last %} <span class="text-xs w-2"></span>{% endif %}
+        {% endfor %}
       </div>
       {% endif %}
 
