@@ -80,12 +80,18 @@
     </div>
 
 
-    <div class=" discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
+    <div class="discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
+      {% if track.tempo and track.label %}
+      <a href="{{url_for('track.compatible_tracks',track_id=track.id)}}" class="normal-link tooltip" data-tip="Find compatible tracks">
+      {% endif %}
       {% if track.tempo %}
       <div>{{ track.tempo if track.tempo else '' }}</div>
       {% endif %}
       {% if track.key %}
       <div>{{ tpl_utils.key_mode(track)}}</div>
+      {% endif %}
+      {% if track.tempo and track.label %}
+      </a>
       {% endif %}
     </div>
     <div class="p-0 w-20 h-16 lg:flex items-end space-x-1 hidden ">

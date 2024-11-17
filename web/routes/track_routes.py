@@ -1,18 +1,42 @@
 from re import L, sub
 import re
+from turtle import mode
 from anyio import key
-from flask import Blueprint, Config, redirect, render_template, request, url_for
+from flask import Blueprint, Config, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import asc
+from web.lib.utils import get_compatible_keys
 from web.routes.routes_utils import get_user_id, tpl_utils
 
 from lang import Lang
-from web.controller import get_playlists_from_user, get_tracks, get_tracks_min_maxes
+from web.controller import get_playlists_from_user, get_track_by_id, get_tracks, get_tracks_min_maxes
 
 
 
 track_bp = Blueprint('track', __name__)
 
+@track_bp.route('/explore/tracks/compatible/<int:track_id>')
+def compatible_tracks(track_id):
+    track = get_track_by_id(track_id=track_id)
+    if not track:
+        flash('Track not found', 'error')
+        return redirect(url_for('track.tracks'))
+    print(track['tempo'], track['key'], track['mode'])
+    if not track['tempo'] or not track['key'] or track['mode'] is None:
+        flash('Track has no key or tempo specified', 'error')
+        return redirect(url_for('track.tracks'))
+    
+    tempo = track['tempo']
+    key = track['key'] # 0-11
+    mode = track['mode'] # 0,1. 
+    
+    # must be a comma separated string of the compatible keys
+    # for example : "A1,A2,A3,B2"
+    keys_compatible = get_compatible_keys(key, mode)
+    
+    
+    return redirect(url_for('track.tracks', keys=keys_compatible, bpm_min=tempo-5, bpm_max=tempo+5))
+    
 
 @track_bp.route('/explore/tracks')
 def tracks():

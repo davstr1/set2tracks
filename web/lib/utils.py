@@ -273,3 +273,38 @@ def discarded_reason_to_ux(reason):
             msg = f'Unknown discarded reason: {reason}'
             logger.error(msg)
             return msg
+
+
+def get_camelot_notation(key, mode):
+    """
+    Convert a musical key and mode to Camelot notation.
+    key: 0-11 (C to B)
+    mode: 0 (minor) or 1 (major)
+    """
+    camelot_number = (key + 3) % 12 + 1  # Shift to match Camelot numbering
+    camelot_letter = "A" if mode == 0 else "B"
+    return f"{camelot_letter}{camelot_number}"
+
+def get_compatible_keys(key, mode):
+    """
+    Calculate compatible keys based on Camelot wheel rules.
+    Returns a comma-separated string of compatible keys in Camelot notation.
+    """
+    camelot_notation = get_camelot_notation(key, mode)
+    number = int(camelot_notation[1:])  # Extract number
+    letter = camelot_notation[0]       # Extract letter
+
+    # Determine compatible keys
+    compatible = []
+
+    # Add same letter, 2 around current number
+    for offset in [-1, 0, 1]:
+        compatible_number = (number + offset - 1) % 12 + 1
+        compatible.append(f"{letter}{compatible_number}")
+
+    # Add opposite letter with the same number
+    opposite_letter = "B" if letter == "A" else "A"
+    compatible.append(f"{opposite_letter}{number}")
+
+    return ",".join(compatible)
+
