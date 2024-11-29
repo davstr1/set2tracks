@@ -59,6 +59,10 @@
         {% include 'snippets/tracks_display_filter.html' %}
         {% endwith %}
 
+        {% with min=danceability_min_default, max=danceability_max_default, min_val=danceability_min, max_val=danceability_max, min_val_name='danceability_min', max_val_name='danceability_max', label='Danceable' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
         {% with min=energy_min_default, max=energy_max_default, min_val=energy_min, max_val=energy_max, min_val_name='energy_min', max_val_name='energy_max', label='Energic' %}
         {% include 'snippets/tracks_display_filter.html' %}
         {% endwith %}
@@ -253,6 +257,10 @@
       {% endwith %}
 
       {% with min=speech_min_default, max=speech_max_default, min_val=speech_min, max_val=speech_max, min_val_name='speech_min', max_val_name='speech_max', label='Speechy' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=danceability_min_default, max=danceability_max_default, min_val=danceability_min, max_val=danceability_max, min_val_name='danceability_min', max_val_name='danceability_max', label='Danceable' %}
       {% include 'snippets/tracks_range_slider.html' %}
       {% endwith %}
 
