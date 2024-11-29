@@ -27,9 +27,9 @@ if not all([APPLE_KEY_ID, APPLE_TEAM_ID, APPLE_PRIVATE_KEY]):
     sys.exit(1)
 
 
-logger.info(f'APPLE_KEY_ID: {APPLE_KEY_ID}')
-logger.info(f'APPLE_PRIVATE_KEY: {APPLE_PRIVATE_KEY}')
-logger.info('Apple API keys loaded from environment variables.')
+# logger.info(f'APPLE_KEY_ID: {APPLE_KEY_ID}')
+# logger.info(f'APPLE_PRIVATE_KEY: {APPLE_PRIVATE_KEY}')
+# logger.info('Apple API keys loaded from environment variables.')
 
 # print(APPLE_PRIVATE_KEY)
 # sys.exit(1)
