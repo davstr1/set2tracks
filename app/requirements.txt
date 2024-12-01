@@ -8,7 +8,7 @@ apple-music-python==1.0.5
 attrs==23.2.0
 Babel==2.14.0
 blinker==1.8.2
-boilersaas==0.6.6
+boilersaas==0.6.7
 Brotli==1.1.0
 certifi==2024.2.2
 cffi==1.16.0
@@ -51,7 +51,7 @@ python-dotenv==1.0.1
 pytube==15.0.0
 pytz==2024.1
 redis==5.0.4
-requests==2.31.0
+requests==2.32.3
 requests-oauthlib==2.0.0
 shazamio==0.6.0
 shazamio_core==1.0.7
