@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" class="w-full max-w-sm" novalidate>
+  {{ form.hidden_tag() }}
+  <h2>{{_('Choose a New Password')}}</h2>
+  <p>
+    {{ form.password.label }}<br>
+    {{ form.password(size=32) }}<br>
+    {% for error in form.password.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </p>
+  <p>
+    {{ form.confirm_password.label }}<br>
+    {{ form.confirm_password(size=32) }}<br>
+    {% for error in form.confirm_password.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </p>
+  <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

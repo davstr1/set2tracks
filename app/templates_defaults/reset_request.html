@@ -1,0 +1,24 @@
+{% extends "blank.html" %}
+
+{% block content %}
+<form action="{{ url_for('users.reset_request') }}" method="post" class="w-full max-w-sm" novalidate>
+  {{ form.hidden_tag() }}
+
+  <div class="mb-6 text-sm bg-orange-100 py-5 px-3 rounded-lg">{{_('Enter your email address')}}.<br />{{{_('You will get an email with instructions to reset
+    your
+    password')}}.</div>
+  <div class="mb-12">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+      {{form.email.label.text }}
+    </label>
+    {{ form.email(size=32) }}
+    {% for error in form.email.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+
+
+  {{ form.submit() }}
+</form>
+{% endblock %}

@@ -90,18 +90,18 @@ Or if you want to develop the boilerplate itself, contribute to the project :
 ```
 Will install ./boilerplate locally instead of from a remote pip. So you can edit it and see immediatly the results.
 
-## 2 - Fill web/.env with your data
+## 2 - Fill app/web/.env with your data
 
 # Run
 
 Tailwind procesor (to monitor and update your css changes in tailwind)
 ```
-npx tailwindcss -i ./web/static/css/tailwind/input.css -o ./web/static/css/tailwind/output.css --watch
+npx tailwindcss -i ./app/web/static/css/tailwind/input.css -o ./app/web/static/css/tailwind/output.css --watch
 
 ```
 The actual app
 ```
-python web/run.py
+python app/web/run.py
 ```
 
 ## Or manual install
@@ -109,13 +109,13 @@ python web/run.py
 ### 1 - Install python dependencies
 
 ```
-pip install -r web/requirements.txt
+pip install -r requirements.txt
 ```
 
 or if you want to developp the boilersaas, ( and contribute to the project) : 
 
 ```
-pip install -r web/requirements_dev.txt
+pip install -r requirements_dev.txt
 ```
 
 Then don't pip install the boilersaas from Pypi,

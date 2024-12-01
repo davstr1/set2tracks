@@ -1,0 +1,38 @@
+{% extends "blank.html" %}
+
+{% block content %}
+
+
+<form action="{{ url_for('users.register_invite',invite_code=invite_code) }}" method="post" class="w-full max-w-sm" novalidate autocomplete="off">
+  {{ form.hidden_tag() }}
+  {{form.invite_code}}
+  <div class="mb-6">
+    <label for="Email" class="block text-sm font-semibold leading-6 text-gray-900">
+      Email
+    </label>
+    <input class="input-text select-none  text-slate-400 ring-0 focus:ring-0" type="text" value="{{email}}" readonly />
+  </div>
+  <div class="mb-6">
+    <label for="{{ form.fname.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+      {{form.fname.label.text }}
+    </label>
+    {{ form.fname(size=32) }}
+    {% for error in form.fname.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="mb-6">
+    <label for="{{ form.password.id }}" class="block text-sm font-semibold leading-6 text-gray-900">
+      {{form.password.label.text }}
+    </label>
+    {{ form.password(size=32) }}
+    {% for error in form.password.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+
+  {{ form.submit() }}
+</form>
+
+{% endblock %}

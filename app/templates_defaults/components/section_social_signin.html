@@ -1,0 +1,23 @@
+<div class="my-16 text-center flex justify-center items-center relative w-full max-w-sm select-none">
+  <div class="absolute inset-0 px-20  mt-4">
+    <div class="w-full border-t border-slate-500 "></div>
+  </div>
+  <span class="text-xs rounded-full p-2 border-slate-500 border bg-white relative z-10 text-slate-500">{{_('OR')}}</span>
+</div>
+
+
+{% if SIGNUP_OPTIONS.get('allow_google') %}
+<p class="text-center w-full max-w-sm">
+  {% include "components/button_signin_google.html" %}
+</p>
+{% endif %}
+{% if SIGNUP_OPTIONS.get('allow_x') %}
+<p class="mt-8 text-center w-full max-w-sm">
+  {% include "components/button_signin_x.html" %}
+</p>
+{% endif %}
+{% if SIGNUP_OPTIONS.get('allow_facebook') %}
+<p class="mt-8 text-center w-full max-w-sm">
+  {% include "components/button_signin_facebook.html" %}
+</p>
+{% endif %}
