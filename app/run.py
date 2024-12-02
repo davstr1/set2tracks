@@ -11,7 +11,7 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 template_files = glob.glob(template_dir + '/**/*.html', recursive=True)
 
 def run_app():
-    port = int(os.environ.get("PORT", 8080))
+    port = 8080
     app.run(debug=True, port=port, extra_files=template_files, use_reloader=True)       
     
 if __name__ == '__main__':
