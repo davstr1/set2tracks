@@ -7,10 +7,15 @@ from lang import Lang
 
 basic_bp = Blueprint('basic', __name__)
 
+@basic_bp.route('/health', methods=['GET'])
+def health():
+    return "OK", 200
+
+
 
 @basic_bp.route('/')
 def index():
-    return 'index'
+    return 'index', 200
     return redirect(url_for('set.sets'))
 
 
