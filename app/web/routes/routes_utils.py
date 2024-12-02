@@ -5,7 +5,6 @@ from flask_login import current_user
 
 from web.controller import get_playlists_from_user
 from web.lib.format import apple_has_track, apple_track_url, get_cover_art, key_mode, km_number, spotify_has_track, spotify_track_url, time_ago
-import dotenv
 
 def is_connected():
     return current_user.is_authenticated

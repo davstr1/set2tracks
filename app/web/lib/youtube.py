@@ -1,14 +1,11 @@
 import logging, dotenv, os
-from math import e
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from venv import logger
 import requests
 import re
 from yt_dlp import YoutubeDL
 import xml.etree.ElementTree as ET
-from fake_useragent import UserAgent
 
-from web.lib.utils import silent_function
 # for list of options see https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')

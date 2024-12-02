@@ -1,8 +1,7 @@
-from ast import In
 #from boilersaas.routes import User
 from boilersaas.utils.db import db
 from datetime import datetime, timezone
-from sqlalchemy import DDL, Boolean, Date,  Index, JSON,  Integer,SmallInteger, func
+from sqlalchemy import DDL, Index, JSON,  Integer,SmallInteger, func
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils.types import TSVectorType

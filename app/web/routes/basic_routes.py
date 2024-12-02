@@ -1,5 +1,4 @@
-from re import L
-from flask import Blueprint, Config, redirect, render_template, request, send_from_directory, url_for
+from flask import Blueprint, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user
 
 from lang import Lang

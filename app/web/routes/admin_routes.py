@@ -1,14 +1,10 @@
-from operator import is_
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
-from flask_login import current_user
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 
 from lang import Lang
-from web.controller import channel_toggle_followable, channel_toggle_visibility, get_channels_with_feat, get_hidden_channels, get_hidden_sets, get_set_searches, queue_discard_set, queue_reset_set, remove_set_temp_files, search_toggle_featured, set_toggle_visibility
-from web.logger import logger
+from web.controller import channel_toggle_followable, channel_toggle_visibility, get_channels_with_feat, get_hidden_sets, get_set_searches, queue_discard_set, queue_reset_set, search_toggle_featured, set_toggle_visibility
 from web.model import SetQueue
 from web.routes.routes_utils import is_admin
-from web.routes.set_routes import sets
 from web.routes.routes_utils import tpl_utils
 
 

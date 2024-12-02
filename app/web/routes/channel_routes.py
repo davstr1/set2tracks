@@ -1,7 +1,4 @@
-import re
-from flask import Blueprint, redirect, render_template, request, url_for
-from flask.cli import F
-from flask_login import current_user
+from flask import Blueprint, render_template, request, url_for
 
 from lang import Lang
 from web.controller import get_channels

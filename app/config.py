@@ -1,4 +1,3 @@
-from re import A
 from dotenv import load_dotenv
 import os,sys
 load_dotenv()

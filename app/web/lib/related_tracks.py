@@ -1,4 +1,3 @@
-import json
 from boilersaas.utils.db import db
 
 import asyncio
@@ -6,7 +5,6 @@ from web.controller import add_tracks_from_json
 from web.lib.apple import add_apple_track_data_from_json
 from web.lib.shazam import shazam_related_tracks
 from web.lib.spotify import add_tracks_spotify_data_from_json
-from web.model import RelatedTracks
 
 def save_related_tracks(track):
     

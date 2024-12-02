@@ -1,10 +1,4 @@
-
-
-
-import dis
 import json
-from math import e
-from nis import cat
 import os
 import re
 import shutil
@@ -27,13 +21,12 @@ from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spo
 from web.lib.utils import as_dict, calculate_avg_properties
 from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
 from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetBrowsingHistory, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from boilersaas.utils.db import db
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
-from pprint import pprint
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from web.lib.format import cut_to_if_needed, format_db_track_for_template, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
 
 from web.logger import logger

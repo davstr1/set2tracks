@@ -1,7 +1,5 @@
-from pprint import pp, pprint
 from aiohttp_retry import ExponentialRetry
 from shazamio import HTTPClient, Shazam
-from shazamio.user_agent import USER_AGENTS
 from shazamio.exceptions import FailedDecodeJson, BadParseData,BadMethod
 import asyncio
 import os

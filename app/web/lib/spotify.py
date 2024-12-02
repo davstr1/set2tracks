@@ -1,11 +1,9 @@
 from itertools import islice
 import json
 import os
-from platform import release
-from re import S
 import time
 from venv import logger
-from flask import jsonify, redirect, request, session, url_for
+from flask import jsonify, request, session
 import requests
 import spotipy
 from spotipy import SpotifyException
@@ -14,7 +12,6 @@ from web.lib.utils import extract_full_date, extract_year, safe_get
 from web.lib.log_config import setup_logging;setup_logging()
 import logging
 import dotenv,os
-from pprint import pprint
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 dotenv.load_dotenv(dotenv_path)

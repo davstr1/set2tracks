@@ -1,5 +1,4 @@
-from flask import Blueprint, make_response, redirect, render_template, request, url_for
-from flask_login import current_user
+from flask import Blueprint, make_response, redirect, request, url_for
 
 from web.lib.spotify import get_client_auth_url, get_client_playlists, get_client_token
 from web.logger import logger
