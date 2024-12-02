@@ -3,6 +3,15 @@
 import math
 import os
 from pydub import AudioSegment
+# Set the ffmpeg converter path dynamically
+ffmpeg_path = f"{os.getcwd()}/ffmpeg/ffmpeg"
+
+if os.path.isfile(ffmpeg_path):
+    AudioSegment.converter = ffmpeg_path
+    print("Using ffmpeg at:", AudioSegment.converter)
+else:
+    raise FileNotFoundError(f"ffmpeg not found at {ffmpeg_path}")
+
 from concurrent.futures import ThreadPoolExecutor
 import logging
 logger = logging.getLogger('root')
