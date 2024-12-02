@@ -3,14 +3,24 @@
 import math
 import os
 from pydub import AudioSegment
-# Set the ffmpeg converter path dynamically
-ffmpeg_path = f"{os.getcwd()}/ffmpeg/ffmpeg"
+import socket
 
-if os.path.isfile(ffmpeg_path):
-    AudioSegment.converter = ffmpeg_path
-    print("Using ffmpeg at:", AudioSegment.converter)
+# Determine if running on localhost
+is_localhost = socket.gethostname() in ['localhost', '127.0.0.1', '::1','d.local']
+print("is_localhost:", is_localhost)
+print("socket.gethostname():", socket.gethostname())
+
+if not is_localhost:
+    # Set the ffmpeg converter path dynamically for non-localhost environments
+    ffmpeg_path = f"{os.getcwd()}/ffmpeg/ffmpeg"
+
+    if os.path.isfile(ffmpeg_path):
+        AudioSegment.converter = ffmpeg_path
+        print("Using ffmpeg at:", AudioSegment.converter)
+    else:
+        raise FileNotFoundError(f"ffmpeg not found at {ffmpeg_path}")
 else:
-    raise FileNotFoundError(f"ffmpeg not found at {ffmpeg_path}")
+    print("Running on localhost; ffmpeg configuration skipped.")
 
 from concurrent.futures import ThreadPoolExecutor
 import logging
