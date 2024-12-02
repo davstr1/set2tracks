@@ -2,6 +2,7 @@ import logging
 import traceback
 from flask import Flask, render_template
 from config import Config
+from sqlalchemy.exc import OperationalError
 
 # important to import before. templates takes precedence
 #from web.init import init_app as init_extend_app 
@@ -59,24 +60,115 @@ def init_extend_app(app):
 
 
 def create_app(config_class=Config):
-    setup_logging()
-    app = Flask(__name__)
-    set_global_exception_handler(app)
-    app.config.from_object(config_class)
-    
-    db.init_app(app)
-    #mail.init_app(app)
-    init_extend_app(app)
-    
-    init_boilerplate_app(app)
-    
-     # Modify Jinja2 environment settings to suppress detailed template loading messages
-    app.jinja_env.globals['debug'] = False
-    app.jinja_env.loader.debug = False
-    app.jinja_env.add_extension('jinja2.ext.do')
-    app.jinja_env.add_extension('jinja2.ext.loopcontrols')
-    app.context_processor(inject_globals)
-    #
+    """
+    Factory function to create and configure the Flask application instance.
+
+    Args:
+        config_class: The configuration class to use for the app settings.
+
+    Returns:
+        app: A configured Flask application instance.
+    """
+    from flask import Flask
+
+    try:
+        print("Starting app creation...")
+        # Initialize logging to capture and manage application logs
+        print("Setting up logging...")
+        setup_logging()
+        print("Logging setup complete.")
+    except Exception as e:
+        print(f"Failed to set up logging: {e}")
+        raise
+
+    try:
+        # Create a Flask application instance
+        print("Creating Flask app instance...")
+        app = Flask(__name__)
+        print("Flask app instance created.")
+    except Exception as e:
+        print(f"Failed to create Flask app instance: {e}")
+        raise
+
+    try:
+        # Set up a global exception handler
+        print("Setting global exception handler...")
+        set_global_exception_handler(app)
+        print("Global exception handler set.")
+    except Exception as e:
+        print(f"Failed to set global exception handler: {e}")
+        raise
+
+    try:
+        # Load application configuration
+        print(f"Loading app configuration from {config_class.__name__}...")
+        app.config.from_object(config_class)
+        print("App configuration loaded.")
+    except Exception as e:
+        print(f"Failed to load app configuration: {e}")
+        raise
+
+    try:
+        # Initialize the database (SQLAlchemy)
+        print("Initializing database...")
+        db.init_app(app)
+        print("Database initialized.")
+    except Exception as e:
+        print(f"Failed to initialize the database: {e}")
+        raise
+
+    try:
+        # (Optional) Initialize the mail extension if required
+        # print("Initializing mail extension...")
+        # mail.init_app(app)
+        # print("Mail extension initialized.")
+        pass  # Uncomment and configure if mail is required
+    except Exception as e:
+        print(f"Failed to initialize mail extension: {e}")
+        raise
+
+    try:
+        # Extend app functionality
+        print("Extending app functionality...")
+        init_extend_app(app)
+        print("App functionality extended.")
+    except Exception as e:
+        print(f"Failed to extend app functionality: {e}")
+        raise
+
+    try:
+        # Boilerplate initialization for common patterns
+        print("Initializing boilerplate app settings...")
+        init_boilerplate_app(app)
+        print("Boilerplate app settings initialized.")
+    except Exception as e:
+        print(f"Failed to initialize boilerplate app settings: {e}")
+        raise
+
+    try:
+        # Configure the Jinja2 template environment
+        print("Configuring Jinja2 template environment...")
+        app.jinja_env.globals['debug'] = False
+        app.jinja_env.loader.debug = False
+        app.jinja_env.add_extension('jinja2.ext.do')
+        app.jinja_env.add_extension('jinja2.ext.loopcontrols')
+        print("Jinja2 template environment configured.")
+    except Exception as e:
+        print(f"Failed to configure Jinja2 template environment: {e}")
+        raise
+
+    try:
+        # Inject global variables or functions into templates
+        print("Injecting global variables into templates...")
+        app.context_processor(inject_globals)
+        print("Global variables injected.")
+    except Exception as e:
+        print(f"Failed to inject global variables: {e}")
+        raise
+
+  
+
+
   
     
     
@@ -86,8 +178,13 @@ def create_app(config_class=Config):
     
     migrate = Migrate(app, db,directory='../init_ressources/migrations')
     with app.app_context():
-         db.create_all()
+        print("Creating database tables...")
+        try:
+            db.create_all()
+            print("Database tables created successfully.")
+        except OperationalError as e:
+            print(f"Database connection failed: {e}")
 
 
-
+    print("App creation complete.")
     return app
