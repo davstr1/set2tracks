@@ -313,4 +313,4 @@ def is_dev_env():
     """
     Check if the application is running in a development environment.
     """
-    socket.gethostname() in ['localhost', '127.0.0.1', '::1','d.local']
+    return socket.gethostname() in ['localhost', '127.0.0.1', '::1','d.local']
