@@ -5,7 +5,7 @@ import os
 from pydub import AudioSegment
 import socket
 
-from app.web.lib.utils import is_dev_env
+from web.lib.utils import is_dev_env
 
 # Determine if running on localhost
 is_localhost = is_dev_env()
