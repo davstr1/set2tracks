@@ -1478,7 +1478,7 @@ def get_set_with_tracks(set_id):
     tracks = format_db_tracks_for_template(tracks)
    
     tracks = format_tracks_with_times(tracks, track_set_dict)  
-    
+    tracks = sorted(tracks, key=lambda track: track['start_time'])
     channel = Channel.query.get(set_instance.channel_id)
     
 
