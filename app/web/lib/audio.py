@@ -5,10 +5,11 @@ import os
 from pydub import AudioSegment
 import socket
 
+from app.web.lib.utils import is_dev_env
+
 # Determine if running on localhost
-is_localhost = socket.gethostname() in ['localhost', '127.0.0.1', '::1','d.local']
-print("is_localhost:", is_localhost)
-print("socket.gethostname():", socket.gethostname())
+is_localhost = is_dev_env()
+
 
 if not is_localhost:
     # Set the ffmpeg converter path dynamically for non-localhost environments
