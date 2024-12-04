@@ -29,7 +29,7 @@ def dashboard():
             return response
             
             
-        return render_template('dashboard.html')
+        return redirect(url_for('set.sets'))
     
     return redirect(url_for('basic.index'))
 
