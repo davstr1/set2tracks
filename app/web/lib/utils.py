@@ -5,6 +5,7 @@ import io
 from typing import Union
 from web.logger import logger
 import numpy as np
+import socket
 
 
 
@@ -307,3 +308,9 @@ def get_compatible_keys(key, mode):
 
     return ",".join(compatible)
 
+
+def is_dev_env():
+    """
+    Check if the application is running in a development environment.
+    """
+    socket.gethostname() in ['localhost', '127.0.0.1', '::1','d.local']
