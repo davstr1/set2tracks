@@ -1,7 +1,7 @@
 console.log("Content script has loaded and is running.");
 
 let lastKnownVideoId = '';
-SERVER_URL = 'http://localhost:8080' # TODO change to production URL
+SERVER_URL = 'http://localhost:8080' // TODO change to production URL
 SET2TRACK_URL = SERVER_URL + '/insert_set/'
 VIDEO_STATUS_URL = SERVER_URL + '/jax/check_set_status/'
 
