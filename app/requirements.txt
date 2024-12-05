@@ -8,7 +8,7 @@ apple-music-python==1.0.5
 attrs==23.2.0
 Babel==2.14.0
 blinker==1.8.2
-boilersaas==0.6.7
+boilersaas==0.7.0
 Brotli==1.1.0
 certifi==2024.2.2
 cffi==1.16.0
