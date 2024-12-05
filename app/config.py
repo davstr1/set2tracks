@@ -11,7 +11,7 @@ SIGNUP_OPTIONS = {
 
 preferred_url_shceme = 'https'
 if os.environ.get('ENV') == 'dev':
-    preferred_url_shceme = 'http'
+    preferred_url_scheme = 'http'
             
 
 class Config:
@@ -33,7 +33,7 @@ class Config:
         GOOGLE_CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
         GOOGLE_CLIENT_SECRET = os.environ['GOOGLE_CLIENT_SECRET']
         SIGNUP_OPTIONS = SIGNUP_OPTIONS
-        PREFERRED_URL_SCHEME = preferred_url_shceme
+        PREFERRED_URL_SCHEME = preferred_url_scheme
         LOGGING_CONFIG_FILE = os.environ['LOGGING_CONFIG_FILE']
         ADMIN_UID = os.environ['ADMIN_UID']
         NOTIF_SOUND = 'pop-bouncy-plop-betacut-1-00-02.mp3'
