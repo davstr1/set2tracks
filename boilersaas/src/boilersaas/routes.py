@@ -24,7 +24,7 @@ def user():
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard')) 
+        return redirect(url_for('basic.dashboard')) 
     
     if not app.config.get('SIGNUP_OPTIONS')['allow_site']:
         flash(_('Registration is not currently allowed.'), 'error')
@@ -42,7 +42,7 @@ def register():
         flash(_('Congratulations, you are now a registered user!'), 'success')
         send_email(user.email, 'Welcome!', 'email/welcome', username=user.fname)
         
-        return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
+        return redirect(next_page) if next_page else redirect(url_for('basic.dashboard'))  # Adjust according to your app's structure
 
     return render_template('register.html', title=_('Register'), form=form, next=next_page, SIGNUP_OPTIONS=app.config.get('SIGNUP_OPTIONS'))
 
@@ -52,7 +52,7 @@ def register():
 def register_invite(invite_code):
     
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard')) 
+        return redirect(url_for('basic.dashboard')) 
     
     if not app.config.get('SIGNUP_OPTIONS')['allow_invite']:
         flash(_('Invites are not currently allowed.'), 'error')
@@ -82,13 +82,13 @@ def register_invite(invite_code):
         flash(_('Congratulations, you are now a registered user!'),'success')
         send_email(user.email, 'Welcome!', 'email/welcome', username=user.fname)
 
-        return redirect(url_for('main.dashboard'))  # Adjust according to your app's structure
+        return redirect(url_for('basic.dashboard'))  # Adjust according to your app's structure
     return render_template('register_invite.html', title=_('Register'), form=form,email=invite.email,invite_code=invite_code)
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard')) 
+        return redirect(url_for('basic.dashboard')) 
     
     form = LoginForm()  
     next_page = request.args.get('next')
@@ -97,7 +97,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)  # Log in the user
-            return redirect(next_page) if next_page else redirect(url_for('main.dashboard'))
+            return redirect(next_page) if next_page else redirect(url_for('basic.dashboard'))
         else:
             flash(_('Invalid email or password'), 'error')
             
@@ -120,7 +120,7 @@ def logout():
 @bp.route('/reset_password', methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('basic.dashboard'))
     form = RequestResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -140,7 +140,7 @@ def reset_request():
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('basic.dashboard'))
     user = User.verify_reset_token(token)
     if user is None:
         flash(_('That is an invalid or expired token'), 'warning')

@@ -87,7 +87,7 @@ def after_authorize():
 
         
    # Todo : check the cookie for the provenance page
-    return redirect(url_for('main.dashboard'))  
+    return redirect(url_for('basic.dashboard'))  
 
 
 
