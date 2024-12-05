@@ -9,7 +9,7 @@ SIGNUP_OPTIONS = {
     'allow_invite': True,
 }
 
-preferred_url_shceme = 'https'
+preferred_url_scheme = 'https'
 if os.environ.get('ENV') == 'dev':
     preferred_url_scheme = 'http'
             
