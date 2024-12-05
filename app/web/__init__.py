@@ -3,6 +3,7 @@ import traceback
 from flask import Flask, render_template
 from config import Config
 from sqlalchemy.exc import OperationalError
+from werkzeug.middleware.proxy_fix import ProxyFix # allows https to be detected by flask on Digital Ocean (reverse proxy)
 
 # important to import before. templates takes precedence
 #from web.init import init_app as init_extend_app 
@@ -107,6 +108,14 @@ def create_app(config_class=Config):
     except Exception as e:
         print(f"Failed to load app configuration: {e}")
         raise
+    
+    try:
+        app.wsgi_app = ProxyFix(app.wsgi_app)
+        print("ProxyFix added.")
+    except Exception as e:
+        print(f"Failed to add ProxyFix: {e}")
+        raise
+        
 
     try:
         # Initialize the database (SQLAlchemy)
