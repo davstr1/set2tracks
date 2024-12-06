@@ -4,10 +4,10 @@ const customConfig = require('./tailwind.config.custom');
 const baseConfig = {
   
   content: [
-    "./web/templates/*.html",
-    "./web/templates/**/*.html",
-    "./boilersaas/src/boilerssas/templates/*.html",
-    "./boilersaas/src/boilersaas/templates/**/*.html"
+    "../app/web/templates/*.html",
+    "../app/web/templates/**/*.html",
+    "../boilersaas/src/boilerssas/templates/*.html",
+    "../boilersaas/src/boilersaas/templates/**/*.html"
   ],
 
   plugins: [require("@tailwindcss/typography"), require("daisyui")], // order matters
