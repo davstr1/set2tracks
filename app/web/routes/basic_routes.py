@@ -1,8 +1,11 @@
 from flask import Blueprint, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user
-
+from markdown import markdown
 from lang import Lang
 
+def load_markdown_file(file_path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        return f.read()
 
 
 basic_bp = Blueprint('basic', __name__)
@@ -56,3 +59,22 @@ def plans():
         'page_title': 'Plans - ' + Lang.APP_NAME,
     }
     return render_template('plans.html', l=l)
+
+
+@basic_bp.route('/terms-of-service')
+def terms_of_service():
+    markdown_content = load_markdown_file("templates/markdown/terms-of-service.md")
+    html_content = markdown(markdown_content)
+    l = {
+        'page_title': 'Terms of Service - ' + Lang.APP_NAME,
+    }
+    return render_template('generic_text_page.html', l=l,content=html_content)
+
+@basic_bp.route('/privacy-policy')
+def privacy_policy():
+    markdown_content = load_markdown_file("web/templates/markdown/privacy-policy.md")
+    html_content = markdown(markdown_content)
+    l = {
+        'page_title': 'Privacy Policy - ' + Lang.APP_NAME,
+    }
+    return render_template('generic_text_page.html', l=l,content=html_content)
