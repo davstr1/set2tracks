@@ -63,7 +63,7 @@ def plans():
 
 @basic_bp.route('/terms-of-service')
 def terms_of_service():
-    markdown_content = load_markdown_file("templates/markdown/terms-of-service.md")
+    markdown_content = load_markdown_file("web/templates/markdown/terms-of-service.md")
     html_content = markdown(markdown_content)
     l = {
         'page_title': 'Terms of Service - ' + Lang.APP_NAME,
