@@ -44,6 +44,13 @@ const customConfig = {
         '.discreet': {
           '@apply opacity-40': {}, // border  border-dashed border-slate-400
         },
+        '.from-markdown h3': {
+          '@apply text-2xl mt-6 mb-2': {},
+        },
+        '.from-markdown h1': {
+          '@apply text-3xl font-bold mt-10 mb-10': {},
+        },
+
       });
     }),
   ],
