@@ -18,8 +18,9 @@ def health():
 
 @basic_bp.route('/')
 def index():
-    return 'index', 200
-    return redirect(url_for('set.sets'))
+    return render_template('index.html')
+    # return 'index', 200
+    # return redirect(url_for('set.sets'))
 
 
 @basic_bp.route('/dashboard')
