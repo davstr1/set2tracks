@@ -401,7 +401,7 @@ def chunked(iterable, size):
     for first in iterator:
         yield [first, *islice(iterator, size - 1)]
 
-def create_spotify_playlist(playlist_name, playlist_description='Created Set2Tracks'):
+def create_spotify_playlist(playlist_name, playlist_description='Created with Set2Tracks.com'):
     
     token_info = session.get('token_info', None)
     if not token_info:
