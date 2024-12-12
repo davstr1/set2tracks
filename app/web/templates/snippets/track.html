@@ -157,7 +157,7 @@
 
         <a class="normal-link relative lg:w-6 lg:h-6 h-12 w-12 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" target="_blank" href="{{tpl_utils.spotify_track_url(track)}}">
           <svg class="pointer-events-none lg:w-6 lg:h-6 h-12 w-12 absolute z-20 fill-base">
-            <use xlink:href="#icon-spotify-no-circle"></use>
+            <use xlink:href="#icon-spotify"></use>
           </svg>
           <div class="lg:w-6 lg:h-6 h-12 w-12  rounded-full bg-base-content  hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
