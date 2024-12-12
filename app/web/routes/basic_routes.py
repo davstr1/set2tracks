@@ -18,7 +18,10 @@ def health():
 
 @basic_bp.route('/')
 def index():
-    return render_template('index.html')
+    l = {
+        'page_title':  Lang.APP_NAME + ' - '+ 'Turn DJ sets into playlists'
+    }
+    return render_template('index.html', l=l)
     # return 'index', 200
     # return redirect(url_for('set.sets'))
 
