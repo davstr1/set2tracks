@@ -28,13 +28,17 @@
     <!-- Right column: Buttons -->
     <div class="flex flex-col justify-start space-y-4 border b-1 p-4">
 
-      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" class="export-sync btn ">
+      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_spotify', playlist_id=playlist.id) }}" href="#" class="export-sync btn justify-start">
+        <img class="w-9 h-9" src="{{url_for('static',filename='im/Spotify_Primary_Logo_Green_RGB.svg')}}" alt="">
         <span class="export{% if playlist.playlist_id_spotify %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_spotify %} hidden{% endif %}">Update to </span>Spotify
+        
       </a>
 
 
-      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync">
+      <a disabled="true" data-href="{{ url_for('playlist.playlist_to_apple', playlist_id=playlist.id) }}" href="#" class="btn export-sync justify-start">
+        <img class="w-9 h-9" src="{{url_for('static',filename='im/Apple_Music_Icon_RGB_sm_073120.svg')}}" alt="">
         <span class="export{% if playlist.playlist_id_apple %} hidden{% endif %}">Export to </span><span class="sync{% if not playlist.playlist_id_apple %} hidden{% endif %}">Update to </span>Apple Music
+        
       </a>
 
 
