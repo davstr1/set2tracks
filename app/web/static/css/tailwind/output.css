@@ -2946,6 +2946,14 @@ input[type=password]:focus {
   top: 1.5rem;
 }
 
+.bottom-3 {
+  bottom: 0.75rem;
+}
+
+.bottom-36 {
+  bottom: 9rem;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -3373,6 +3381,10 @@ input[type=password]:focus {
 
 .w-9 {
   width: 2.25rem;
+}
+
+.w-10 {
+  width: 2.5rem;
 }
 
 .min-w-\[200px\] {
