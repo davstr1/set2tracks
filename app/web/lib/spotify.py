@@ -21,8 +21,8 @@ SPOTIPY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI') #'http://localhost:5000
 PROXY_URL = os.getenv('SHAZAM_PROXY_URL')
 
 # Scope for the data you want to access and modify
-SCOPE = 'user-library-read playlist-read-private playlist-modify-public playlist-modify-private'
-
+SCOPE = 'playlist-read-private playlist-modify-public playlist-modify-private'
+# no need for user-library-read
 
 proxies = {
     'http': PROXY_URL,
