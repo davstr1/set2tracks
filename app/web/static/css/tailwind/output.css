@@ -3271,6 +3271,10 @@ input[type=password]:focus {
   height: 100%;
 }
 
+.h-9 {
+  height: 2.25rem;
+}
+
 .max-h-40 {
   max-height: 10rem;
 }
@@ -3367,6 +3371,10 @@ input[type=password]:focus {
   width: 100%;
 }
 
+.w-9 {
+  width: 2.25rem;
+}
+
 .min-w-\[200px\] {
   min-width: 200px;
 }
@@ -3445,12 +3453,12 @@ input[type=password]:focus {
   cursor: ew-resize;
 }
 
-.cursor-pointer {
-  cursor: pointer;
-}
-
 .cursor-not-allowed {
   cursor: not-allowed;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .select-none {
