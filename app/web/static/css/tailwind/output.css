@@ -2874,10 +2874,6 @@ input[type=password]:focus {
   bottom: 0px;
 }
 
-.bottom-16 {
-  bottom: 4rem;
-}
-
 .bottom-2 {
   bottom: 0.5rem;
 }
@@ -2944,14 +2940,6 @@ input[type=password]:focus {
 
 .top-6 {
   top: 1.5rem;
-}
-
-.bottom-3 {
-  bottom: 0.75rem;
-}
-
-.bottom-36 {
-  bottom: 9rem;
 }
 
 .z-0 {
@@ -3271,16 +3259,16 @@ input[type=password]:focus {
   height: 2rem;
 }
 
+.h-9 {
+  height: 2.25rem;
+}
+
 .h-auto {
   height: auto;
 }
 
 .h-full {
   height: 100%;
-}
-
-.h-9 {
-  height: 2.25rem;
 }
 
 .max-h-40 {
@@ -3363,6 +3351,10 @@ input[type=password]:focus {
   width: 2rem;
 }
 
+.w-9 {
+  width: 2.25rem;
+}
+
 .w-\[100px\] {
   width: 100px;
 }
@@ -3377,14 +3369,6 @@ input[type=password]:focus {
 
 .w-full {
   width: 100%;
-}
-
-.w-9 {
-  width: 2.25rem;
-}
-
-.w-10 {
-  width: 2.5rem;
 }
 
 .min-w-\[200px\] {
