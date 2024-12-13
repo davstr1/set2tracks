@@ -1,6 +1,7 @@
 
 
 
+import re
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 
@@ -237,7 +238,23 @@ def playlist_delete(playlist_id):
 
 
 @playlist_bp.route('/playlist_to_spotify/<int:playlist_id>')
-def playlist_to_spotify(playlist_id,non_ajax=False):
+def playlist_to_spotify(playlist_id):
+    
+    non_ajax = request.args.get('non_ajax', False)
+    
+    def return_result(result_json):
+        if not non_ajax:
+                print('----- not non ajax')
+                return jsonify(result_json)
+            
+        if 'error' in result_json:
+            flash(result_json['error'], 'warning')
+        else:
+            flash(result_json['message'], 'success')
+          
+        
+        redirect_url = url_for('playlist.show_playlist',playlist_id=playlist_id)
+        return(redirect(redirect_url))
     
     try:
         # connect to spotify
@@ -245,7 +262,7 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         
         # Not connected to Spotify
         if token_spotify is None :
-            redirect_url = url_for('spotify.spotify_auth', next=url_for('playlist.playlist_to_spotify', playlist_id=playlist_id)) #non_ajax=True
+            redirect_url = url_for('spotify.spotify_auth', next=url_for('playlist.playlist_to_spotify', playlist_id=playlist_id,non_ajax=True)) #non_ajax=True
             return jsonify({'redirect': redirect_url})
             #return redirect(url_for('spotify.spotify_auth', next=url_for('playlist.playlist_to_spotify',playlist_id=playlist_id)))
         
@@ -256,13 +273,13 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         tracks = res['tracks']
         
         if not isinstance(playlist, dict):
-            return jsonify({'error': 'Playlist object is not valid'}), 400
+            return return_result({'error': 'Playlist object is not valid'}), 400
         
         if playlist is None:
-            return jsonify({'error': 'Playlist is None'}), 400
+            return return_result({'error': 'Playlist is None'}), 400
         
         if not tracks or len(tracks) == 0:
-            return jsonify({'error': 'No tracks in the playlist'}), 400
+            return return_result({'error': 'No tracks in the playlist'}), 400
         
         
         playlist_id_spotify = playlist.get('playlist_id_spotify',None)
@@ -270,7 +287,9 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
         
         
         if playlist_id_spotify is None:
-            return create_spotify_playlist_and_add_tracks(playlist.get('title'), tracks,playlist_id)
+            result_json = create_spotify_playlist_and_add_tracks(playlist.get('title'), tracks,playlist_id)
+            return return_result(result_json)
+            
             
         else:
             spotify_playlist_tracks_ids = get_spotify_playlist_tracks_ids(playlist_id_spotify)
@@ -278,14 +297,17 @@ def playlist_to_spotify(playlist_id,non_ajax=False):
             tracks_to_add = list(set(local_tracks_ids) - set(spotify_playlist_tracks_ids))
             tracks_to_add = [item for item in tracks_to_add if item not in (None, '')]
             if not len(tracks_to_add):
-                return jsonify({'error': 'No new tracks to add to Spotify playlist'}), 400
+                result = ({'error': 'No new tracks to add to Spotify playlist'})
+                return return_result(result)
 
             
-            return add_tracks_to_spotify_playlist(playlist_id_spotify, tracks_to_add)
+            result = add_tracks_to_spotify_playlist(playlist_id_spotify, tracks_to_add)
+            return return_result(result,non_ajax)
             
            
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        result = jsonify({'error': str(e)})
+        return return_result(result,non_ajax)
     
 
 
