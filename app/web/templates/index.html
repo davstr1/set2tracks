@@ -1,32 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="text-center mt-16">
-  <h2 class="text-4xl font-bold mb-4 text-primary ">Youtube DJ sets -> actionable playlists</h2>
-</div>
-<div class="flex items-center justify-center mx-auto aspect-video max-w-screen-md ">
-  <iframe width="100%" height="100%" src="https://www.youtube.com/embed/zIKrLGGlsFw?si=mm0li-yoeTK0zfdy&vq=hd1080" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-<div class="text-center mt-6">
-  <a href="{{url_for('set.sets')}}" class="btn btn-primary text-xl mt-6">
-    Start Exploring
-  </a>
+<div class=" mt-16 border border-primary p-6 rounded-lg">
+  <div class="text-center">
+    <h2 class="text-4xl font-bold mb-4 text-primary ">Youtube DJ sets -> actionable playlists</h2>
+  </div>
+  <div class="flex items-center justify-center mx-auto aspect-video max-w-screen-md">
+    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/zIKrLGGlsFw?si=mm0li-yoeTK0zfdy&vq=hd1080" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+  <div class="text-center mt-6">
+    <a href="{{url_for('set.sets')}}" class="btn btn-primary text-xl mt-6">
+      Start Exploring
+    </a>
+  </div>
 </div>
 
 <section class="max-w-5xl mx-auto mt-16 px-6">
   <div class="text-center">
     <h2 class="text-4xl font-bold mb-4 text-primary">Take Your DJ Game to the Next Level</h2>
     <p class="text-lg mb-6 text-left">
-      Set2Tracks is your ultimate tool for transforming YouTube DJ sets into fully customizable playlists. 
-      <br/> Whether you're looking to explore new music, plan your next set, or simply discover tracks that fit your vibe, we've got you covered.
+      Set2Tracks is your ultimate tool for transforming YouTube DJ sets into fully customizable playlists.
+      <br /> Whether you're looking to explore new music, plan your next set, or simply discover tracks that fit your vibe, we've got you covered.
     </p>
-   
+
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mt-6">
     <div>
       <h3 class="text-2xl font-semibold mb-3">Turn Sets Into Playlists</h3>
       <p class="mb-4">
-        Instantly convert DJ sets into playlists you can tweak and export to Spotify or Apple Music. 
+        Instantly convert DJ sets into playlists you can tweak and export to Spotify or Apple Music.
         No more manual hunting for track IDs— Let Set2Tracks handle the hard work so you can focus on the music.
       </p>
       <p class="mb-4">
@@ -49,13 +51,13 @@
         Use advanced filters like genre, label, or related tracks to find the perfect additions to your collection. Level up your track selection process with tools designed for DJs by DJs.
       </p>
     </div>
-   
+
   </div>
   <div class="rounded-lg p-6 mt-16 border-2 border-primary border-dashed">
     <h3 class="text-2xl font-semibold mb-3 text-center">Most Features Are Free!</h3>
     <p class="text-center mb-6">
-      Dive in, explore, and see how Set2Tracks can transform the way you approach music discovery. 
-      <br/>The best part? You can try it out for free—no strings attached.
+      Dive in, explore, and see how Set2Tracks can transform the way you approach music discovery.
+      <br />The best part? You can try it out for free—no strings attached.
     </p>
     <div class="text-center">
       <a href="{{url_for('set.sets')}}" class="btn btn-primary text-xl mt-6">
