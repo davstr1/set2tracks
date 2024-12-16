@@ -40,7 +40,8 @@ def dashboard():
     
     return redirect(url_for('basic.index'))
 
-
+@basic_bp.route('android-chrome-192x192.png')
+@basic_bp.route('android-chrome-512x512.png')
 @basic_bp.route('/apple-touch-icon.png')
 @basic_bp.route('/favicon-32x32.png')
 @basic_bp.route('/favicon-16x16.png')
