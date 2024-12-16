@@ -95,8 +95,9 @@ Will install ./boilerplate locally instead of from a remote pip. So you can edit
 # Run
 
 Tailwind procesor (to monitor and update your css changes in tailwind)
+From ./tailwind folder :
 ```
-npx tailwindcss -i ./app/web/static/css/tailwind/input.css -o ./app/web/static/css/tailwind/output.css --watch
+npx tailwindcss -i ../app/web/static/css/tailwind/input.css -o ../app/web/static/css/tailwind/output.css --watch
 
 ```
 The actual app
