@@ -46,6 +46,7 @@ def dashboard():
 @basic_bp.route('/favicon-16x16.png')
 @basic_bp.route('/favicon.ico')
 @basic_bp.route('/site.webmanifest')
+@basic_bp.route('/robots.txt')
 def serve_static_files():
     return send_from_directory('static/root', request.path[1:])
 
