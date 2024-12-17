@@ -1,6 +1,10 @@
-from flask import Blueprint, redirect, render_template, request, send_from_directory, url_for
+import math
+from xml.etree.ElementTree import Element, SubElement, tostring
+from xml.dom.minidom import parseString
+from flask import Blueprint, redirect, render_template, request, send_from_directory, url_for,Response
 from flask_login import current_user
 from markdown import markdown
+from web.controller import get_playable_sets, get_playable_sets_number
 from lang import Lang
 
 def load_markdown_file(file_path):
@@ -85,3 +89,46 @@ def privacy_policy():
         'page_title': 'Privacy Policy - ' + Lang.APP_NAME,
     }
     return render_template('generic_text_page.html', l=l,content=html_content)
+
+
+MAX_ITEMS_PER_MAP = 1000
+
+@basic_bp.route('/sitemap.xml')
+def sitemap():
+    nb_sets = get_playable_sets_number()
+    total_sitemaps = math.ceil(nb_sets / MAX_ITEMS_PER_MAP)
+
+    # Create the sitemap index
+    urlset = Element('sitemapindex', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
+
+    base_url = request.host_url.rstrip('/')
+
+    for i in range(1, total_sitemaps + 1):
+        sitemap = SubElement(urlset, 'sitemap')
+        loc = SubElement(sitemap, 'loc')
+        loc.text = f"{base_url}/sitemap_sets{i}.xml"
+
+    xml_str = tostring(urlset, encoding='utf-8', method='xml')
+    pretty_xml = parseString(xml_str).toprettyxml(indent="  ")
+    return Response(pretty_xml, mimetype='application/xml')
+
+
+
+@basic_bp.route('/sitemap_sets<int:page>.xml')
+def sitemap_set(page):
+    sets, _ = get_playable_sets(page=page, per_page=MAX_ITEMS_PER_MAP)
+
+    # Build sitemap
+    urlset = Element('urlset', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
+    base_url = request.host_url.rstrip('/')
+
+    for playable_set in sets:
+        url = SubElement(urlset, 'url')
+        loc = SubElement(url, 'loc')
+        loc.text = f"{base_url}/set/{playable_set.id}"  # Adjust to your set URL structure
+        lastmod = SubElement(url, 'lastmod')
+        lastmod.text = playable_set.updated_at.isoformat()
+
+    xml_str = tostring(urlset, encoding='utf-8', method='xml')
+    pretty_xml = parseString(xml_str).toprettyxml(indent="  ")
+    return Response(pretty_xml, mimetype='application/xml')
