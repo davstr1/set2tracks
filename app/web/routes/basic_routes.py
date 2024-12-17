@@ -95,27 +95,17 @@ MAX_ITEMS_PER_MAP = 1000
 
 @basic_bp.route('/sitemap.xml')
 def sitemap():
-    
-    # Create the sitemap index
+    """Generate the main sitemap index file."""
     urlset = Element('sitemapindex', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
 
     base_url = request.host_url.rstrip('/')
-    
-     # Add static URLs
-    static_urls = [
-        '/',
-        '/explore',
-        '/explore/channels',
-        '/explore/tracks',
-        '/login',
-        '/register',
-    ]
 
-    for static_url in static_urls:
-        sitemap = SubElement(urlset, 'sitemap')
-        loc = SubElement(sitemap, 'loc')
-        loc.text = f"{base_url}{static_url}"
-        
+    # Add main sitemap entry points
+    sitemap_main = SubElement(urlset, 'sitemap')
+    loc = SubElement(sitemap_main, 'loc')
+    loc.text = f"{base_url}/sitemap_main_entry_points.xml"
+
+    # Dynamically generated sitemaps for sets
     nb_sets = get_playable_sets_number()
     total_sitemaps = math.ceil(nb_sets / MAX_ITEMS_PER_MAP)
 
@@ -124,6 +114,7 @@ def sitemap():
         loc = SubElement(sitemap, 'loc')
         loc.text = f"{base_url}/sitemap_sets{i}.xml"
 
+    # Generate XML string
     xml_str = tostring(urlset, encoding='utf-8', method='xml')
     pretty_xml = parseString(xml_str).toprettyxml(indent="  ")
     return Response(pretty_xml, mimetype='application/xml')
@@ -145,6 +136,34 @@ def sitemap_set(page):
         lastmod = SubElement(url, 'lastmod')
         lastmod.text = playable_set.updated_at.isoformat()
 
+    xml_str = tostring(urlset, encoding='utf-8', method='xml')
+    pretty_xml = parseString(xml_str).toprettyxml(indent="  ")
+    return Response(pretty_xml, mimetype='application/xml')
+
+
+@basic_bp.route('/sitemap_main_entry_points.xml')
+def sitemap_main_entry_points():
+    """Generate a separate sitemap file for static URLs."""
+    urlset = Element('urlset', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
+
+    base_url = request.host_url.rstrip('/')
+    
+    # Static URLs
+    static_urls = [
+        '/',
+        '/explore',
+        '/explore/channels',
+        '/explore/tracks',
+        '/login',
+        '/register',
+    ]
+
+    for static_url in static_urls:
+        url = SubElement(urlset, 'url')
+        loc = SubElement(url, 'loc')
+        loc.text = f"{base_url}{static_url}"
+
+    # Generate XML string
     xml_str = tostring(urlset, encoding='utf-8', method='xml')
     pretty_xml = parseString(xml_str).toprettyxml(indent="  ")
     return Response(pretty_xml, mimetype='application/xml')
