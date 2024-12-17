@@ -95,13 +95,27 @@ MAX_ITEMS_PER_MAP = 1000
 
 @basic_bp.route('/sitemap.xml')
 def sitemap():
-    nb_sets = get_playable_sets_number()
-    total_sitemaps = math.ceil(nb_sets / MAX_ITEMS_PER_MAP)
-
+    
     # Create the sitemap index
     urlset = Element('sitemapindex', {'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9'})
 
     base_url = request.host_url.rstrip('/')
+    
+     # Add static URLs
+    static_urls = [
+        '/',
+        '/explore',
+        '/explore/channels',
+        '/explore/tracks'
+    ]
+
+    for static_url in static_urls:
+        sitemap = SubElement(urlset, 'sitemap')
+        loc = SubElement(sitemap, 'loc')
+        loc.text = f"{base_url}{static_url}"
+        
+    nb_sets = get_playable_sets_number()
+    total_sitemaps = math.ceil(nb_sets / MAX_ITEMS_PER_MAP)
 
     for i in range(1, total_sitemaps + 1):
         sitemap = SubElement(urlset, 'sitemap')
