@@ -108,7 +108,7 @@ def sitemap():
         '/explore/channels',
         '/explore/tracks',
         '/login',
-        '/signup',
+        '/register',
     ]
 
     for static_url in static_urls:
