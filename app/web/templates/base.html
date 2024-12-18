@@ -35,6 +35,16 @@
           },
           "description": "A playlist created from '{{ set.title }}' by {{ set.channel.author }}. Discover songs and export tracks to Spotify or Apple Music.",
           "url": "{{ request.url }}",
+          "isBasedOn": {
+            "@type": "VideoObject",
+            "url": "https://www.youtube.com/watch?v={{ set.video_id }}",
+            "name": "{{ set.title }}",
+            "creator": {
+              "@type": "Person",
+              "name": "{{ set.channel.author }}"
+            },
+            "description": "The original mix from which this playlist was created."
+          },
           "track": [
             {% for track in set.tracks %}
             {% if track.id != 1 %}
