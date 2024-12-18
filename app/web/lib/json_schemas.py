@@ -36,7 +36,7 @@ def generate_set_json_schema(set_data, request_url):
             "description": "The original mix from which this playlist was created.",
             "thumbnailUrl": set_data["thumbnail"]
         },
-        "tracks": []
+        "hasPart": []
     }
 
     for track in set_data["tracks"]:
@@ -62,6 +62,6 @@ def generate_set_json_schema(set_data, request_url):
             if "genres" in track and track["genres"]:
                 track_data["genre"] = [genre.name for genre in track["genres"]]
 
-            json_object["tracks"].append(track_data)
+            json_object["hasPart"].append(track_data)
 
     return json.dumps(json_object, indent=4)
