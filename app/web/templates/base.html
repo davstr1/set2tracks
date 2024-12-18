@@ -23,6 +23,43 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
 
+    {% if set %}
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "MusicPlaylist",
+          "name": "{{ set.title }}",
+          "creator": {
+            "@type": "Person",
+            "name": "{{ set.channel.author }}"
+          },
+          "description": "A playlist created from '{{ set.title }}' by {{ set.channel.author }}. Discover songs and export tracks to Spotify or Apple Music.",
+          "url": "{{ request.url }}",
+          "track": [
+            {% for track in set.tracks %}
+            {% if track.id != 1 %}
+            {
+              "@type": "MusicRecording",
+              "name": "{{ track.title }}",
+              "url": "{{ tpl_utils.spotify_track_url(track) }}",
+              "inPlaylist": "{{ set.title }}",
+              "duration": "PT{{ track.end_time - track.start_time }}S",
+             {% if track.conver_art %} "image": "{{ track.cover_art if track.cover_art else '' }}", {% endif %}
+              "byArtist": {
+                "@type": "MusicGroup",
+                "name": "{{ track.artist_name }}"
+              },
+              {% if track.release_date %}"datePublished": "{{ track.release_date if track.release_date else '' }}", {% endif %}
+              {% if track.genres %}"genre": [{% for genre in track.genres %}"{{ genre.name | safe }}"{% if not loop.last %},{% endif %}{% endfor %}] {% endif %}
+            }{% if not loop.last %},{% endif %}
+            {% endif %}
+            {% endfor %}
+          ]
+        }
+        </script>
+        
+        {% endif %}
+</head>
 <body class="bg-primary-content min-h-screen lg:overflow-x-hidden p-0">
 
     <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
