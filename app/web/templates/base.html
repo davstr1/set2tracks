@@ -27,7 +27,7 @@
     <script type="application/ld+json">
         {
           "@context": "https://schema.org",
-          "@type": "MusicPlaylist",
+          "@type": "CreativeWork",
           "name": "{{ set.title }}",
           "creator": {
             "@type": "Person",
@@ -43,9 +43,10 @@
               "@type": "Person",
               "name": "{{ set.channel.author }}"
             },
-            "description": "The original mix from which this playlist was created."
+            "description": "The original mix from which this playlist was created.",
+            "thumbnailUrl": "{{ set.thumbnail }}",
           },
-          "track": [
+          "tracks": [
             {% for track in set.tracks %}
             {% if track.id != 1 %}
             {
