@@ -16,7 +16,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ l.page_title|safe if l is defined and l.page_title is defined else 'no title' }}</title>
-
+    <meta name="description" content="{{ l.page_description|safe if l is defined and l.page_description is defined else '' }}">
     <link href="{{url_for('static',filename='css/tailwind/output.css')}}" rel="stylesheet">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">

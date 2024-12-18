@@ -253,7 +253,8 @@ def set(set_id):
         user_playlists = []
         
     l = {
-        'page_title': set.get('title') + 'Playlist  '  + Lang.APP_NAME,
+        'page_title': 'Playlist from "' + set.get('title') + '" - ' + set['channel'].author,
+        'page_description': f'Explore the playlist from {set.get("title")} (by {set["channel"].author}). Discover songs, preview tracks, and export to Spotify or Apple Music'
     }      
 
     return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l)
