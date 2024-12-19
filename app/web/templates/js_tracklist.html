@@ -593,15 +593,36 @@
   }
 
 
-  function onYoutubeReady(e) {
 
+  function onYoutubeReady(e) {
     if (!e.target.videoTitle) {
-      console.error('video is unavailable');
+      console.error('Video is unavailable');
       return;
     }
-    console.log('youtube player ready')
+    console.log('YouTube player ready bro');
 
+    const player = e.target;
+    const url = new URL(window.location.href);
+    console.log('url', url);
+    const tParam = url.searchParams.get('t');
+
+    if (tParam && !isNaN(tParam)) {
+      console.log('found initial time parameter', tParam);
+      const startTime = parseInt(tParam, 10);
+      const videoDuration = player.getDuration();
+
+      if (startTime < videoDuration) {
+        console.log(`Starting video at ${startTime} seconds`);
+        player.seekTo(startTime, true);
+        player.playVideo(); // Ensure playback starts
+      } else {
+        console.warn(`Invalid start time: ${startTime} (greater than video duration)`);
+      }
+    }
   }
+
+
+
 
 
 
@@ -636,6 +657,7 @@
       videoId: '{{set.video_id if set else ""}}',
       playerVars: {
         start: 0,
+        autoplay: 1,
       },
       events: {
         'onReady': yt.onReady,
