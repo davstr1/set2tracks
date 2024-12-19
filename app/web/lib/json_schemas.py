@@ -33,12 +33,7 @@ def generate_video_object_with_tracklist(set_data, request_url):
             "name": track["title"],
             "startOffset": track["start_time"],
             "endOffset": track["end_time"],
-            "url": f"{request_url}?t={track['start_time']}",  # Link directly to timestamp
-            "partOf": {
-                "@type": "VideoObject",
-                "name": set_data["title"],
-                "url": f"https://www.youtube.com/watch?v={set_data['video_id']}"
-            }
+            "url": f"{request_url}?t={track['start_time']}"  # Link directly to timestamp
         }
         json_object["hasPart"].append(track_data)
 
