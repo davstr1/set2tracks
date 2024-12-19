@@ -1,8 +1,4 @@
 import json
-from turtle import up
-
-from web.lib.format import spotify_track_url
-
 
 def generate_video_object_with_tracklist(set_data, request_url):
     """
