@@ -20,7 +20,7 @@ def generate_video_object_with_tracklist(set_data, request_url):
         ),
         "thumbnailUrl": set_data["thumbnail"], # TODO : custom thumbnail by adding "with tracklist" text
         "uploadDate": set_data['upload_date'],
-        "contentUrl": f"https://www.youtube.com/watch?v={set_data['video_id']}",
+        "contentUrl": request_url,
         "embedUrl": f"https://www.youtube.com/embed/{set_data['video_id']}",
         "duration": f"PT{set_data.get('duration', 3600)}S",
         "hasPart": []
