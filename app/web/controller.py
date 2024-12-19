@@ -1483,6 +1483,23 @@ def get_set_with_tracks(set_id):
     
 
 
+    try:
+        set_queue_entry = SetQueue.query.filter_by(video_id=set_instance.video_id).first()
+        if set_queue_entry and set_queue_entry.video_info_json:
+            print('set_queue_entry.video_info_json',set_queue_entry.video_info_json)
+            video_info_json = set_queue_entry.video_info_json
+        else:
+            video_info_json = {}  
+    except json.JSONDecodeError:
+        video_info_json = {}  
+    except Exception as e:
+        video_info_json = {}  
+        logger.error(f"An error occurred with the video_info: {e}")
+        
+    upload_date_str = video_info_json.get('upload_date', datetime.now().strftime("%Y%m%d")) # today if not found
+    upload_date = f"{upload_date_str[:4]}-{upload_date_str[4:6]}-{upload_date_str[6:]}"
+
+
     set_details = {
         'id': set_instance.id,
         'video_id': set_instance.video_id,
@@ -1501,6 +1518,8 @@ def get_set_with_tracks(set_id):
         'view_count': set_instance.view_count,
         'like_count': set_instance.like_count,
         'hidden': set_instance.hidden,
+        'video_info_json': video_info_json,
+        'upload_date': upload_date
         
     }
     return set_details
