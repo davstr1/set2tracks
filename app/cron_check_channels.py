@@ -2,9 +2,6 @@ from datetime import datetime, timezone
 import logging
 import time
 
-from requests import get
-import requests
-
 from web import create_app
 from web.controller import filter_out_existing_sets, get_channel_to_check, insert_set_from_queue, pre_queue_set, queue_set
 from boilersaas.utils.db import db
