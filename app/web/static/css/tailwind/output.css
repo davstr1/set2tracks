@@ -3391,6 +3391,10 @@ input[type=password]:focus {
   width: 100%;
 }
 
+.w-5\/6 {
+  width: 83.333333%;
+}
+
 .min-w-\[200px\] {
   min-width: 200px;
 }
@@ -4957,6 +4961,10 @@ input[type=password]:focus {
 
   .md\:w-auto {
     width: auto;
+  }
+
+  .md\:w-5\/6 {
+    width: 83.333333%;
   }
 
   .md\:grid-cols-2 {
