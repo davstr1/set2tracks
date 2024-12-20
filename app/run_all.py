@@ -1,17 +1,26 @@
 import subprocess
 
-# List of scripts to run
-scripts = [
-    "python run.py",
+# Start the foreground process (blocking)
+foreground_process = subprocess.Popen("python run.py", shell=True)
+
+# Start background processes (non-blocking)
+background_scripts = [
     "python cron_check_channels.py",
     "python cron_remove_temp_downloads.py",
     "python cron_set_insert.py",
     "python cron_set_queue.py"
 ]
 
-# Start all scripts in parallel (non-blocking)
-processes = [subprocess.Popen(script, shell=True) for script in scripts]
+background_processes = [
+    subprocess.Popen(script, shell=True) for script in background_scripts
+]
 
-# Optionally print process details or log them
-for process, script in zip(processes, scripts):
-    print(f"Started {script} with PID {process.pid}")
+try:
+    # Wait indefinitely for the foreground process
+    foreground_process.wait()
+except KeyboardInterrupt:
+    # Handle shutdown signal (e.g., Ctrl+C)
+    print("Shutting down...")
+    for process in background_processes:
+        process.terminate()
+    foreground_process.terminate()
