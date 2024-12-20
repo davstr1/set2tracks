@@ -206,7 +206,7 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
         # Set the ffmpeg converter path dynamically for non-localhost environments
         ffmpeg_path = f"{os.getcwd()}/ffmpeg/ffmpeg"
         from yt_dlp.postprocessor import FFmpegPostProcessor
-        FFmpegPostProcessor._ffmpeg_location.set(r'{ffmpeg_path}')
+        FFmpegPostProcessor._ffmpeg_location.set(ffmpeg_path)
     
     yt = f"https://www.youtube.com/watch?v={id}"
     
