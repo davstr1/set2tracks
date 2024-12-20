@@ -205,8 +205,14 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
     if not is_localhost:
         # Set the ffmpeg converter path dynamically for non-localhost environments
         ffmpeg_path = f"{os.getcwd()}/ffmpeg/ffmpeg"
+        ffprobe_path = f"{os.getcwd()}/ffmpeg/ffprobe"
         from yt_dlp.postprocessor import FFmpegPostProcessor
         FFmpegPostProcessor._ffmpeg_location.set(ffmpeg_path)
+        
+        os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_path)
+        os.environ["PATH"] += os.pathsep + os.path.dirname(ffprobe_path)
+        print("PATH updated to include ffmpeg/ffprobe:", os.environ["PATH"])
+
     
     yt = f"https://www.youtube.com/watch?v={id}"
     
