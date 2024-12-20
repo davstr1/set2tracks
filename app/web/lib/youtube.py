@@ -6,6 +6,8 @@ import re
 from yt_dlp import YoutubeDL
 import xml.etree.ElementTree as ET
 
+from app.web.lib.utils import is_dev_env
+
 # for list of options see https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -195,6 +197,16 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
        #     'Referer': 'https://www.youtube.com',
        # },
     }
+    
+    # Determine if running on localhost
+    is_localhost = is_dev_env()
+
+
+    if not is_localhost:
+        # Set the ffmpeg converter path dynamically for non-localhost environments
+        ffmpeg_path = f"{os.getcwd()}/ffmpeg/ffmpeg"
+        from yt_dlp.postprocessor import FFmpegPostProcessor
+        FFmpegPostProcessor._ffmpeg_location.set(r'{ffmpeg_path}')
     
     yt = f"https://www.youtube.com/watch?v={id}"
     
