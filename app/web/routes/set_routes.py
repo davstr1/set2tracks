@@ -254,8 +254,8 @@ def set(set_id):
         user_playlists = []
         
     l = {
-        'page_title': 'Playlist from "' + set.get('title') + '" - ' + set['channel'].author,
-        'page_description': f'Explore the playlist from {set.get("title")} (by {set["channel"].author}). Discover songs, preview tracks, and export to Spotify or Apple Music'
+        'page_title': 'Video with playlist from "' + set.get('title') + '" - ' + set['channel'].author,
+        'page_description': f'Watch the video and explore the playlist from {set.get("title")} (by {set["channel"].author}). Discover songs, preview tracks, and export to Spotify or Apple Music'
     }      
 
     json_schema = generate_video_object_with_tracklist(set, current_url)
