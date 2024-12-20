@@ -1496,10 +1496,11 @@ def get_set_with_tracks(set_id):
         video_info_json = {}  
         logger.error(f"An error occurred with the video_info: {e}")
         
-    upload_date_str = video_info_json.get('upload_date', datetime.now().strftime("%Y%m%d")) # today if not found
+    upload_date_str = video_info_json.get('upload_date', datetime.now().strftime("%Y%m%d"))
     upload_date = f"{upload_date_str[:4]}-{upload_date_str[4:6]}-{upload_date_str[6:]}"
-
-
+    utc_date = datetime.strptime(upload_date, "%Y-%m-%d").replace(hour=8, minute=0, second=0, tzinfo=timezone.utc) # 8am UTC, yep.
+    upload_date_iso = utc_date.isoformat()
+    
     set_details = {
         'id': set_instance.id,
         'video_id': set_instance.video_id,
@@ -1519,7 +1520,7 @@ def get_set_with_tracks(set_id):
         'like_count': set_instance.like_count,
         'hidden': set_instance.hidden,
         'video_info_json': video_info_json,
-        'upload_date': upload_date
+        'upload_date': upload_date_iso
         
     }
     return set_details
