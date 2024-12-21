@@ -63,7 +63,7 @@ def tracks():
     instrumental_max = 100 - vocal_min if vocal_min is not None else None
     
     keys = request.args.get('keys', '', type=str)
-    genre = request.args.get('genre', None, type=str)
+    genre = request.args.get('genre', '', type=str)
     
     
     order_by = request.args.get('order_by', '', type=str)
