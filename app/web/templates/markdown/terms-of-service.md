@@ -2,7 +2,12 @@
 
 **Effective Date:** December 6, 2024
 
+
+Set2Tracks is a service provided by NexumSolis LLC.
+
+
 Welcome to Set2Tracks ! 
+
 By using our services, you agree to these Terms of Service. If you do not agree, please do not use our services.
 
 ### **1. Use of the Service**
@@ -26,5 +31,12 @@ By using our services, you agree to these Terms of Service. If you do not agree,
 ### **5. Changes to Terms**
 
 - We may update these Terms. Continued use of the service constitutes your acceptance of the updated Terms.
+
+If you have questions about these Terms, contact us at info@set2tracks.com.
+
+
+### **6. Refund Policy**
+
+- We offer a 7-day refund policy for all subscriptions. To request a refund, please contact us at info@set2tracks.com within 7 days of your purchase. Refunds will be processed within 5-7 business days after approval. This policy applies only to initial purchases and not to renewals.
 
 If you have questions about these Terms, contact us at info@set2tracks.com.

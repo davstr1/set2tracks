@@ -4,6 +4,8 @@
 
 Set2Tracks ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect, use, and protect your personal information when you use our services.
 
+Set2Tracks is a service provided by NexumSolis LLC.
+
 ### **Information We Collect**
 
 1. **Account Information**: When you sign up via email or Google authentication, we collect your email address.
