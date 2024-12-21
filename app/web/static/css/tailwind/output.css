@@ -4967,6 +4967,14 @@ input[type=password]:focus {
     width: 83.333333%;
   }
 
+  .md\:w-1\/4 {
+    width: 25%;
+  }
+
+  .md\:w-1\/2 {
+    width: 50%;
+  }
+
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5044,6 +5052,14 @@ input[type=password]:focus {
 
   .lg\:w-auto {
     width: auto;
+  }
+
+  .lg\:w-1 {
+    width: 0.25rem;
+  }
+
+  .lg\:w-1\/4 {
+    width: 25%;
   }
 
   .lg\:flex-1 {
