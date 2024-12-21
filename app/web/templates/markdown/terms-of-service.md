@@ -37,6 +37,6 @@ If you have questions about these Terms, contact us at info@set2tracks.com.
 
 ### **6. Refund Policy**
 
-- We offer a 7-day refund policy for all subscriptions. To request a refund, please contact us at info@set2tracks.com within 7 days of your purchase. Refunds will be processed within 5-7 business days after approval. This policy applies only to initial purchases and not to renewals.
+- We offer a 7-day refund policy for all subscriptions. To request a refund, please contact us at info@set2tracks.com within 7 days of your purchase. Refunds will be processed within 5-7 business days after approval. This policy applies to initial purchases as well as renewals.
 
 If you have questions about these Terms, contact us at info@set2tracks.com.
