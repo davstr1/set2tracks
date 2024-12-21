@@ -64,7 +64,7 @@ def help():
 
 
 @basic_bp.route('/pricing')
-def plans():
+def pricing():
     # TODO: Add useer integration
     l = {
         'page_title': 'Pricing - ' + Lang.APP_NAME,
