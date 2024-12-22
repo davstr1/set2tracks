@@ -259,8 +259,9 @@ def set(set_id):
     }      
 
     json_schema = generate_video_object_with_tracklist(set, current_url)
+    canonical_url = url_for('set.set', set_id=set_id, _external=True)
 
-    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l,json_schema=json_schema)
+    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l,json_schema=json_schema,canonical_url=canonical_url)
 
 
 
