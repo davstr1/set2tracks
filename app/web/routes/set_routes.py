@@ -258,8 +258,9 @@ def set(set_id):
         'page_description': f'Watch the video and explore the playlist from {set.get("title")} (by {set["channel"].author}). Discover songs, preview tracks, and export to Spotify or Apple Music'
     }      
 
-    json_schema = generate_video_object_with_tracklist(set, current_url)
     canonical_url = url_for('set.set', set_id=set_id, _external=True)
+    json_schema = generate_video_object_with_tracklist(set, canonical_url)
+   
 
     return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l,json_schema=json_schema,canonical_url=canonical_url)
 
