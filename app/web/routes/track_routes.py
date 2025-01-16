@@ -1,6 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from operator import is_
+from flask import Blueprint, flash, make_response, redirect, render_template, request, url_for
+from web.lib.format import apple_track_url, spotify_track_url
 from web.lib.utils import get_compatible_keys
-from web.routes.routes_utils import get_user_id, tpl_utils
+from web.routes.routes_utils import get_user_id, is_connected, tpl_utils
 
 from lang import Lang
 from web.controller import get_playlists_from_user, get_track_by_id, get_tracks, get_tracks_min_maxes
@@ -8,6 +10,36 @@ from web.controller import get_playlists_from_user, get_track_by_id, get_tracks,
 
 
 track_bp = Blueprint('track', __name__)
+
+
+@track_bp.route('/track/<int:track_id>/<string:music_service>')
+def track_link(track_id, music_service):
+    error_redirect = url_for('set.sets')
+    # Music service should be either 'spotify' or 'apple'
+    track = get_track_by_id(track_id=track_id)
+    print(track)
+    if not track:
+        flash('Track not found', 'error')
+        return redirect(error_redirect)
+    
+    # Check if the user is authenticated
+    if not is_connected():
+        response = make_response(redirect(url_for('users.login', next=request.referrer)))
+        #response.set_cookie('next_page_track_link', url_for('track.track_link',track_id=track_id,music_service=music_service), max_age=600, httponly=False, samesite='Lax', path='/')
+        return response
+
+    # Generate the URL for the specified music service
+    if music_service.lower() == 'spotify':
+        url = spotify_track_url(track)
+    elif music_service.lower() == 'apple':
+        url = apple_track_url(track)
+    else:
+        flash('Invalid music service', 'error')
+        return redirect(error_redirect)
+    
+    # Redirect the user to the generated URL
+    return redirect(url)
+
 
 @track_bp.route('/explore/tracks/compatible/<int:track_id>')
 def compatible_tracks(track_id):

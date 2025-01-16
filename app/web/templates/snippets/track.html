@@ -154,13 +154,13 @@
 
 
 
-        <a class="normal-link relative lg:w-6 lg:h-6 h-8 w-8 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" target="_blank" href="{{tpl_utils.spotify_track_url(track)}}">
+        <a class="normal-link relative lg:w-6 lg:h-6 h-8 w-8 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='spotify')}}">
           <svg class="pointer-events-none lg:w-6 lg:h-6 h-8 w-8 absolute z-20 fill-base">
             <use xlink:href="#icon-spotify"></use>
           </svg>
           <div class="lg:w-6 lg:h-6 h-8 w-8  rounded-full bg-base-content  hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
-        <a class="normal-link lg:w-6 lg:h-6 h-8 w-8  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" target="_blank" href="{{tpl_utils.apple_track_url(track)}}">
+        <a class="normal-link lg:w-6 lg:h-6 h-8 w-8  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='apple')}}">
           <svg class="lg:w-6 lg:h-6 h-8 w-8  pointer-events-none absolute z-20 fill-base ">
             <use xlink:href="#icon-apple-no-square"></use>
           </svg>
