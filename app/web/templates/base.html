@@ -33,13 +33,11 @@
         {% endif %}
 </head>
 <body class="bg-primary-content min-h-screen lg:overflow-x-hidden p-0">
-
-    <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
+   <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
         <symbol id="icon-link-external" class="h-6 w-6" viewBox="0 0 8 10">
             <path class="fill-base-content hover:fill-primary" d="M7.625,3.5c-0.101,0-0.191-0.041-0.259-0.105C7.364,3.393,7.361,3.393,7.359,3.391  L6.427,2.458l-2.36,2.36c-0.244,0.243-0.64,0.243-0.884,0c-0.244-0.244-0.244-0.64,0-0.884l2.359-2.359L4.609,0.641  C4.607,0.639,4.607,0.636,4.605,0.634C4.541,0.566,4.5,0.476,4.5,0.375C4.5,0.168,4.668,0,4.875,0H7.5C7.776,0,8,0.224,8,0.5v2.625  C8,3.332,7.832,3.5,7.625,3.5z M1,2.25v4.5C1,6.888,1.112,7,1.25,7h4.5C5.888,7,6,6.888,6,6.75V4l1,1v2c0,0.553-0.447,1-1,1H1  C0.448,8,0,7.553,0,7V2c0-0.552,0.448-1,1-1h2l1,1H1.25C1.112,2,1,2.112,1,2.25z" />
         </symbol>
     </svg>
-
 
     <div class="container mx-auto w-full pl-3 pr-3 lg:pl-5 lg:pr-5 xl:w-3/4">
         <header class="border-b-2 border-slate-200 w-full mb-8">
@@ -57,7 +55,8 @@
                 </div> -->
 
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-                    <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class="block px-4 py-2 text-sm">Feedback/Help</a>
+                    <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class=" px-4 py-2 text-sm">
+                        <img class="h-4 w-4 inline" src="{{url_for('static',filename='im/reddit-logo-2436.png')}}"> Feedback/Help</a>
                 </div>
 
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -108,7 +107,7 @@
                 </div> -->
 
                 <div class="pt-4 pb-3 border-t-2 border-slate-200">
-                    <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class="block pl-3 pr-4 py-2 text-base font-medium">Feedback/Help</a>
+                    <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class="block pl-3 pr-4 py-2 text-base font-medium"><img class="h-4 w-4 inline" src="{{url_for('static',filename='im/reddit-logo-2436.png')}}"> Feedback/Help</a>
                 </div>
                 <div class="pt-4 pb-3 border-t-2 border-slate-200">
                     {% if current_user.is_authenticated %}
