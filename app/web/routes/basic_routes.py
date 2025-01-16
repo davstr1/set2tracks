@@ -22,12 +22,12 @@ def health():
 
 @basic_bp.route('/')
 def index():
-    l = {
-        'page_title':  Lang.APP_NAME + ' - '+ 'Turn DJ sets into playlists'
-    }
-    return render_template('index.html', l=l)
+    # l = {
+    #     'page_title':  Lang.APP_NAME + ' - '+ 'Turn DJ sets into playlists'
+    # }
+    # return render_template('index.html', l=l)
     # return 'index', 200
-    # return redirect(url_for('set.sets'))
+    return redirect(url_for('set.sets'))
 
 
 @basic_bp.route('/dashboard')
