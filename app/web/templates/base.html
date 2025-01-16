@@ -48,13 +48,13 @@
                     {% include 'logo.html' %}
                 </div>
 
-                <div class="hidden lg:flex lg:gap-x-12">
+                <!-- <div class="hidden lg:flex lg:gap-x-12">
                     <a href="{{ url_for('set.sets') }}" class="{{ 'text-primary ' if page_name == 'explore' }} text-sm font-semibold leading-6 py-2.5 px-4">Explore</a>
-                </div>
+                </div> -->
 
-                <div class="hidden lg:flex lg:gap-x-12">
+                <!-- <div class="hidden lg:flex lg:gap-x-12">
                     <a href="{{ url_for('playlist.my_playlists') }}" class="{{ 'text-primary ' if page_name == 'my_playlists' }} text-sm font-semibold leading-6 py-2.5 px-4">{{ _("My Playlists") }}</a>
-                </div>
+                </div> -->
 
                 <div class="hidden lg:flex lg:flex-1 lg:justify-end">
                     <a target="_blank" href="mailto:info@set2tracks.com" class="block px-4 py-2 text-sm">Feedback/Help</a>
@@ -102,10 +102,10 @@
 
             <!-- Mobile menu -->
             <div id="mobile-menu" class="border-2 absolute left-3 right-3 bg-primary-content hidden peer-checked:flex flex-col lg:hidden z-50">
-                <div class="pt-2 pb-3 space-y-1">
+                <!-- <div class="pt-2 pb-3 space-y-1">
                     <a href="{{ url_for('set.sets') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Explore") }}</a>
                     <a href="{{ url_for('playlist.my_playlists') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("My Playlists") }}</a>
-                </div>
+                </div> -->
 
                 <div class="pt-4 pb-3 border-t-2 border-slate-200">
                     <a target="_blank" href="mailto:info@set2tracks.com" class="block pl-3 pr-4 py-2 text-base font-medium">Feedback/Help</a>
