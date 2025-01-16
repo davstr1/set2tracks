@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% include 'snippets/explore_submenu.html' %}
+
+<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+<style>
+  input[type=range]::-webkit-slider-thumb {
+    pointer-events: all;
+    width: 24px;
+    height: 24px;
+    -webkit-appearance: none;
+    /* @apply w-6 h-6 appearance-none pointer-events-auto; */
+  }
+
+  .no-transition {
+    transition: none !important;
+  }
+</style>
+
+<form id="search_tracks" action="{{ url_for('track.tracks') }}">
+  <input type="hidden" name="genre" value="{{ genre }}">
+
+  <div class="flex space-y-1">
+    <!-- Left side with the search field -->
+    <div class="flex flex-col w-full lg:w-2/3 mb-4">
+
+      <div class="relative w-full">
+        <input type="text" class="form-input w-full pr-10 bg-gray-800 text-white border-gray-700 placeholder-gray-500" name="s" placeholder="Search track or artist name" value="{{ search }}">
+        {% if results_count %}
+        <button class="absolute inset-y-0 right-10 flex items-center pr-3 text-gray-500">{{ results_count }} tracks</button>
+        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none tooltip" data-tip="Reset Form" onclick="document.querySelector('input[name=\'s\']').value='';document.getElementById('search_tracks').submit();">
+          <svg class="h-5 w-5 rounded-full bg-gray-600 hover:bg-gray-500 p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        {% endif %}
+      </div>
+
+      <div class="mt-2">
+        {% if genre %}
+        <span x-text="genre" class="p-2 border rounded-xl mr-1 border-primary text-primary cursor-pointer hover:border-gray-400 hover:text-gray-400 hover:line-through" onclick="document.querySelector('input[name=\'genre\']').value='';document.getElementById('search_tracks').submit();">Genre:{{genre}}</span>
+        {% endif %}
+        {% with min=year_min_default, max=year_max_default, min_val=year_min, max_val=year_max,min_val_name='year_min', max_val_name='year_max', label='Year' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=bpm_min_default, max=bpm_max_default, min_val=bpm_min, max_val=bpm_max, min_val_name='bpm_min', max_val_name='bpm_max', label='BPM' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocal' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=acoustic_min_default, max=acoustic_max_default, min_val=acoustic_min, max_val=acoustic_max, min_val_name='acoustic_min', max_val_name='acoustic_max', label='Acoustic' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=speech_min_default, max=speech_max_default, min_val=speech_min, max_val=speech_max, min_val_name='speech_min', max_val_name='speech_max', label='Speechy' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=danceability_min_default, max=danceability_max_default, min_val=danceability_min, max_val=danceability_max, min_val_name='danceability_min', max_val_name='danceability_max', label='Danceable' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=energy_min_default, max=energy_max_default, min_val=energy_min, max_val=energy_max, min_val_name='energy_min', max_val_name='energy_max', label='Energic' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=loudness_min_default, max=loudness_max_default, min_val=loudness_min, max_val=loudness_max, min_val_name='loudness_min', max_val_name='loudness_max', label='Loud' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+        {% with min=valence_min_default, max=valence_max_default, min_val=valence_min, max_val=valence_max, min_val_name='valence_min', max_val_name='valence_max', label='Happy' %}
+        {% include 'snippets/tracks_display_filter.html' %}
+        {% endwith %}
+
+      </div>
+
+      
+      <div class="flex justify-between">
+        <div class="relative h-10 w-24 min-w-[200px] my-8">
+          <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+            <option value="release_date" {% if order_by=='release_date' %}selected{% endif %}>Released</option>
+            <option value="" {% if order_by=='' or order_by==null %}selected{% endif %}>New Here</option>
+            <option value="tempo" {% if order_by=='tempo' %}selected{% endif %}>BPM</option>
+            <option value="speechiness" {% if order_by=='speechiness' %}selected{% endif %}>Speechy</option>
+            <option value="acousticness" {% if order_by=='acousticness' %}selected{% endif %}>Acoustic</option>
+            <option value="danceability" {% if order_by=='danceability' %}selected{% endif %}>Danceable</option>
+            <option value="energy" {% if order_by=='energy' %}selected{% endif %}>Energic</option>
+            <option value="loudness" {% if order_by=='loudness' %}selected{% endif %}>Loud</option>
+            <option value="valence" {% if order_by=='valence' %}selected{% endif %}>Happy</option>
+            <option value="nb_sets" {% if order_by=='nb_sets' %}selected{% endif %}>Nb Sets</option>
+            <option value="artist_popularity_spotify" {% if order_by=='artist_popularity_spotify' %}selected{% endif %}>Artist Popularity</option>
+          </select>
+          <label class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-900 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
+            Order
+          </label>
+        </div>
+
+        <label for="asc" class="asc relative inline-flex cursor-pointer select-none items-center">
+          <input type="checkbox" name="asc" id="asc" class="sr-only" />
+          <div class="flex w-[82px] items-center justify-center rounded-md text-xs p-1 border border-blue-gray-200">
+            <span class="{% if asc=='on'  %} discreet {% endif %}flex h-6 w-14 items-center justify-center  border-r hover:text-primary" onclick="document.getElementById('asc').value = ''">
+              ↓
+            </span>
+            <span class="{% if asc=='off' or not asc %}discreet {% endif %}flex h-6 w-14 items-center justify-center hover:text-primary">
+              ↑
+            </span>
+          </div>
+        </label>
+      </div>
+
+
+    </div>
+
+
+
+
+  </div>
+
+
+
+
+
+  <div class="">
+    <!-- Filters panel -->
+    <div id="toggle-filters-panel" class="m-2 absolute top-0 right-2 cursor-pointer p-2 text-discreet text-xs rounded-xl border  border-blue-200 hover:text-primary hover:border-primary z-50 bg-primary-content">
+      <svg class=" lg:w-6 lg:h-6 h-12 w-12 inline ">
+        <use xlink:href="#icon-filters"></use>
+      </svg> Filters
+    </div>
+    <div id="filters-panel" class="hidden absolute top-0 right-0 md:w-1/2 lg:w-1/4 bg-primary-content border b-2 border-gray-700 shadow-lg p-4 rounded z-50 transform transition-transform duration-300 translate-x-full">
+
+      <div id="close-panel" class="absolute top-0 right-2 mt-4 px-4 py-2 text-discreet cursor-pointer text-xs rounded hover:bg-gray-600 ">
+        Hide
+      </div>
+      <h2 class=" text-lg font-semibold mb-4">
+        <svg class="lg:w-6 lg:h-6 h-12 w-12 inline ">
+          <use xlink:href="#icon-filters"></use>
+        </svg> Filters
+      </h2>
+
+
+      <div class="space-y-4" >
+        <!-- A Row -->
+        <div class="text-center">Keys</div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold">A</span>
+          <div class="grid grid-cols-12 gap-1 row" data-row="A">
+            <!-- Numbers -->
+            <span class="w-6 h-6 text-center text-xs border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">1</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">2</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">3</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">4</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">5</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">6</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">7</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">8</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">9</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">10</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">11</span>
+            <span class="w-6 h-6 text-xs text-center border border-transparent rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">12</span>
+
+          </div>
+        </div>
+
+        <!-- B Row -->
+        <div class="flex items-center space-x-2">
+          <span class="font-bold">B</span>
+          <div class="grid grid-cols-12 gap-1 row" data-row="B">
+            <!-- Numbers -->
+            <span class="w-6 h-6 text-center text-xs  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">1</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">2</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">3</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">4</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">5</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">6</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">7</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">8</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">9</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">10</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">11</span>
+            <span class="w-6 h-6 text-xs text-center  rounded flex items-center justify-center cursor-pointer" onclick="toggleSelection(this)">12</span>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" name="keys" value="{{keys}}">
+      <script>
+        function toggleSelection(button) {
+          // Toggle the selected state
+          button.classList.toggle("bg-primary");
+          button.classList.toggle("text-white");
+          button.classList.toggle("selected");
+
+          // Update the hidden input field
+          updateHiddenField();
+          submitForm();
+        }
+
+        function updateHiddenField() {
+          const selectedValues = [];
+
+          // Loop through all rows and gather selections
+          document.querySelectorAll(".row").forEach(row => {
+            const rowId = row.getAttribute("data-row"); // A or B
+            const selectedButtons = row.querySelectorAll(".selected");
+            
+            selectedButtons.forEach(button => {
+              const value = `${rowId}${button.textContent.trim()}`; // Combine row and number
+              console.log(value);
+              selectedValues.push(value);
+            });
+          });
+          console.table(selectedValues);
+          // Update the hidden input
+          document.querySelector("input[name='keys']").value = selectedValues.join(",");
+        }
+
+        function initializeSelections() {
+          const hiddenInput = document.querySelector("input[name='keys']");
+          const selectedValues = hiddenInput.value.split(",").map(val => val.trim());
+
+          // Preselect based on hidden input
+          document.querySelectorAll(".row").forEach(row => {
+            const rowId = row.getAttribute("data-row"); // A or B
+            const buttons = row.querySelectorAll("span");
+            buttons.forEach(button => {
+              const value = `${rowId}${button.textContent.trim()}`;
+              if (selectedValues.includes(value)) {
+                button.classList.add("bg-primary", "text-white", "selected");
+              }
+            });
+          });
+        }
+
+        document.addEventListener("DOMContentLoaded", initializeSelections);
+      </script>
+
+
+
+
+      {% with min=year_min_default, max=year_max_default, min_val=year_min, max_val=year_max, min_val_name='year_min', max_val_name='year_max', label='Year' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=bpm_min_default, max=bpm_max_default, min_val=bpm_min, max_val=bpm_max, min_val_name='bpm_min', max_val_name='bpm_max', label='BPM' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=vocal_min_default, max=vocal_max_default, min_val=vocal_min, max_val=vocal_max, min_val_name='vocal_min', max_val_name='vocal_max', label='Vocal' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=acoustic_min_default, max=acoustic_max_default, min_val=acoustic_min, max_val=acoustic_max, min_val_name='acoustic_min', max_val_name='acoustic_max', label='Acoustic' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=speech_min_default, max=speech_max_default, min_val=speech_min, max_val=speech_max, min_val_name='speech_min', max_val_name='speech_max', label='Speechy' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=danceability_min_default, max=danceability_max_default, min_val=danceability_min, max_val=danceability_max, min_val_name='danceability_min', max_val_name='danceability_max', label='Danceable' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=energy_min_default, max=energy_max_default, min_val=energy_min, max_val=energy_max, min_val_name='energy_min', max_val_name='energy_max', label='Energic' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=loudness_min_default, max=loudness_max_default, min_val=loudness_min, max_val=loudness_max, min_val_name='loudness_min', max_val_name='loudness_max', label='Loud' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+      {% with min=valence_min_default, max=valence_max_default, min_val=valence_min, max_val=valence_max, min_val_name='valence_min', max_val_name='valence_max', label='Happy' %}
+      {% include 'snippets/tracks_range_slider.html' %}
+      {% endwith %}
+
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="flex flex-col items-center justify-center">
+      {% include 'tracklist.html' %}
+    </div>
+
+  </div>
+</form>
+
+<script>
+  const panel = document.getElementById('filters-panel');
+  const mainContent = document.getElementById('main-content');
+  const toggleFiltersPanelButton = document.getElementById('toggle-filters-panel');
+  const closeFiltersPanelButton = document.getElementById('close-panel');
+
+
+  const FILTERS_COOKIE_NAME = 'filters_panel_visibility';
+
+  // Helper functions for managing the specific filters panel cookie
+  const setFiltersPanelCookie = (isVisible) => {
+    const date = new Date();
+    date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days expiration
+    document.cookie = `${FILTERS_COOKIE_NAME}=${isVisible};expires=${date.toUTCString()};path=/`;
+  };
+
+  const getFiltersPanelCookie = () => {
+    const cookieValue = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${FILTERS_COOKIE_NAME}=`))
+      ?.split('=')[1];
+    return cookieValue === undefined ? true : cookieValue === 'true'; // Default to true if cookie is not found
+  };
+
+
+
+  const adjustFiltersPanelTop = () => {
+    const contentTop = mainContent.getBoundingClientRect().top + window.scrollY;
+    panel.style.top = `${contentTop}px`;
+    toggleFiltersPanelButton.style.top = `${contentTop}px`;
+
+  };
+
+  const initFiltersPanel = () => {
+    adjustFiltersPanelTop();
+    const isPanelVisible = getFiltersPanelCookie();
+    panel.classList.add('no-transition'); // Temporarily disable transitions
+    if (isPanelVisible) {
+      panel.classList.remove('hidden', 'translate-x-full');
+    } else {
+      panel.classList.add('hidden', 'translate-x-full');
+    }
+    setTimeout(() => panel.classList.remove('no-transition'), 0); // Re-enable transitions
+  }
+
+  initFiltersPanel();
+
+  // Handle filter panel position on scroll
+  const handleScroll = () => {
+    const contentTop = mainContent.getBoundingClientRect().top + window.scrollY;
+    const scrollPosition = window.scrollY;
+
+    if (scrollPosition >= contentTop) {
+      panel.classList.add('fixed', 'top-0');
+      panel.classList.remove('absolute');
+      panel.style.top = null;
+      toggleFiltersPanelButton.classList.add('fixed', 'top-0');
+      toggleFiltersPanelButton.classList.remove('absolute');
+      toggleFiltersPanelButton.style.top = null;
+      // Reset inline style when fixed
+    } else {
+      panel.classList.remove('fixed', 'top-0');
+      panel.classList.add('absolute');
+      toggleFiltersPanelButton.classList.remove('fixed', 'top-0');
+      toggleFiltersPanelButton.classList.add('absolute');
+      adjustFiltersPanelTop(); // Recalculate top position
+    }
+  };
+
+  window.addEventListener('resize', adjustFiltersPanelTop);
+  window.addEventListener('scroll', handleScroll);
+
+  toggleFiltersPanelButton.addEventListener('click', () => {
+    console.log('toggleFiltersPanelButton');
+    const isVisible = panel.classList.contains('hidden');
+    if (isVisible) {
+      panel.classList.remove('hidden'); // Ensure it's part of the layout
+      requestAnimationFrame(() => {
+        panel.classList.remove('translate-x-full'); // Trigger the transition
+      });
+    } else {
+      panel.classList.add('translate-x-full');
+      setTimeout(() => panel.classList.add('hidden'), 300); // Wait for animation to complete
+    }
+    setFiltersPanelCookie(isVisible);
+  });
+
+  // Close the filter panel with animation
+  closeFiltersPanelButton.addEventListener('click', () => {
+    panel.classList.add('translate-x-full');
+    setTimeout(() => panel.classList.add('hidden'), 300); // Wait for animation to complete
+    setFiltersPanelCookie(false);
+  });
+
+</script>
+
+<div class="mt-8 flex justify-center space-x-4">
+  {% if is_paginated %}
+  {% if pagination.prev_url %}
+  <a href="{{ pagination.prev_url }}" class="px-4 py-2 btn-primary btn rounded-full">Previous</a>
+  {% endif %}
+  {% if pagination.next_url %}
+  <a href="{{ pagination.next_url }}" class="px-4 py-2 btn-primary btn rounded-full">Next</a>
+  {% endif %}
+  {% endif %}
+</div>
+
+
+<audio id="audio-player" controls class="fixed  bottom-2 left-1/2 transform -translate-x-1/2 z-50 hidden">
+  Your browser does not support the audio element.
+</audio>
+
+
+
+<script>
+
+  function displayFilterText({ label, minValName, maxValName, min, max, minVal = null, maxVal = null }) {
+    console.log(min, max, minVal, minVal);
+    return {
+      minVal: minVal ?? min,
+      maxVal: maxVal ?? max,
+      min: min,
+      max: max,
+      minthumb: 0,
+      maxthumb: 0,
+      label: label,
+      resetValues() {
+        this.minVal = this.min;
+        this.maxVal = this.max;
+
+        const minInput = document.querySelector(`[name="${minValName}"]`);
+        const maxInput = document.querySelector(`[name="${maxValName}"]`);
+
+        if (minInput) minInput.value = this.min;
+        if (maxInput) maxInput.value = this.max;
+      },
+      get display() {
+        console.log(this.min, this.max, this.minVal, this.maxVal);
+        if (this.min === this.minVal && this.max === this.maxVal) return "";
+        if (this.minVal === this.maxVal) return `${this.label}: ${this.maxVal}`;
+        if (this.min === this.minVal) return `${this.label}: <= ${this.maxVal}`;
+        if (this.max === this.maxVal) return `${this.label}: >= ${this.minVal}`;
+        if (this.min === this.max) return `${this.label}: ${this.minVal}`;
+        return `${this.label}: ${this.minVal}-${this.maxVal}`;
+      }
+
+
+    }
+  }
+
+
+  // Adapted from https://www.creative-tim.com/twcomponents/component/multi-range-slider        
+  function range({ min, max, minValInput = null, maxValInput = null }) {
+    const ret = {
+      minVal: minValInput ?? min,
+      maxVal: maxValInput ?? max,
+      min: min,
+      max: max,
+      minthumb: 0,
+      maxthumb: 0,
+
+      mintrigger() {
+        this.minVal = Math.min(this.minVal, this.maxVal); // -1 to disalow both values to be the same
+        this.minthumb = ((this.minVal - this.min) / (this.max - this.min)) * 100;
+        console.log('mintrigger:', this.minVal, this.minthumb);
+
+      },
+
+      maxtrigger() {
+        this.maxVal = Math.max(this.maxVal, this.minVal); // + 1 to disalow both values to be the same
+        this.maxthumb = 100 - (((this.maxVal - this.min) / (this.max - this.min)) * 100);
+        console.log('maxtrigger:', this.maxVal, this.maxthumb);
+      },
+      resetValues() {
+        this.minVal = this.min;
+        this.maxVal = this.max;
+        this.mintrigger();
+        this.maxtrigger();
+      }
+    }
+    console.log(ret);
+    return ret;
+  }
+
+  function submitForm() {
+    document.getElementById('search_tracks').submit();
+  }
+
+  document.querySelectorAll('#search_tracks input, #search_tracks select, #asc').forEach(element => {
+    element.addEventListener('change', () => {
+      submitForm();
+    });
+  });
+
+</script>
+
+
+
+
+
+
+
+
+{% endblock %}
