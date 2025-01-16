@@ -76,7 +76,7 @@
                         <!-- Dropdown menu with content-fitting width and text-right alignment -->
                         <div class="absolute hidden group-hover:flex group-hover:flex-col bg-primary-content border-2 border-slate-200 rounded-lg shadow-md mt-0 z-50 w-auto py-2 right-0">
                             {% if current_user.is_authenticated %}
-                            <a href="#" class="block px-6 py-3 text-sm text-primary font-bold text-right whitespace-nowrap">Go Premium</a>
+                            <!-- <a href="#" class="block px-6 py-3 text-sm text-primary font-bold text-right whitespace-nowrap">Go Premium</a> -->
                             <a href="{{ url_for('users.logout') }}" class="block px-6 py-3 text-sm text-right">Logout</a>
                             {% else %}
                             <a href="{{ url_for('users.login') }}" class="block px-6 py-3 text-sm text-right">Sign in</a>
@@ -112,7 +112,7 @@
                 </div>
                 <div class="pt-4 pb-3 border-t-2 border-slate-200">
                     {% if current_user.is_authenticated %}
-                    <a href="#" class="block pl-3 pr-4 py-2 text-base font-bold text-primary">Go Premium</a>
+                    <!-- <a href="#" class="block pl-3 pr-4 py-2 text-base font-bold text-primary">Go Premium</a> -->
                     <a href="{{ url_for('users.logout') }}" class="block pl-3 pr-4 py-2 text-base font-medium">[{{ current_user.fname }}] | {{ _("Logout") }}</a>
 
                     {% else %}
