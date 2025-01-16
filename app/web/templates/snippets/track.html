@@ -88,7 +88,7 @@
     </div>
 
 
-    <div class="discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
+    <!-- <div class="discreet p-2 w-20 absolute top-12 left-2 sm:relative sm:top-auto sm:left-auto">
       {% if track.tempo and track.label %}
       <a href="{{url_for('track.compatible_tracks',track_id=track.id)}}" class="normal-link tooltip" data-tip="Find compatible tracks">
       {% endif %}
@@ -105,7 +105,6 @@
     <div class="p-0 w-20 h-16 lg:flex items-end space-x-1 hidden ">
       {% if track.danceability %}
       <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (100 - track.instrumentalness) | int }}% vocal" style="height: {{ 100 - track.instrumentalness }}%;">&nbsp;</div>
-      <!-- <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.instrumentalness) | int }}% instrumental" style="height: {{ track.instrumentalness }}%;">&nbsp;</div> -->
       <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.acousticness) | int }}% acoustic" style="height: {{ track.acousticness }}%;">&nbsp;</div>
       <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.speechiness) | int }}% speechy" style="height: {{ track.speechiness }}%;">&nbsp;</div>
       {% endif %}
@@ -117,7 +116,7 @@
       <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ track.loudness  }}% loud" style="height: {{ track.loudness }}%;">&nbsp;</div>
       <div class="bar-vertical bg-base-content discreet w-3 tooltip" data-tip="{{ (track.valence) | int }}% happy" style="height: {{ track.valence }}%;">&nbsp;</div>
       {% endif %}
-    </div>
+    </div> -->
 
     <div class="discreet  p-2 w-20 absolute top-12 right-2 sm:relative lg:text-right sm:top-auto sm:right-auto sm:text-left tooltip " data-tip="Released {{ 'the ' + track.release_date + '-' +  (track.release_year | string) if track.release_date else ('in ' + (track.release_year | string) if track.release_year else 'date unknown') }}">
       <div>{{ track.release_year if track.release_year else '-'}}</div>
@@ -127,7 +126,7 @@
     <div class="track-ext p-2 flex  space-x-2  buttons w-full justify-center md:w-auto  sm:bottom-auto lg:justify-end  sm:relative lg:right-auto lg:bottom-auto">
       {% if track.artist_name and track.id != 1 %}
       <div class="sm:visible-hover-track text-center sm:p-0 p-5  sm:bg-transparent rounded-xl">
-        <a href="#" class="js-action addTrackToRecentPlaylist pr-4 tooltip " data-tip="Add to last used playlist">
+        <!-- <a href="#" class="js-action addTrackToRecentPlaylist pr-4 tooltip " data-tip="Add to last used playlist">
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-8 w-8 ">
             <use xlink:href="#icon-plus-circle"></use>
           </svg>
@@ -136,7 +135,7 @@
           <svg class="stroke-base-content hover:stroke-primary lg:w-6 lg:h-6 h-8 w-8 ">
             <use xlink:href="#icon-minus-circle"></use>
           </svg>
-        </a>
+        </a> -->
 
 
         {% if track.nb_sets > 0 %}
@@ -167,11 +166,11 @@
           </svg>
           <div class="lg:w-6 lg:h-6 h-8 w-8  rounded-md bg-base-content  hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
         </a>
-        <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
+        <!-- <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
           <svg class="lg:w-6 lg:h-6 h-8 w-8  fill-base-content hover:fill-primary">
             <use xlink:href="#icon-plus"></use>
           </svg>
-        </a>
+        </a> -->
 
       </div>
       {% endif %}
