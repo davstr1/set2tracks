@@ -27,7 +27,7 @@
     <div class="flex flex-col w-full lg:w-2/3 mb-4">
 
       <div class="relative w-full">
-        <input type="text" class="form-input w-full pr-10 bg-gray-800 text-white border-gray-700 placeholder-gray-500" name="s" placeholder="Search track or artist name" value="{{ search }}">
+        <input type="text" class="form-input w-full pr-10 bg-gray-800 text-white border-gray-700 placeholder-gray-500" name="s" placeholder="Search title/artist/label" value="{{ search }}">
         {% if results_count %}
         <button class="absolute inset-y-0 right-10 flex items-center pr-3 text-gray-500">{{ results_count }} tracks</button>
         <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none tooltip" data-tip="Reset Form" onclick="document.querySelector('input[name=\'s\']').value='';document.getElementById('search_tracks').submit();">
