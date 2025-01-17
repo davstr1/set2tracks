@@ -442,8 +442,13 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
         return queue_set_discarded(video_id,'Error getting video info.',existing_queue_entry)
     
     chapters = video_info.get('chapters',[]) or []
+    # ditch chapters if there are less than 5 songs.
+    # We will then use the regular chapter less method
+    # Reason : some sets are discarted, because the chapters are not done by songs
+    # EX : mixtape : face A , face B
     if len(chapters) and len(chapters) < 5:
-        return queue_set_discarded(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.',existing_queue_entry)
+        chapters = []
+        #return queue_set_discarded(video_id,f'{len(chapters)} songs in the chapters. Only sets with 5 or more songs are accepted.',existing_queue_entry)
     
     if video_info.get('duration',0) < 900:
         return queue_set_discarded(video_id,'Video shorter than 15m. Only sets longer than 15m are accepted.',existing_queue_entry)
@@ -468,7 +473,7 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
        'channel_url': video_info.get('channel_url'),
        'duration': video_info.get('duration'),
        'playable_in_embed': video_info.get('playable_in_embed'),
-       'chapters': video_info.get('chapters'),
+       'chapters': chapters,
        'channel_follower_count': video_info.get('channel_follower_count'),
        "like_count": video_info.get('like_count'),
         "view_count": video_info.get('view_count'),
@@ -527,7 +532,7 @@ def queue_set(video_id,user_id=None,discard_if_exists=False,send_email=False,pla
 
 
 
-def pre_queue_set(video_id, user_id=None, discard_if_exists=False, send_email=False, play_sound=False):
+def pre_queue_set(video_id, user_id=None, discard_if_exists=False, send_email=False, play_sound=False):#
     """
     Pre-queue a set for processing.
     - If the set already exists, returns an error.
