@@ -2,29 +2,50 @@
 
 {% block content %}
 {% include 'snippets/explore_submenu.html' %}
-<div class="container mx-auto py-8">
-  
-  <div class="relative h-10 w-24 min-w-[200px] mb-5">
-    <form id="channels" action="{{url_for('channel.channels')}}" method="get">
-    <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
-      <option value="channel_popularity" {% if order_by=='channel_popularity' %}selected{% endif %}>Biggest</option>
-      <option value="az" {% if order_by=='az' %}selected{% endif %}>A-Z</option>
-    </select>
-    <label class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-900 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
-      Order
-    </label>
+<div class="container mx-auto">
+  <form id="channels" action="{{url_for('channel.channels')}}" method="get">
+
+    <div class="relative w-full lg:w-2/3 mb-8">
+      <input type="text" class="form-input w-full pr-10 bg-gray-800 text-white border-gray-700 placeholder-gray-500" name="s" placeholder="Search channel name" value="{{ search }}">
+      
+      <button class="absolute inset-y-0 right-10 flex items-center pr-3 text-gray-500">{{ results_count }} channel{% if results_count | int > 1  %}s{% endif %}</button>
+      <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 focus:outline-none tooltip" data-tip="Reset Form" onclick="document.querySelector('input[name=\'s\']').value='';document.getElementById('channels').submit();">
+        <svg class="h-5 w-5 rounded-full bg-gray-600 hover:bg-gray-500 p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+     
+    </div>
+
+    <div class="relative h-10 w-24 min-w-[200px] mb-5">
+
+
+      <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
+        <option value="channel_popularity" {% if order_by=='channel_popularity' %}selected{% endif %}>Biggest</option>
+        <option value="az" {% if order_by=='az' %}selected{% endif %}>A-Z</option>
+      </select>
+      <label class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-900 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
+        Order
+      </label>
+
+    </div>
   </form>
-  </div>
+  {% if results_count |int < 1 %}
+  <div class="text-center">
+    No channels found.
+    <br/><a href="{{url_for('channel.channels')}}" class="primary-content">→ Go back to all channels</a>
+    </div>
+    {% endif %}
   {% for channel in channels %}
   <div class="mb-20">
     <h2 class="text-xl mb-5">
       {% if order_by == 'channel_popularity' %}
       <span class="rank">#{{ loop.index + (page * per_page) - per_page }}</span>
-    {% endif %}
+      {% endif %}
       <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s='channelid:' + channel.id|string)}}">
         {{ channel.author }}
       </a>
-      - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs 
+      - {{ tpl_utils.km_number(channel.channel_follower_count) }} subs
       <a target="_blank" class="tooltip" data-tip="Check {{channel.author}}'s Channel on Youtube" href="{{channel.channel_url}}">
         <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
           <use xlink:href="#icon-link-external"></use>
@@ -51,9 +72,9 @@
           </a>
           <p class="text-gray-600">
             @{{ tpl_utils.time_ago(set.publish_date,False) }}
-          <!-- - {{ tpl_utils.km_number(set.view_count) }} views
+            <!-- - {{ tpl_utils.km_number(set.view_count) }} views
             - {{ tpl_utils.km_number(set.like_count) }} likes
-            --> 
+            -->
           </p>
         </div>
       </div>
@@ -81,7 +102,7 @@
 
 </div>
 <script>
-  document.getElementById('channels').addEventListener('change', function() {
+  document.getElementById('channels').addEventListener('change', function () {
     this.submit();
   });
 </script>

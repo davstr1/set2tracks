@@ -2149,7 +2149,7 @@ def get_channel_by_id(channel_id):
         return None
     return channel
 
-def get_channels(page=1, order_by='channel_popularity', per_page=20, hiddens=None):
+def get_channels(page=1, order_by='channel_popularity', per_page=20, search='',hiddens=None):
     """
     Retrieves a paginated list of channels with customizable sorting and filtering options.
 
@@ -2182,9 +2182,13 @@ def get_channels(page=1, order_by='channel_popularity', per_page=20, hiddens=Non
         
     if hiddens is not None:
         query = query.filter_by(hidden=hiddens)
+        
+    if search:
+        query = query.filter(Channel.author.ilike(f"%{search}%"))
     
     results = query.paginate(page=page, per_page=per_page, error_out=False)
-    return results
+    count = query.count()
+    return results,count
 
 def get_hidden_channels():
     return Channel.query.filter_by(hidden=True).all()
