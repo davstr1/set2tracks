@@ -1331,84 +1331,146 @@ def compile_and_sort_genres(track_sets):
     return sorted_genre_counts
 
 
-def get_playable_sets(page=1, per_page=20, search=None, order_by='latest_youtube'):
-    
+def get_playable_sets(page=1, per_page=20, search=None, order_by='latest_youtube', deduplicate=False):
     prefixed_search = False
     
+    if search or page > 1:
+        deduplicate = False
+
     if search and search.startswith('trackid:'):
         track_id = search[len('trackid:'):]
-        #TODO check for numeric value
-        # check for existence of track
+        # TODO check for numeric value
         prefixed_search = True
         query = (
-        Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
-        .join(TrackSet, Set.id == TrackSet.set_id)
-        .join(Set.channel) \
-        .filter(Set.channel.has(hidden=False)) \
-        .options(joinedload(Set.channel))
-        .filter(TrackSet.track_id == track_id)
+            Set.query.filter_by(playable_in_embed=True, published=True, hidden=False)
+            .join(TrackSet, Set.id == TrackSet.set_id)
+            .join(Set.channel)
+            .filter(Set.channel.has(hidden=False))
+            .options(joinedload(Set.channel))
+            .filter(TrackSet.track_id == track_id)
         )
-        
+
     elif search and search.startswith('channelid:'):
         channel_id = search[len('channelid:'):]
-        # TODO check for numberic value
-        # check for existence of channel
         prefixed_search = True
-        query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False,channel_id=channel_id) 
-        
-        
-    else: 
-        query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
-                     .join(Set.channel) \
-                     .filter(Set.channel.has(hidden=False)) \
-                     .options(joinedload(Set.channel))
-                     
-    
+        query = Set.query.filter_by(playable_in_embed=True, published=True, hidden=False, channel_id=channel_id)
+
+    else:
+        query = (
+            Set.query.filter_by(playable_in_embed=True, published=True, hidden=False)
+            .join(Set.channel)
+            .filter(Set.channel.has(hidden=False))
+            .options(joinedload(Set.channel))
+        )
 
     if search and not prefixed_search:
-                 
-          # Use SQLAlchemy's or_ to create an OR condition
         search_filter = or_(
-              Set.title_tsv.match(search),  # Assuming title_tsv is a full-text search vector
-              Channel.author.match(search)  # Assuming author is also a searchable field
-          )
-          
+            Set.title_tsv.match(search),  # Assuming title_tsv is a full-text search vector
+            Channel.author.match(search)  # Assuming author is also a searchable field
+        )
         query = query.filter(search_filter)
 
-        # Print the generated SQL query for debugging
-        # print(str(query.statement))
-
-
-    
     if order_by == 'latest_youtube':
         query = query.order_by(Set.publish_date.desc())
     elif order_by == 'latest_set2tracks':
         query = query.order_by(Set.id.desc())
     elif order_by == 'channel_popularity':
         query = query.order_by(Channel.channel_follower_count.desc())
-    
-    # 
-    # OBSOLETE for now
-    #
-    # elif order_by == 'old':
-    #     query = query.order_by(Set.publish_date.asc())
-    # elif order_by == 'likes':
-    #     query = query.order_by(Set.like_count.desc())
-    # elif order_by == 'views':
-    #     query = query.order_by(Set.view_count.desc())
-    # elif order_by == 'views_minus':
-    #     query = query.order_by(Set.view_count.asc())
-    # elif order_by == 'likes_minus':
-    #     query = query.order_by(Set.like_count.asc())
-    # elif order_by == 'small_channel':
-    #     query = query.order_by(Channel.channel_follower_count.asc())
 
-    
     results_count = query.count()
-    results = query.paginate(page=page, per_page=per_page, error_out=False)
+    paginated_results = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    if deduplicate:
+        results = paginated_results.items
+        deduplicated_results = []
+        channel_seen = {}
+
+        for result in results:
+            channel_id = result.channel_id
+            if channel_id not in channel_seen:
+                channel_seen[channel_id] = 1
+                result.show = 1
+                result.nb_other_sets_from_channel = 0
+                deduplicated_results.append(result)
+            else:
+                channel_seen[channel_id] += 1
+
+        for result in deduplicated_results:
+            result.nb_other_sets_from_channel = channel_seen[result.channel_id] - 1
+
+        # Replace only the items in the current page
+        paginated_results.items = deduplicated_results
+
     if search and not prefixed_search:
         upsert_setsearch(search, results_count)
-    return results,results_count
+
+    return paginated_results, results_count
+
+
+
+
+# def get_playable_sets(page=1, per_page=20, search=None, order_by='latest_youtube'):
+    
+#     prefixed_search = False
+    
+#     if search and search.startswith('trackid:'):
+#         track_id = search[len('trackid:'):]
+#         #TODO check for numeric value
+#         # check for existence of track
+#         prefixed_search = True
+#         query = (
+#         Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
+#         .join(TrackSet, Set.id == TrackSet.set_id)
+#         .join(Set.channel) \
+#         .filter(Set.channel.has(hidden=False)) \
+#         .options(joinedload(Set.channel))
+#         .filter(TrackSet.track_id == track_id)
+#         )
+        
+#     elif search and search.startswith('channelid:'):
+#         channel_id = search[len('channelid:'):]
+#         # TODO check for numberic value
+#         # check for existence of channel
+#         prefixed_search = True
+#         query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False,channel_id=channel_id) 
+        
+        
+#     else: 
+#         query = Set.query.filter_by(playable_in_embed=True, published=True,hidden=False) \
+#                      .join(Set.channel) \
+#                      .filter(Set.channel.has(hidden=False)) \
+#                      .options(joinedload(Set.channel))
+                     
+    
+
+#     if search and not prefixed_search:
+                 
+#           # Use SQLAlchemy's or_ to create an OR condition
+#         search_filter = or_(
+#               Set.title_tsv.match(search),  # Assuming title_tsv is a full-text search vector
+#               Channel.author.match(search)  # Assuming author is also a searchable field
+#           )
+          
+#         query = query.filter(search_filter)
+
+#         # Print the generated SQL query for debugging
+#         # print(str(query.statement))
+
+
+    
+#     if order_by == 'latest_youtube':
+#         query = query.order_by(Set.publish_date.desc())
+#     elif order_by == 'latest_set2tracks':
+#         query = query.order_by(Set.id.desc())
+#     elif order_by == 'channel_popularity':
+#         query = query.order_by(Channel.channel_follower_count.desc())
+    
+    
+#     results_count = query.count()
+#     results = query.paginate(page=page, per_page=per_page, error_out=False)
+#     if search and not prefixed_search:
+#         upsert_setsearch(search, results_count)
+#     return results,results_count
 
 
 def get_browsing_history(user_id, page=1, per_page=20, order_by='recent', search=None):

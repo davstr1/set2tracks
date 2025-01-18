@@ -158,6 +158,9 @@
         <div class="p-4 text-sm">
           <a href="{{ url_for('set.set', set_id=set.id) }}">
             <h3 class="text-white font-semibold hover:text-primary">{{ set.title }}</h3>
+            {% if set.nb_other_sets_from_channel %}
+            <a href="{{url_for('set.sets',s='channelid:'~set.channel.id)}}" class="text-gray-600">+ {{ set.nb_other_sets_from_channel }} other new set{% if set.nb_other_sets_from_channel|int>1 %}s{%endif%}</a>
+            {% endif %}
           </a>
           <p class="text-gray-600"><a href="{{url_for('set.sets',s='channelid:'~set.channel.id)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
           <p class="text-gray-600">@{{ tpl_utils.time_ago(set.publish_date,False) }} <!--  - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes --></p>
