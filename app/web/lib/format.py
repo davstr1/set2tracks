@@ -50,6 +50,29 @@ def time_ago(value,less_than_a_day=True):
     else:
         return "just now"
     
+def sec_to_mm_ss(time_in_seconds):
+    """
+    Converts time in seconds (string input) to mm:ss format.
+
+    Args:
+        time_in_seconds (str): Time in seconds as a string.
+
+    Returns:
+        str: Time in mm:ss format.
+    """
+    try:
+        # Convert the input string to an integer
+        total_seconds = int(float(time_in_seconds))
+
+        # Calculate minutes and seconds
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+
+        # Format as mm:ss
+        return f"{minutes:02}:{seconds:02}"
+    except ValueError:
+        return "Invalid input"
+    
 def km_number(value):
     if value is None:
         return '0'
