@@ -2176,6 +2176,8 @@ def get_channels(page=1, order_by='channel_popularity', per_page=20, search='',h
 
     if order_by == 'az':
         query = query.order_by(Channel.author.asc())
+    elif order_by == 'added':
+        query = query.order_by(Channel.channel_id.desc())
     else:
         # as popularity is the default and only one other
         query = query.order_by(Channel.channel_follower_count.desc())
