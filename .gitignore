@@ -159,3 +159,7 @@ cython_debug/
 # Specific to SET2TRACKS
 temp_downloads/
 test.py
+
+# Dumps
+*.dump
+*.sql
