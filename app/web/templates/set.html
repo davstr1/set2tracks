@@ -7,44 +7,71 @@
 otherwise player playerMetaWrap takes all width 
 even where the player is not behind*/
   #playerMetaWrap {
-    pointer-events: none;
+    pointer-events: auto;
     max-width: 100vw !important;
   }
 
   #playerWrap {
-    max-width: 85vw !important;
     pointer-events: auto;
+  }
+
+  @media (min-width: 768px) {
+    #playerWrap {
+      max-width: 85vw !important;
+    }
   }
 </style>
 
 
 
-<div class="md:flex md:justify-between md:items-start p-4 pl-0 pr-0">
-  <div class="pl-2">
 
-    <h1 class="lg:text-2xl"><span class="discreet block">Video and Playlist from DJ set : </span>
-      <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
-        <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
-          <use xlink:href="#icon-link-external"></use>
-        </svg>
-      </a>
-      {%if is_admin %}
-      <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600">[{{ "Show" if set.hidden else "Hide" }}]
-      </a>
-      {%endif%}
-    </h1>
+<div class="-mx-3 lg:-mx-5">
 
-    <p class="text-gray-600">
-      <a href="{{url_for('set.sets',s='channelid:'+set.channel.id|string)}}">{{ set.channel.author }}</a> - {{ tpl_utils.km_number(set.channel.channel_follower_count) }} subs
-      {%if is_admin %}
-      <a href="{{url_for('admin.channel_visibility_toggle',channel_id=set.channel.id)}}" class="text-gray-600">[{{ "Show" if set.channel.hidden else "Hide" }}
-        ]</a>
-      <a href="{{url_for('admin.channel_followability_toggle',channel_id=set.channel.id)}}">[ Make {%if set.channel.followable %}un{% endif %}followable ]</a>
-      {%endif%}
+  <div id="playerMetaWrap" class="md:flex md:flex-col md:items-center  md:p-4 md:top-0 md:z-50 ">
 
-    <p class="text-gray-600">@{{ tpl_utils.time_ago(set.publish_date,False) }} <!--- - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes --></p>
+    <div id="playerWrap" class="w-full md:w-5/6  md:z-50 md:relative">
+
+      <div id="modifyLeftMargin" class="relative">
+        <div class="md:absolute  flex items-center   -left-5 h-full">
+          <div id="draggable" class="hidden md:block cursor-ew-resize opacity-30 hover:opacity-100 h-2/6 w-3 bg-gray-500 rounded-xl select-none">&nbsp;</div>
+        </div>
+
+        <div id="videoWrap" class="relative  overflow-auto  md:p-2">
+          <div id="youtubePlayer" class="aspect-video w-full"></div>
+        </div>
+
+      </div>
+
+
+    </div>
   </div>
-  <!-- <div class="flex flex-col justify-start space-y-4 border b-1 p-4  mt-5 md:mt-0">
+
+
+
+  <div class="sticky w-full md:relative md:w-auto" id="containerUnderPlayer">
+    <div class="bg-[#131418] p-3 rounded-xl py-4 w-full">
+
+      <h1 class="lg:text-2xl text-white font-bold">
+        <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
+          <svg class="w-6 h-6 fill-base-content hover:fill-primary hidden md:inline ">
+            <use xlink:href="#icon-link-external"></use>
+          </svg>
+        </a>
+        {%if is_admin %}
+        <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600 hidden md:inline">[{{ "Show" if set.hidden else "Hide" }}]
+        </a>
+        {%endif%}
+      </h1>
+      <p class="text-gray-500">{{ tpl_utils.time_ago(set.publish_date,False) }} <!--- - {{ tpl_utils.km_number(set.view_count) }} views - {{ tpl_utils.km_number(set.like_count) }} likes --></p>
+      <div class="text-gray-500 mt-5">
+        <a class="font-bold" href="{{url_for('set.sets',s='channelid:'+set.channel.id|string)}}">{{ set.channel.author }}</a> <span class="ml-4">{{ tpl_utils.km_number(set.channel.channel_follower_count) }} subscribers</span>
+        {%if is_admin %}
+        <a class="hidden md:inline" href="{{url_for('admin.channel_visibility_toggle',channel_id=set.channel.id)}}" class="text-gray-600">[{{ "Show" if set.channel.hidden else "Hide" }}
+          ]</a>
+        <a class="hidden md:inline" href="{{url_for('admin.channel_followability_toggle',channel_id=set.channel.id)}}">[ Make {%if set.channel.followable %}un{% endif %}followable ]</a>
+        {%endif%}
+      </div>
+      <!-- <div class="flex flex-col justify-start space-y-4 border b-1 p-4  mt-5 md:mt-0">
     {% if not set.playlist_id %}
     <a href="#" id="create-playlist-from-set-tracks" class="btn">
       Create Playlist from set tracks
@@ -58,64 +85,51 @@ even where the player is not behind*/
       Add all tracks to playlist
     </a>
   </div> -->
-</div>
-
-
-<div id="playerMetaWrap" class="flex flex-col items-center  p-4 sticky top-0 z-50 ">
-
-  <div id="playerWrap" class=" w-full md:w-5/6  z-50 relative">
-
-    <div id="modifyLeftMargin" class=" relative ">
-      <div class="absolute  flex items-center   -left-5 h-full">
-        <div id="draggable" class="cursor-ew-resize opacity-30 hover:opacity-100 h-2/6 w-3 bg-gray-500 rounded-xl select-none">&nbsp;</div>
-      </div>
-
-      <div id="videoWrap" class="relative  overflow-auto  p-2">
-        <div id="youtubePlayer" class="aspect-video"></div>
-      </div>
-
     </div>
 
 
+    <div class="flex justify-between items-center mt-8 mx-4">
+      <div>
+        <h2 class="text-xl font-semibold  text-white">Playlist</h2>
+      </div>
+
+      <div class="discreet text-xs">Timestamps are approximate
+        <div class="hidden md:block">
+          Accuracy may vary by genre. Relax and enjoy the surprises !
+        </div>
+      </div>
+    </div>
+
+
+
+    {% set tracks = set.tracks %}
+    <div id="playlist-in-set">
+      {% include 'tracklist.html' %}
+    </div>
+
+    <script>
+      document.querySelector('#add_all_tracks_to_playlist').addEventListener('click', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        showContextMenu(event, this);
+      });
+
+
+    </script>
+
+  </div>
+
+
+  <div class="hidden md:fixed bottom-0 w-full  text-center bg-primary-content z-50 border-t-2 p-2 text-xs lg:p-4 lg:text-xl">
+    <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
+      ❤ Support your DJ!
+      <span class="inline-block lg:inline">Like, comment, and subscribe on YouTube</span>
+      <svg class="w-6 h-6 fill-current inline hover:fill-primary">
+        <use xlink:href="#icon-link-external"></use>
+      </svg>
+    </a>
   </div>
 </div>
-
-<div id="containerUnderPlayer">
-  <h1 class="text-xl font-semibold mt-8 ">Playlist from Set</h1>
-</div>
-
-<p class="discreet italic">Timestamps are {% if not set.has_chapters %}approximate and{% endif %} auto-detected. <br />Accuracy may vary by genre, so relax and enjoy the surprises—sometimes it gets creative!</p>
-
-
-
-{% set tracks = set.tracks %}
-<div id="playlist-in-set">
-  {% include 'tracklist.html' %}
-</div>
-
-<script>
-  document.querySelector('#add_all_tracks_to_playlist').addEventListener('click', function (event) {
-    event.stopPropagation();
-    event.preventDefault();
-    showContextMenu(event, this);
-  });
-
-
-</script>
-
-</div>
-
-
-<div class="fixed bottom-0 w-full  text-center bg-primary-content z-50 border-t-2 p-2 text-xs lg:p-4 lg:text-xl">
-  <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
-    ❤ Support your DJ!
-    <span class="inline-block lg:inline">Like, comment, and subscribe on YouTube</span>
-    <svg class="w-6 h-6 fill-current inline hover:fill-primary">
-      <use xlink:href="#icon-link-external"></use>
-    </svg>
-  </a>
-</div>
-
 
 <script>
 
@@ -125,6 +139,7 @@ even where the player is not behind*/
   // @TODO : wrap classes are totally confusing
   const playerWrap = document.getElementById('playerWrap');
   const metaWrap = document.getElementById('playerMetaWrap');
+  const topMenuHeight = document.getElementById('topMenuWrap').offsetHeight;
   const playerTopWrap = playerWrap.parentElement;
   const videoWrap = document.getElementById('videoWrap');
   const containerUnderPlayer = document.getElementById('containerUnderPlayer');
@@ -155,6 +170,9 @@ even where the player is not behind*/
 
   // Function to load the wrap width from localStorage
   function loadWrapWidth() {
+    if (window.innerWidth < 768) {
+      return;
+    }
     const wrapWidth = localStorage.getItem('wrapWidth');
     if (wrapWidth) {
       modifyLeftMargin.style.marginLeft = '0px';
@@ -166,7 +184,7 @@ even where the player is not behind*/
 
   window.addEventListener('load', function () {
     playerTopWrapHeight = playerTopWrap.offsetTop;
-    shrinkOn = playerTopWrapHeight; // metaWrap.getBoundingClientRect().top +
+    shrinkOn =   metaWrap.offsetTop - 33; // bad approximation
     console.log('shrinkOn', shrinkOn)
     console.log('playerTopWrapHeight', playerTopWrapHeight)
 
@@ -213,7 +231,7 @@ even where the player is not behind*/
   function endDrag() {
     if (isDragging) {
       isDragging = false;
-      const wrapWidth = videoWrap.offsetWidth > 65 ? videoWrap.offsetWidth : 65;
+      const wrapWidth = videoWrap.offsetWidth > 120 ? videoWrap.offsetWidth : 120;
       modifyLeftMargin.style.marginLeft = '0px';
       playerWrap.style.width = `${wrapWidth}px`;
       videoWrap.classList.remove('pointer-events-none');
@@ -223,8 +241,16 @@ even where the player is not behind*/
 
 
   window.addEventListener('scroll', function () {
+    // if page width is less than 768px, do not shrink the video
+    if (window.innerWidth < 768) {
+      return;
+    }
     if (!VideoShrinkThresholdReached && window.scrollY > shrinkOn) {
-      containerUnderPlayer.style.marginTop = `${metaWrap.offsetHeight}px`;
+      let newMargin = topMenuHeight + metaWrap.offsetHeight;
+      console.log('topMenuHeight', topMenuHeight)
+      console.log('metaWrap.offsetHeight', metaWrap.offsetHeight)
+      metaWrap.style.top = `${topMenuHeight}px`;
+      containerUnderPlayer.style.marginTop = `${newMargin}px`;
       metaWrap.classList.add(...playerFixedClasses);
 
       metaWrap.classList.remove(...playerScrolledClasses);

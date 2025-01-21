@@ -761,22 +761,6 @@ input[type=password]:focus {
   }
 }
 
-.\!track.active {
-  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-  --tw-ring-opacity: 1;
-  --tw-ring-color: var(--fallback-p,oklch(var(--p)/var(--tw-ring-opacity)));
-}
-
-.track.active {
-  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-  --tw-ring-opacity: 1;
-  --tw-ring-color: var(--fallback-p,oklch(var(--p)/var(--tw-ring-opacity)));
-}
-
 .\!track.active .bar-vertical {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)));
@@ -2890,14 +2874,6 @@ input[type=password]:focus {
   left: 50%;
 }
 
-.left-2 {
-  left: 0.5rem;
-}
-
-.left-3 {
-  left: 0.75rem;
-}
-
 .right-0 {
   right: 0px;
 }
@@ -2916,10 +2892,6 @@ input[type=password]:focus {
 
 .right-2 {
   right: 0.5rem;
-}
-
-.right-3 {
-  right: 0.75rem;
 }
 
 .top-0 {
@@ -3022,6 +2994,11 @@ input[type=password]:focus {
   margin-bottom: 1rem;
 }
 
+.my-5 {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
 .my-6 {
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
@@ -3046,10 +3023,6 @@ input[type=password]:focus {
 
 .mb-0 {
   margin-bottom: 0px;
-}
-
-.mb-1 {
-  margin-bottom: 0.25rem;
 }
 
 .mb-12 {
@@ -3096,6 +3069,10 @@ input[type=password]:focus {
   margin-left: 0.5rem;
 }
 
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .ml-8 {
   margin-left: 2rem;
 }
@@ -3124,8 +3101,8 @@ input[type=password]:focus {
   margin-top: 0.25rem;
 }
 
-.mt-12 {
-  margin-top: 3rem;
+.mt-14 {
+  margin-top: 3.5rem;
 }
 
 .mt-16 {
@@ -3162,14 +3139,6 @@ input[type=password]:focus {
 
 .mt-8 {
   margin-top: 2rem;
-}
-
-.mt-10 {
-  margin-top: 2.5rem;
-}
-
-.mt-14 {
-  margin-top: 3.5rem;
 }
 
 .line-clamp-1 {
@@ -3231,10 +3200,6 @@ input[type=password]:focus {
   height: 3rem;
 }
 
-.h-16 {
-  height: 4rem;
-}
-
 .h-2 {
   height: 0.5rem;
 }
@@ -3249,10 +3214,6 @@ input[type=password]:focus {
 
 .h-28 {
   height: 7rem;
-}
-
-.h-3 {
-  height: 0.75rem;
 }
 
 .h-4 {
@@ -3303,8 +3264,8 @@ input[type=password]:focus {
   width: 33.333333%;
 }
 
-.w-1\/4 {
-  width: 25%;
+.w-10 {
+  width: 2.5rem;
 }
 
 .w-12 {
@@ -3335,6 +3296,10 @@ input[type=password]:focus {
   width: 0.75rem;
 }
 
+.w-3\/12 {
+  width: 25%;
+}
+
 .w-3\/6 {
   width: 50%;
 }
@@ -3345,6 +3310,10 @@ input[type=password]:focus {
 
 .w-4 {
   width: 1rem;
+}
+
+.w-4\/6 {
+  width: 66.666667%;
 }
 
 .w-48 {
@@ -3391,10 +3360,6 @@ input[type=password]:focus {
   width: 100%;
 }
 
-.w-5\/6 {
-  width: 83.333333%;
-}
-
 .min-w-\[200px\] {
   min-width: 200px;
 }
@@ -3438,6 +3403,10 @@ input[type=password]:focus {
 
 .flex-shrink-0 {
   flex-shrink: 0;
+}
+
+.shrink {
+  flex-shrink: 1;
 }
 
 .flex-grow {
@@ -3585,12 +3554,6 @@ input[type=password]:focus {
   gap: 1.5rem;
 }
 
-.space-x-1 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(0.25rem * var(--tw-space-x-reverse));
-  margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
-}
-
 .space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
@@ -3680,6 +3643,10 @@ input[type=password]:focus {
 
 .rounded-md {
   border-radius: 0.375rem;
+}
+
+.rounded-sm {
+  border-radius: 0.125rem;
 }
 
 .rounded-xl {
@@ -3780,13 +3747,23 @@ input[type=password]:focus {
   border-color: transparent;
 }
 
-.border-blue-400 {
-  --tw-border-opacity: 1;
-  border-color: rgb(96 165 250 / var(--tw-border-opacity));
-}
-
 .border-t-transparent {
   border-top-color: transparent;
+}
+
+.bg-\[\#101129\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(16 17 41 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#131418\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(19 20 24 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#9E7FFF\] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(158 127 255 / var(--tw-bg-opacity));
 }
 
 .bg-base-content {
@@ -3897,6 +3874,10 @@ input[type=password]:focus {
   --tw-bg-opacity: 0.5;
 }
 
+.bg-opacity-90 {
+  --tw-bg-opacity: 0.9;
+}
+
 .bg-center {
   background-position: center;
 }
@@ -3934,6 +3915,10 @@ input[type=password]:focus {
   padding: 0.5rem;
 }
 
+.p-3 {
+  padding: 0.75rem;
+}
+
 .p-4 {
   padding: 1rem;
 }
@@ -3966,14 +3951,14 @@ input[type=password]:focus {
   padding-right: 1rem;
 }
 
-.px-5 {
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-}
-
 .px-6 {
   padding-left: 1.5rem;
   padding-right: 1.5rem;
+}
+
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .py-10 {
@@ -4036,20 +4021,12 @@ input[type=password]:focus {
   padding-left: 0px;
 }
 
-.pl-2 {
-  padding-left: 0.5rem;
-}
-
 .pl-3 {
   padding-left: 0.75rem;
 }
 
 .pl-4 {
   padding-left: 1rem;
-}
-
-.pr-0 {
-  padding-right: 0px;
 }
 
 .pr-10 {
@@ -4152,6 +4129,10 @@ input[type=password]:focus {
   font-weight: 700;
 }
 
+.font-light {
+  font-weight: 300;
+}
+
 .font-medium {
   font-weight: 500;
 }
@@ -4190,6 +4171,21 @@ input[type=password]:focus {
 
 .tracking-wider {
   letter-spacing: 0.05em;
+}
+
+.text-\[\#101129\] {
+  --tw-text-opacity: 1;
+  color: rgb(16 17 41 / var(--tw-text-opacity));
+}
+
+.text-\[\#9E7FFF\] {
+  --tw-text-opacity: 1;
+  color: rgb(158 127 255 / var(--tw-text-opacity));
+}
+
+.text-\[\#AEAFB0\] {
+  --tw-text-opacity: 1;
+  color: rgb(174 175 176 / var(--tw-text-opacity));
 }
 
 .text-blue-600 {
@@ -4436,6 +4432,111 @@ input[type=password]:focus {
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
+}
+
+@media (min-width: 768px) {
+  .md\:tooltip {
+    position: relative;
+    display: inline-block;
+    --tooltip-offset: calc(100% + 1px + var(--tooltip-tail, 0px));
+  }
+
+  .md\:tooltip:before {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    content: var(--tw-content);
+    --tw-content: attr(data-tip);
+    transform: translateX(-50%);
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-offset);
+  }
+
+  .md\:tooltip {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    --tooltip-tail: 0.1875rem;
+    --tooltip-color: var(--fallback-n,oklch(var(--n)/1));
+    --tooltip-text-color: var(--fallback-nc,oklch(var(--nc)/1));
+    --tooltip-tail-offset: calc(100% + 0.0625rem - var(--tooltip-tail));
+  }
+
+  .md\:tooltip:before,.md\:tooltip:after {
+    opacity: 0;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+    transition-delay: 100ms;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .md\:tooltip:after {
+    position: absolute;
+    content: "";
+    border-style: solid;
+    border-width: var(--tooltip-tail, 0);
+    width: 0;
+    height: 0;
+    display: block;
+  }
+
+  .md\:tooltip:before {
+    max-width: 20rem;
+    border-radius: 0.25rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    background-color: var(--tooltip-color);
+    color: var(--tooltip-text-color);
+    width: -moz-max-content;
+    width: max-content;
+  }
+
+  .md\:tooltip.tooltip-open:before {
+    opacity: 1;
+    transition-delay: 75ms;
+  }
+
+  .md\:tooltip.tooltip-open:after {
+    opacity: 1;
+    transition-delay: 75ms;
+  }
+
+  .md\:tooltip:hover:before {
+    opacity: 1;
+    transition-delay: 75ms;
+  }
+
+  .md\:tooltip:hover:after {
+    opacity: 1;
+    transition-delay: 75ms;
+  }
+
+  .md\:tooltip:has(:focus-visible):after,.md\:tooltip:has(:focus-visible):before {
+    opacity: 1;
+    transition-delay: 75ms;
+  }
+
+  .md\:tooltip:not([data-tip]):hover:before,.md\:tooltip:not([data-tip]):hover:after {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .md\:tooltip:after {
+    transform: translateX(-50%);
+    border-color: var(--tooltip-color) transparent transparent transparent;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-tail-offset);
+  }
 }
 
 .before\:pointer-events-none::before {
@@ -4855,18 +4956,6 @@ input[type=password]:focus {
 }
 
 @media (min-width: 640px) {
-  .sm\:relative {
-    position: relative;
-  }
-
-  .sm\:bottom-auto {
-    bottom: auto;
-  }
-
-  .sm\:left-auto {
-    left: auto;
-  }
-
   .sm\:right-auto {
     right: auto;
   }
@@ -4875,20 +4964,8 @@ input[type=password]:focus {
     top: auto;
   }
 
-  .sm\:hidden {
-    display: none;
-  }
-
   .sm\:h-6 {
     height: 1.5rem;
-  }
-
-  .sm\:w-1\/6 {
-    width: 16.666667%;
-  }
-
-  .sm\:w-4\/6 {
-    width: 66.666667%;
   }
 
   .sm\:w-6 {
@@ -4897,10 +4974,6 @@ input[type=password]:focus {
 
   .sm\:border {
     border-width: 1px;
-  }
-
-  .sm\:border-t {
-    border-top-width: 1px;
   }
 
   .sm\:border-current {
@@ -4913,14 +4986,6 @@ input[type=password]:focus {
 
   .sm\:p-0 {
     padding: 0px;
-  }
-
-  .sm\:pb-4 {
-    padding-bottom: 1rem;
-  }
-
-  .sm\:pt-4 {
-    padding-top: 1rem;
   }
 
   .sm\:text-left {
@@ -4943,6 +5008,34 @@ input[type=password]:focus {
 }
 
 @media (min-width: 768px) {
+  .md\:pointer-events-auto {
+    pointer-events: auto;
+  }
+
+  .md\:visible {
+    visibility: visible;
+  }
+
+  .md\:fixed {
+    position: fixed;
+  }
+
+  .md\:absolute {
+    position: absolute;
+  }
+
+  .md\:relative {
+    position: relative;
+  }
+
+  .md\:top-0 {
+    top: 0px;
+  }
+
+  .md\:z-50 {
+    z-index: 50;
+  }
+
   .md\:mb-0 {
     margin-bottom: 0px;
   }
@@ -4955,24 +5048,52 @@ input[type=password]:focus {
     margin-top: 0px;
   }
 
+  .md\:block {
+    display: block;
+  }
+
+  .md\:inline {
+    display: inline;
+  }
+
   .md\:flex {
     display: flex;
   }
 
-  .md\:w-auto {
-    width: auto;
+  .md\:hidden {
+    display: none;
+  }
+
+  .md\:h-3 {
+    height: 0.75rem;
+  }
+
+  .md\:w-1\/2 {
+    width: 50%;
   }
 
   .md\:w-5\/6 {
     width: 83.333333%;
   }
 
-  .md\:w-1\/4 {
-    width: 25%;
+  .md\:w-auto {
+    width: auto;
   }
 
-  .md\:w-1\/2 {
-    width: 50%;
+  .md\:w-20 {
+    width: 5rem;
+  }
+
+  .md\:w-24 {
+    width: 6rem;
+  }
+
+  .md\:w-2 {
+    width: 0.5rem;
+  }
+
+  .md\:w-28 {
+    width: 7rem;
   }
 
   .md\:grid-cols-2 {
@@ -4987,8 +5108,32 @@ input[type=password]:focus {
     align-items: flex-start;
   }
 
+  .md\:items-center {
+    align-items: center;
+  }
+
   .md\:justify-between {
     justify-content: space-between;
+  }
+
+  .md\:rounded-lg {
+    border-radius: 0.5rem;
+  }
+
+  .md\:p-2 {
+    padding: 0.5rem;
+  }
+
+  .md\:p-4 {
+    padding: 1rem;
+  }
+
+  .md\:pl-3 {
+    padding-left: 0.75rem;
+  }
+
+  .md\:pr-3 {
+    padding-right: 0.75rem;
   }
 
   .md\:text-4xl {
@@ -5018,6 +5163,11 @@ input[type=password]:focus {
     top: auto;
   }
 
+  .lg\:-mx-5 {
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+  }
+
   .lg\:inline {
     display: inline;
   }
@@ -5032,6 +5182,10 @@ input[type=password]:focus {
 
   .lg\:h-6 {
     height: 1.5rem;
+  }
+
+  .lg\:w-1\/4 {
+    width: 25%;
   }
 
   .lg\:w-12 {
@@ -5054,12 +5208,24 @@ input[type=password]:focus {
     width: auto;
   }
 
+  .lg\:w-3 {
+    width: 0.75rem;
+  }
+
+  .lg\:w-3\/12 {
+    width: 25%;
+  }
+
+  .lg\:w-36 {
+    width: 9rem;
+  }
+
   .lg\:w-1 {
     width: 0.25rem;
   }
 
-  .lg\:w-1\/4 {
-    width: 25%;
+  .lg\:w-1\/12 {
+    width: 8.333333%;
   }
 
   .lg\:flex-1 {
@@ -5087,12 +5253,21 @@ input[type=password]:focus {
     padding: 1rem;
   }
 
+  .lg\:px-5 {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
   .lg\:pl-5 {
     padding-left: 1.25rem;
   }
 
   .lg\:pr-5 {
     padding-right: 1.25rem;
+  }
+
+  .lg\:text-left {
+    text-align: left;
   }
 
   .lg\:text-right {

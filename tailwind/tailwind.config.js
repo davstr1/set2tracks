@@ -6,6 +6,7 @@ const baseConfig = {
   content: [
     "../app/web/templates/*.html",
     "../app/web/templates/**/*.html",
+    "../app/web/templates/snippets/*.html",
     "../boilersaas/src/boilerssas/templates/*.html",
     "../boilersaas/src/boilersaas/templates/**/*.html"
   ],

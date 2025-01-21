@@ -32,9 +32,6 @@ const customConfig = {
         '.form-wrapper': {
           '@apply sm:border sm:border-current w-full max-w-sm rounded-lg p-4 content-center': {},
         },
-        '.track.active': {
-          '@apply ring-2 ring-primary': {},
-        },
         '.track.active .bar-vertical': {
           '@apply bg-primary': {},
         },

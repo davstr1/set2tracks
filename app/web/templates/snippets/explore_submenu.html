@@ -1,12 +1,13 @@
-<ul class="mb-5 flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
-  <li class="me-2">
-    <a href="{{ url_for('set.sets') }}" class="{{'active ' if subpage_name=='sets' }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">Sets</a>
-  </li>
-  <li class="me-2">
-    <a href="{{ url_for('track.tracks') }}" class="{{'active ' if subpage_name=='tracks' }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">Tracks</a>
-  </li>
-  <li class="me-2">
-    <a href="{{ url_for('channel.channels') }}" class="{{'active ' if subpage_name=='channels' }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">Channels</a>
-  </li>
- 
+<div class="py-5">
+  <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
+    <li class="me-2">
+      <a href="{{ url_for('set.sets') }}" class="{{'active ' if subpage_name=='sets' }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">Sets</a>
+    </li>
+    <li class="me-2">
+      <a href="{{ url_for('track.tracks') }}" class="{{'active ' if subpage_name=='tracks' }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">Tracks</a>
+    </li>
+    <li class="me-2">
+      <a href="{{ url_for('channel.channels') }}" class="{{'active ' if subpage_name=='channels' }}inline-block p-4  bg-gray-100 rounded-t-lg  dark:bg-gray-800 ">Channels</a>
+    </li>
   </ul>
+</div>
