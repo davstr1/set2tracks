@@ -146,7 +146,7 @@
             {% endblock %}
         </main>
 
-        <footer class="bg-gray-800 py-6 mt-52 mb-20 rounded-xl">
+        <footer class="bg-gray-800 py-6 mt-52 mb-20 rounded-xl relative">
             <div class="container mx-auto px-4 text-white ">
                 <div class="flex flex-wrap justify-between">
 
@@ -156,6 +156,12 @@
                             <!-- <a rel="no_follow" href="{{url_for('basic.pricing')}}">Pricing</a> -  -->
                             <a rel="no_follow" href="{{url_for('basic.terms_of_service')}}">Terms of Service</a> - <a rel="no_follow" href="{{url_for('basic.privacy_policy')}}">Privacy Policy</a>
                         </p>
+                        {% if is_admin %}
+                        <div class="absolute top-0 right-0 text-gray-500 p-2 rounded-tl-lg z-50">
+                            <a href="{{url_for('admin.admin')}}">Admin</a>
+                    
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -213,12 +219,7 @@
 
 
 
-    {% if is_admin %}
-    <div class="fixed bottom-0 right-0 bg-red-500 text-white p-2 rounded-tl-lg z-50">
-        <a href="{{url_for('admin.admin')}}">Admin</a>
 
-    </div>
-    {% endif %}
     <audio id="notifSound">
         <source src="{{url_for('static',filename=notif_sound)}}" type="audio/mpeg">
     </audio>
