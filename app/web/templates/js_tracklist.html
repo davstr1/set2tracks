@@ -2,6 +2,8 @@
 
   const previewPlayer = document.getElementById('previewPlayer');
   const playlist = document.getElementById('playlist');
+  const controlTrack = document.getElementById('track-control');
+  const trackProgress = document.getElementById('track-progress');
   let mouseX = 0;
 
   // Track mouse position whenever it moves
@@ -251,52 +253,52 @@
   }
 
 
-  document.querySelectorAll('.add-track-to-playlist').forEach(link => {
-    link.addEventListener('click', function (event) {
-      event.preventDefault();
-      const playlist_id = this.getAttribute('data-playlist-id');
-      if (!trackWithContextMenu) { // Add all tracks from set to playlist
+  // document.querySelectorAll('.add-track-to-playlist').forEach(link => {
+  //   link.addEventListener('click', function (event) {
+  //     event.preventDefault();
+  //     const playlist_id = this.getAttribute('data-playlist-id');
+  //     if (!trackWithContextMenu) { // Add all tracks from set to playlist
 
-        console.log('trackWithContextMenu not found');
-        return addAllTracksFromSetToPlaylist({ playlist_id: playlist_id, set_id: setId })
-          .then(response => {
-            if (response.status_code === 200) {
-              console.log(response.message);
-              showSystemMessage(response.message);
-            } else {
-              console.log(response.error);
-              showSystemMessage(response.error, 'warning');
-            }
-          });
+  //       console.log('trackWithContextMenu not found');
+  //       return addAllTracksFromSetToPlaylist({ playlist_id: playlist_id, set_id: setId })
+  //         .then(response => {
+  //           if (response.status_code === 200) {
+  //             console.log(response.message);
+  //             showSystemMessage(response.message);
+  //           } else {
+  //             console.log(response.error);
+  //             showSystemMessage(response.error, 'warning');
+  //           }
+  //         });
 
-      }
-      // Add single track to playlist
-      const trackId = trackWithContextMenu.getAttribute('data-track-id');
-      addTrackToPlaylist({ track_id: trackId, playlist_id: playlist_id })
-        .then(response => {
-          if (response.status_code === 200) {
-            console.log(response.message);
-            showSystemMessage(response.message);
-          } else {
-            console.log(response.error);
-            showSystemMessage(response.error, 'warning');
-          }
-        });
-    });
-  });
+  //     }
+  //     // Add single track to playlist
+  //     const trackId = trackWithContextMenu.getAttribute('data-track-id');
+  //     addTrackToPlaylist({ track_id: trackId, playlist_id: playlist_id })
+  //       .then(response => {
+  //         if (response.status_code === 200) {
+  //           console.log(response.message);
+  //           showSystemMessage(response.message);
+  //         } else {
+  //           console.log(response.error);
+  //           showSystemMessage(response.error, 'warning');
+  //         }
+  //       });
+  //   });
+  // });
 
-  function addTrackToPlaylist(payload) {
-    return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
-  }
+  // function addTrackToPlaylist(payload) {
+  //   return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
+  // }
 
-  function addAllTracksFromSetToPlaylist(payload) {
-    return processAjax('{{ url_for("playlist.jax_add_all_set_tracks_to_playlist") }}', 'POST', payload)
-  }
+  // function addAllTracksFromSetToPlaylist(payload) {
+  //   return processAjax('{{ url_for("playlist.jax_add_all_set_tracks_to_playlist") }}', 'POST', payload)
+  // }
 
-  function addTrackToPlaylistLastUsed(payload) {
-    payload.caller_url = window.location.href;
-    return processAjax('{{ url_for("playlist.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
-  }
+  // function addTrackToPlaylistLastUsed(payload) {
+  //   payload.caller_url = window.location.href;
+  //   return processAjax('{{ url_for("playlist.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
+  // }
 
 
 
@@ -326,12 +328,15 @@
     const activeTrack = document.querySelector('.track.active');
     if (!activeTrack) return;
     activeTrack.classList.remove('active', 'playing');
-    activeTrack.style.setProperty('--background-width', `0%`);
+    // activeTrack.style.setProperty('--background-width', `0%`);
+    trackProgress.style.setProperty('width', `0%`);
   }
 
   function activateTrack(track) {
     track.classList.add('active', 'playing');
-    track.style.setProperty('--background-width', `0%`);
+    // track.style.setProperty('--background-width', `0%`);
+    trackProgress.style.setProperty('width', `0%`);
+    updateControlTrack(track);
   }
 
   function monitorTrackProgress(track) {
@@ -341,7 +346,8 @@
         return;
       }
       const percentageWidth = parseFloat((previewPlayer.currentTime / previewPlayer.duration * 100).toFixed(2));
-      track.style.setProperty('--background-width', `${percentageWidth}%`);
+      // track.style.setProperty('--background-width', `${percentageWidth}%`);
+      trackProgress.style.setProperty('width', `${percentageWidth}%`);
 
       if (percentageWidth >= 100) {
         clearInterval(checkTrackPlayerHead);
@@ -368,6 +374,7 @@
     if (!audioUrl) return playNextTrack(nextTrack);
 
     playPreview(nextTrack);
+    updateControlTrack(nextTrack);
   }
 
   function pausePreview(track) {
@@ -468,6 +475,15 @@
   var playMode = isSetPage ? 'video' : 'preview';
   isSetPage ? setVideoMode() : setPreviewMode();
 
+  function updateControlTrack(activeTrack) {
+    const title = activeTrack.querySelector('.title').textContent;
+    const artist = activeTrack.querySelector('.artist_name').textContent;
+    const coverArt = activeTrack.querySelector('.cover_art').src;
+    controlTrack.querySelector('.title').textContent = title;
+    controlTrack.querySelector('.artist_name').textContent = artist;
+    controlTrack.querySelector('.cover_art').src = coverArt;
+  }
+
   function inVideoMode() {
     return playMode === 'video';
   }
@@ -511,6 +527,9 @@
 
       if (yt.activeTrack) {
         yt.activeTrack.classList.add('playing');
+
+
+        updateControlTrack(yt.activeTrack);
       }
 
     }
@@ -576,6 +595,7 @@
       if (youtubeNewActiveTrack) {
 
         youtubeNewActiveTrack.classList.add('active', 'playing');
+        updateControlTrack(youtubeNewActiveTrack);
       }
       yt.activeTrack = youtubeNewActiveTrack;
 
@@ -683,9 +703,10 @@
 
     if (playlist.classList.contains('preview-playing')) {
       const previewBg = track.querySelector('.bg-preview');
-      previewBg.style.setProperty('--background-width', `${percentageWidth}%`);
+      // previewBg.style.setProperty('--background-width', `${percentageWidth}%`);
     } else {
-      track.style.setProperty('--background-width', `${percentageWidth}%`);
+      // track.style.setProperty('--background-width', `${percentageWidth}%`);
+      trackProgress.style.setProperty('width', `${percentageWidth}%`);
     }
 
   }

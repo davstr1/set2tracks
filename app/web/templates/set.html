@@ -25,7 +25,7 @@ even where the player is not behind*/
 
 
 
-<div class="-mx-3 lg:-mx-5">
+<div class="-mx-3 -my-4 lg:-mx-5">
 
   <div id="playerMetaWrap" class="md:flex md:flex-col md:items-center  md:p-4 md:top-0 md:z-50 ">
 
@@ -49,7 +49,7 @@ even where the player is not behind*/
 
 
   <div class="sticky w-full md:relative md:w-auto" id="containerUnderPlayer">
-    <div class="bg-[#131418] p-3 rounded-xl py-4 w-full">
+    <div class="bg-[#131418] p-3 rounded-xl py-6 w-full">
 
       <h1 class="lg:text-2xl text-white font-bold">
         <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
@@ -93,7 +93,11 @@ even where the player is not behind*/
         <h2 class="text-xl font-semibold  text-white">Playlist</h2>
       </div>
 
-      <div class="discreet text-xs">Timestamps are approximate
+      <div class="discreet text-xs">
+        <svg class="w-4 h-4 fill-current inline">
+        <use xlink:href="#icon-clock"></use>
+        </svg>
+        Timestamps are approximate
         <div class="hidden md:block">
           Accuracy may vary by genre. Relax and enjoy the surprises !
         </div>

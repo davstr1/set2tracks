@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="set2tracks">
 <style>
-    {
-        # QnDirty fix to a mysterious page width problem on mobile Page would not take up all horizontal space+there is horizontal scrollbar Yet no element seems to cause an overflow @TODO : investigate that, when i retire, if i have time...and want to. #
-    }
+    
+        /* # QnDirty fix to a mysterious page width problem on mobile Page would not take up all horizontal space+there is horizontal scrollbar Yet no element seems to cause an overflow @TODO : investigate that, when i retire, if i have time...and want to. #
+     */
 
     html,
     body {
@@ -39,94 +39,106 @@
             <path class="fill-base-content hover:fill-primary" d="M7.625,3.5c-0.101,0-0.191-0.041-0.259-0.105C7.364,3.393,7.361,3.393,7.359,3.391  L6.427,2.458l-2.36,2.36c-0.244,0.243-0.64,0.243-0.884,0c-0.244-0.244-0.244-0.64,0-0.884l2.359-2.359L4.609,0.641  C4.607,0.639,4.607,0.636,4.605,0.634C4.541,0.566,4.5,0.476,4.5,0.375C4.5,0.168,4.668,0,4.875,0H7.5C7.776,0,8,0.224,8,0.5v2.625  C8,3.332,7.832,3.5,7.625,3.5z M1,2.25v4.5C1,6.888,1.112,7,1.25,7h4.5C5.888,7,6,6.888,6,6.75V4l1,1v2c0,0.553-0.447,1-1,1H1  C0.448,8,0,7.553,0,7V2c0-0.552,0.448-1,1-1h2l1,1H1.25C1.112,2,1,2.112,1,2.25z" />
         </symbol>
     </svg>
-<div id="topMenuWrap" class="w-full  bg-[#101129] bg-opacity-90 fixed top-0 z-50">
-    <div class="container mx-auto w-full md:pl-3 md:pr-3 lg:pl-5 lg:pr-5 xl:w-3/4 ">
-        <header class=" w-full ">
-            <nav id="navbar" class="mx-auto flex items-center justify-between py-3" aria-label="Global">
-                <!-- Mobile menu button -->
-                <div class="lg:hidden flex items-center px-4">
-                    <input type="checkbox" id="mobile-menu-toggle" class="peer hidden" />
-                    <label for="mobile-menu-toggle" class="cursor-pointer">
-                        <svg class="h-8 w-8 text-gray-500 hover:text-gray-700" fill="none" stroke="#9E7FFF" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </label>
-                </div>
+    <div id="topMenuWrap" class="w-full  bg-[#101129] bg-opacity-90 fixed top-0 z-50">
+        <div class="container mx-auto w-full md:pl-3 md:pr-3 lg:pl-5 lg:pr-5 xl:w-3/4 ">
+            <header class=" w-full ">
+                <nav id="navbar" class="mx-auto flex items-center justify-between py-2" aria-label="Global">
+                    <!-- Mobile menu button -->
+                    <div class="lg:hidden flex items-center px-4">
+                        <input type="checkbox" id="mobile-menu-toggle" class="peer hidden" />
+                        <label for="mobile-menu-toggle" class="cursor-pointer">
 
-                <div class="flex lg:flex-1 w-full items-center">
-                    {% include 'logo.html' %}
-                </div>
-                <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-                    <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class=" px-4 py-2 text-sm">
-                        <img class="h-4 w-4 inline" src="{{url_for('static',filename='im/reddit-logo-2436.png')}}"> Feedback/Help</a>
-                </div>
-
-                <div class=" lg:flex lg:flex-1 lg:justify-end">
-                    <div class="relative group">
-                        <button class="text-sm font-semibold leading-6 py-2.5 px-4">
-                            {% if current_user.is_authenticated %}
-                            [{{ current_user.fname }}]
-                            {% else %}
-                            <span class="hidden lg:inline">Sign in</span> 
-                            
-                            <svg class="lg:hidden h-10 w-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M8 6C8 3.79086 9.79086 2 12 2H17.5C19.9853 2 22 4.01472 22 6.5V17.5C22 19.9853 19.9853 22 17.5 22H12C9.79086 22 8 20.2091 8 18V17C8 16.4477 8.44772 16 9 16C9.55228 16 10 16.4477 10 17V18C10 19.1046 10.8954 20 12 20H17.5C18.8807 20 20 18.8807 20 17.5V6.5C20 5.11929 18.8807 4 17.5 4H12C10.8954 4 10 4.89543 10 6V7C10 7.55228 9.55228 8 9 8C8.44772 8 8 7.55228 8 7V6ZM12.2929 8.29289C12.6834 7.90237 13.3166 7.90237 13.7071 8.29289L16.7071 11.2929C17.0976 11.6834 17.0976 12.3166 16.7071 12.7071L13.7071 15.7071C13.3166 16.0976 12.6834 16.0976 12.2929 15.7071C11.9024 15.3166 11.9024 14.6834 12.2929 14.2929L13.5858 13L5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11L13.5858 11L12.2929 9.70711C11.9024 9.31658 11.9024 8.68342 12.2929 8.29289Z" fill="#9E7FFF"/>
-                                </svg>
-                            {% endif %}
-                            <svg class="hidden lg:inline w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            <svg class="h-8 w-8 text-gray-500 hover:text-gray-700" fill="none" stroke="#9E7FFF" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
-                        </button>
 
-                        <!-- Dropdown menu with content-fitting width and text-right alignment -->
-                        <div class="absolute hidden group-hover:flex group-hover:flex-col bg-primary-content border-2 border-slate-200 rounded-lg shadow-md mt-0 z-50 w-auto py-2 right-0">
+                        </label>
+                    </div>
+
+                    <div class="flex lg:flex-1 w-full items-center">
+                        {% include 'logo.html' %}
+                    </div>
+                    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+                        <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class=" px-4 py-2 text-sm">
+                            <img class="h-4 w-4 inline" src="{{url_for('static',filename='im/reddit-logo-2436.png')}}"> Feedback/Help</a>
+                    </div>
+
+                    <div class=" lg:flex lg:flex-1 lg:justify-end text-[#9E7FFF]">
+                        <div class="relative group">
+                            <button class="text-sm font-semibold leading-6 py-2.5 px-4">
+
+                                {% if current_user.is_authenticated %}
+                                <span class="hidden lg:inline">Log out</span>
+                                <svg class="lg:hidden h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M2 6.5C2 4.01472 4.01472 2 6.5 2H12C14.2091 2 16 3.79086 16 6V7C16 7.55228 15.5523 8 15 8C14.4477 8 14 7.55228 14 7V6C14 4.89543 13.1046 4 12 4H6.5C5.11929 4 4 5.11929 4 6.5V17.5C4 18.8807 5.11929 20 6.5 20H12C13.1046 20 14 19.1046 14 18V17C14 16.4477 14.4477 16 15 16C15.5523 16 16 16.4477 16 17V18C16 20.2091 14.2091 22 12 22H6.5C4.01472 22 2 19.9853 2 17.5V6.5ZM18.2929 8.29289C18.6834 7.90237 19.3166 7.90237 19.7071 8.29289L22.7071 11.2929C23.0976 11.6834 23.0976 12.3166 22.7071 12.7071L19.7071 15.7071C19.3166 16.0976 18.6834 16.0976 18.2929 15.7071C17.9024 15.3166 17.9024 14.6834 18.2929 14.2929L19.5858 13L11 13C10.4477 13 10 12.5523 10 12C10 11.4477 10.4477 11 11 11L19.5858 11L18.2929 9.70711C17.9024 9.31658 17.9024 8.68342 18.2929 8.29289Z" fill="#9E7FFF" />
+                                </svg>
+                                {% else %}
+                                <a href="{{ url_for('users.login') }}">
+                                    <span class="hidden lg:inline">Sign In</span>
+
+                                    <svg class=" h-10 w-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8 6C8 3.79086 9.79086 2 12 2H17.5C19.9853 2 22 4.01472 22 6.5V17.5C22 19.9853 19.9853 22 17.5 22H12C9.79086 22 8 20.2091 8 18V17C8 16.4477 8.44772 16 9 16C9.55228 16 10 16.4477 10 17V18C10 19.1046 10.8954 20 12 20H17.5C18.8807 20 20 18.8807 20 17.5V6.5C20 5.11929 18.8807 4 17.5 4H12C10.8954 4 10 4.89543 10 6V7C10 7.55228 9.55228 8 9 8C8.44772 8 8 7.55228 8 7V6ZM12.2929 8.29289C12.6834 7.90237 13.3166 7.90237 13.7071 8.29289L16.7071 11.2929C17.0976 11.6834 17.0976 12.3166 16.7071 12.7071L13.7071 15.7071C13.3166 16.0976 12.6834 16.0976 12.2929 15.7071C11.9024 15.3166 11.9024 14.6834 12.2929 14.2929L13.5858 13L5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11L13.5858 11L12.2929 9.70711C11.9024 9.31658 11.9024 8.68342 12.2929 8.29289Z" fill="#9E7FFF" />
+                                    </svg>
+                                </a>
+                                {% endif %}
+                                <svg class="hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown menu with content-fitting width and text-right alignment -->
                             {% if current_user.is_authenticated %}
-                            <!-- <a href="#" class="block px-6 py-3 text-sm text-primary font-bold text-right whitespace-nowrap">Go Premium</a> -->
-                            <a href="{{ url_for('users.logout') }}" class="block px-6 py-3 text-sm text-right">Logout</a>
-                            {% else %}
-                            <a href="{{ url_for('users.login') }}" class="block px-6 py-3 text-sm text-right">Sign in</a>
-                            <a href="{{ url_for('users.register') }}" class="block px-6 py-3 text-sm text-right">Register</a>
+                            <div class="absolute hidden group-hover:flex group-hover:flex-col  border-2 border-[#9E7FFF] bg-[#101129] rounded-lg shadow-md mt-0 z-50  w-max py-2 right-0">
+                               
+                                <!-- <a href="#" class="block px-6 py-3 text-sm text-primary font-bold text-right whitespace-nowrap">Go Premium</a> -->
+                                <div class="text-center block">[{{current_user.fname}}]</div>
+                                <a href="{{ url_for('users.logout') }}" class="block px-6 py-3 text-sm text-right">Log out</a>
+                             
+                            </div>
                             {% endif %}
                         </div>
                     </div>
-                </div>
-            </div>
+        </div>
 
-                <!-- <div class="lg:hidden flex items-center px-4">
+        <!-- <div class="lg:hidden flex items-center px-4">
                     <div class="h-6 w-6 rounded-full">d</div>
                 </div> -->
 
 
-            </nav>
+        </nav>
 
-            <!-- Mobile menu -->
-            <div id="mobile-menu" class="border-2 absolute left-0 right-0 bg-primary-content hidden peer-checked:flex flex-col lg:hidden z-50">
-                <!-- <div class="pt-2 pb-3 space-y-1">
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class=" rounded-lg border-2 border-[#9E7FFF] bg-[#101129] text-[#9E7FFF] absolute left-0 right-0  hidden peer-checked:flex flex-col lg:hidden z-50">
+            <!-- <div class="pt-2 pb-3 space-y-1">
                     <a href="{{ url_for('set.sets') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Explore") }}</a>
                     <a href="{{ url_for('playlist.my_playlists') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("My Playlists") }}</a>
                 </div> -->
+            <div class="pt-4 pb-3 border-t-2 border-inherit">
+                <a href="{{ url_for('set.sets') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Explore") }}</a>
 
-                <div class="pt-4 pb-3 border-t-2 border-slate-200">
-                    <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class="block pl-3 pr-4 py-2 text-base font-medium">
-                        <img class="h-4 w-4 inline" src="{{url_for('static',filename='im/reddit-logo-2436.png')}}"> Feedback/Help</a>
-                </div>
-                <div class="pt-4 pb-3 border-t-2 border-slate-200">
-                    {% if current_user.is_authenticated %}
-                    <!-- <a href="#" class="block pl-3 pr-4 py-2 text-base font-bold text-primary">Go Premium</a> -->
-                    <a href="{{ url_for('users.logout') }}" class="block pl-3 pr-4 py-2 text-base font-medium">[{{ current_user.fname }}] | {{ _("Logout") }}</a>
-
-                    {% else %}
-                    <a href="{{ url_for('users.login') }}" class="block pl-3 pr-4 py-2 text-base font-medium text-gr">{{ _("Sign in") }}</a>
-                    <a href="{{ url_for('users.register') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Register") }}</a>
-                    {% endif %}
-                </div>
             </div>
+
+
+            <div class="pt-4 pb-3 border-t-2 border-inherit">
+                <a target="_blank" rel="no_follow" href="https://www.reddit.com/r/Set2Tracks" class="block pl-3 pr-4 py-2 text-base font-medium">
+                    Feedback/Help <img class="h-4 w-4 inline" src="{{url_for('static',filename='im/reddit-logo-2436.png')}}"></a>
+            </div>
+            <div class="pt-4 pb-3 border-t-2 border-inherit">
+                {% if current_user.is_authenticated %}
+                <!-- <a href="#" class="block pl-3 pr-4 py-2 text-base font-bold text-primary">Go Premium</a> -->
+                <a href="{{ url_for('users.logout') }}" class="block pl-3 pr-4 py-2 text-base font-medium">[{{ current_user.fname }}] | {{ _("Logout") }}</a>
+
+                {% else %}
+                <a href="{{ url_for('users.login') }}" class="block pl-3 pr-4 py-2 text-base font-medium text-gr">{{ _("Sign in") }}</a>
+                {% endif %}
+            </div>
+        </div>
         </header>
 
 
 
-</div>
-<div class="container mx-auto w-full px-3 lg:px-5 xl:w-3/4">
+    </div>
+    <div class="container mx-auto w-full px-3 lg:px-5 xl:w-3/4">
 
 
 
@@ -146,20 +158,20 @@
             {% endblock %}
         </main>
 
-        <footer class="bg-gray-800 py-6 mt-52 mb-20 rounded-xl relative">
-            <div class="container mx-auto px-4 text-white ">
+        <footer class="mt-52 mb-16">
+            <div class="container mx-auto text-white text-xs text-left">
                 <div class="flex flex-wrap justify-between">
 
                     <div class="w-full m-1">
-                        <p class="text-center mb-2">{{ current_year }}, Set2Tracks. <span class="discreet"></span></p>
-                        <p class="text-center text-xs">
+                        <p class=" mb-2">{{ current_year }}, Set2Tracks. <span class="discreet"></span></p>
+                        <p class=" text-xs">
                             <!-- <a rel="no_follow" href="{{url_for('basic.pricing')}}">Pricing</a> -  -->
                             <a rel="no_follow" href="{{url_for('basic.terms_of_service')}}">Terms of Service</a> - <a rel="no_follow" href="{{url_for('basic.privacy_policy')}}">Privacy Policy</a>
                         </p>
                         {% if is_admin %}
-                        <div class="absolute top-0 right-0 text-gray-500 p-2 rounded-tl-lg z-50">
+                        <div class=" text-gray-500 ">
                             <a href="{{url_for('admin.admin')}}">Admin</a>
-                    
+
                         </div>
                         {% endif %}
                     </div>

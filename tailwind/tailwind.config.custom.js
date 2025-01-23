@@ -5,7 +5,7 @@ const customConfig = {
       {
         set2tracks: {
 
-          "primary": "oklch(65.69% 0.196 275.75)",
+          "primary": "#9E7FFF", //oklch(65.69% 0.196 275.75)",
           "primary-content": "#1D232A", // 2a323c
           "secondary": "oklch(74.8% 0.26 342.55)",
           "accent": "oklch(74.51% 0.167 183.61)",

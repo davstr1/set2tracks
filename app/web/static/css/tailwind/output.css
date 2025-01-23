@@ -521,7 +521,7 @@ html {
 }
 
 :root {
-  --p: 65.69% 0.196 275.75;
+  --p: 68.3458% 0.182841 292.003922;
   --in: 72.06% 0.191 231.6;
   --su: 64.8% 0.150 160;
   --wa: 84.71% 0.199 83.87;
@@ -2866,10 +2866,6 @@ input[type=password]:focus {
   left: 0px;
 }
 
-.left-1 {
-  left: 0.25rem;
-}
-
 .left-1\/2 {
   left: 50%;
 }
@@ -3004,12 +3000,51 @@ input[type=password]:focus {
   margin-bottom: 2rem;
 }
 
+.-mx-5 {
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+}
+
+.-mx-10 {
+  margin-left: -2.5rem;
+  margin-right: -2.5rem;
+}
+
+.-my-10 {
+  margin-top: -2.5rem;
+  margin-bottom: -2.5rem;
+}
+
+.-my-8 {
+  margin-top: -2rem;
+  margin-bottom: -2rem;
+}
+
+.-my-6 {
+  margin-top: -1.5rem;
+  margin-bottom: -1.5rem;
+}
+
+.-my-5 {
+  margin-top: -1.25rem;
+  margin-bottom: -1.25rem;
+}
+
+.-my-4 {
+  margin-top: -1rem;
+  margin-bottom: -1rem;
+}
+
 .-ml-1 {
   margin-left: -0.25rem;
 }
 
 .-mr-3 {
   margin-right: -0.75rem;
+}
+
+.-mt-1 {
+  margin-top: -0.25rem;
 }
 
 .-mt-2 {
@@ -3179,12 +3214,12 @@ input[type=password]:focus {
   aspect-ratio: 16 / 9;
 }
 
-.h-0 {
-  height: 0px;
-}
-
 .h-1 {
   height: 0.25rem;
+}
+
+.h-1\/2 {
+  height: 50%;
 }
 
 .h-10 {
@@ -3255,6 +3290,10 @@ input[type=password]:focus {
   min-height: 100vh;
 }
 
+.w-1\/12 {
+  width: 8.333333%;
+}
+
 .w-1\/3 {
   width: 33.333333%;
 }
@@ -3271,12 +3310,12 @@ input[type=password]:focus {
   width: 3.5rem;
 }
 
-.w-16 {
-  width: 4rem;
-}
-
 .w-2 {
   width: 0.5rem;
+}
+
+.w-2\/12 {
+  width: 16.666667%;
 }
 
 .w-20 {
@@ -3319,6 +3358,10 @@ input[type=password]:focus {
   width: 1.5rem;
 }
 
+.w-6\/12 {
+  width: 50%;
+}
+
 .w-60 {
   width: 15rem;
 }
@@ -3329,6 +3372,10 @@ input[type=password]:focus {
 
 .w-8 {
   width: 2rem;
+}
+
+.w-8\/12 {
+  width: 66.666667%;
 }
 
 .w-9 {
@@ -3349,6 +3396,16 @@ input[type=password]:focus {
 
 .w-full {
   width: 100%;
+}
+
+.w-min {
+  width: -moz-min-content;
+  width: min-content;
+}
+
+.w-max {
+  width: -moz-max-content;
+  width: max-content;
 }
 
 .min-w-\[200px\] {
@@ -3649,10 +3706,6 @@ input[type=password]:focus {
   border-top-right-radius: 0.5rem;
 }
 
-.rounded-tl-lg {
-  border-top-left-radius: 0.5rem;
-}
-
 .border {
   border-width: 1px;
 }
@@ -3685,6 +3738,11 @@ input[type=password]:focus {
   border-style: dashed;
 }
 
+.border-\[\#9E7FFF\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(158 127 255 / var(--tw-border-opacity));
+}
+
 .border-blue-200 {
   --tw-border-opacity: 1;
   border-color: rgb(191 219 254 / var(--tw-border-opacity));
@@ -3707,6 +3765,10 @@ input[type=password]:focus {
 .border-gray-700 {
   --tw-border-opacity: 1;
   border-color: rgb(55 65 81 / var(--tw-border-opacity));
+}
+
+.border-inherit {
+  border-color: inherit;
 }
 
 .border-primary {
@@ -3827,11 +3889,6 @@ input[type=password]:focus {
   background-color: var(--fallback-pc,oklch(var(--pc)/var(--tw-bg-opacity)));
 }
 
-.bg-red-500 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(239 68 68 / var(--tw-bg-opacity));
-}
-
 .bg-slate-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity));
@@ -3879,6 +3936,10 @@ input[type=password]:focus {
 
 .fill-current {
   fill: currentColor;
+}
+
+.fill-white {
+  fill: #fff;
 }
 
 .stroke-base-content {
@@ -3952,6 +4013,11 @@ input[type=password]:focus {
   padding-bottom: 0px;
 }
 
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
 .py-10 {
   padding-top: 2.5rem;
   padding-bottom: 2.5rem;
@@ -3982,14 +4048,14 @@ input[type=password]:focus {
   padding-bottom: 1.25rem;
 }
 
-.py-6 {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .pb-16 {
@@ -4184,6 +4250,10 @@ input[type=password]:focus {
   color: rgb(37 99 235 / var(--tw-text-opacity));
 }
 
+.text-current {
+  color: currentColor;
+}
+
 .text-gray-400 {
   --tw-text-opacity: 1;
   color: rgb(156 163 175 / var(--tw-text-opacity));
@@ -4271,10 +4341,6 @@ input[type=password]:focus {
 
 .opacity-50 {
   opacity: 0.5;
-}
-
-.opacity-55 {
-  opacity: 0.55;
 }
 
 .opacity-60 {
@@ -4423,111 +4489,6 @@ input[type=password]:focus {
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
-}
-
-@media (min-width: 768px) {
-  .md\:tooltip {
-    position: relative;
-    display: inline-block;
-    --tooltip-offset: calc(100% + 1px + var(--tooltip-tail, 0px));
-  }
-
-  .md\:tooltip:before {
-    position: absolute;
-    pointer-events: none;
-    z-index: 1;
-    content: var(--tw-content);
-    --tw-content: attr(data-tip);
-    transform: translateX(-50%);
-    top: auto;
-    left: 50%;
-    right: auto;
-    bottom: var(--tooltip-offset);
-  }
-
-  .md\:tooltip {
-    position: relative;
-    display: inline-block;
-    text-align: center;
-    --tooltip-tail: 0.1875rem;
-    --tooltip-color: var(--fallback-n,oklch(var(--n)/1));
-    --tooltip-text-color: var(--fallback-nc,oklch(var(--nc)/1));
-    --tooltip-tail-offset: calc(100% + 0.0625rem - var(--tooltip-tail));
-  }
-
-  .md\:tooltip:before,.md\:tooltip:after {
-    opacity: 0;
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
-    transition-delay: 100ms;
-    transition-duration: 200ms;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .md\:tooltip:after {
-    position: absolute;
-    content: "";
-    border-style: solid;
-    border-width: var(--tooltip-tail, 0);
-    width: 0;
-    height: 0;
-    display: block;
-  }
-
-  .md\:tooltip:before {
-    max-width: 20rem;
-    border-radius: 0.25rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    background-color: var(--tooltip-color);
-    color: var(--tooltip-text-color);
-    width: -moz-max-content;
-    width: max-content;
-  }
-
-  .md\:tooltip.tooltip-open:before {
-    opacity: 1;
-    transition-delay: 75ms;
-  }
-
-  .md\:tooltip.tooltip-open:after {
-    opacity: 1;
-    transition-delay: 75ms;
-  }
-
-  .md\:tooltip:hover:before {
-    opacity: 1;
-    transition-delay: 75ms;
-  }
-
-  .md\:tooltip:hover:after {
-    opacity: 1;
-    transition-delay: 75ms;
-  }
-
-  .md\:tooltip:has(:focus-visible):after,.md\:tooltip:has(:focus-visible):before {
-    opacity: 1;
-    transition-delay: 75ms;
-  }
-
-  .md\:tooltip:not([data-tip]):hover:before,.md\:tooltip:not([data-tip]):hover:after {
-    visibility: hidden;
-    opacity: 0;
-  }
-
-  .md\:tooltip:after {
-    transform: translateX(-50%);
-    border-color: var(--tooltip-color) transparent transparent transparent;
-    top: auto;
-    left: 50%;
-    right: auto;
-    bottom: var(--tooltip-tail-offset);
-  }
 }
 
 .before\:pointer-events-none::before {
@@ -5055,10 +5016,6 @@ input[type=password]:focus {
     width: 50%;
   }
 
-  .md\:w-28 {
-    width: 7rem;
-  }
-
   .md\:w-5\/6 {
     width: 83.333333%;
   }
@@ -5147,10 +5104,6 @@ input[type=password]:focus {
     height: 1.5rem;
   }
 
-  .lg\:w-1\/12 {
-    width: 8.333333%;
-  }
-
   .lg\:w-1\/4 {
     width: 25%;
   }
@@ -5159,16 +5112,8 @@ input[type=password]:focus {
     width: 66.666667%;
   }
 
-  .lg\:w-3\/12 {
-    width: 25%;
-  }
-
   .lg\:w-6 {
     width: 1.5rem;
-  }
-
-  .lg\:w-auto {
-    width: auto;
   }
 
   .lg\:flex-1 {
