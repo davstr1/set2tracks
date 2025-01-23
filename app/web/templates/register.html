@@ -1,0 +1,44 @@
+{% extends "blank.html" %}
+
+{% block content %}
+
+<div class=" sm:border sm:border-current w-full max-w-sm rounded-lg p-4 text-current ">
+<form action="{{ url_for('users.register') }}" method="post" class="w-full max-w-sm" novalidate autocomplete="off">
+  {{ form.hidden_tag() }}
+  <div class="mb-6 text-center">
+    Already have an account? <a href="{{ url_for('users.login',next=next) }}" class="font-semibold leading-6">Sign In</a>
+  </div>
+  <div class="mb-6">
+    <label for="{{ form.fname.id }}" class="block text-sm font-semibold leading-6">
+      {{form.fname.label.text }}
+    </label>
+    {{ form.fname(size=32) }}
+    {% for error in form.fname.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+  <div class="mb-6">
+    <label for="{{ form.email.id }}" class="block text-sm font-semibold leading-6">
+      {{form.email.label.text }}
+    </label>
+    {{ form.email(size=32) }}
+    {% for error in form.email.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+  </div>
+  <div class="mb-6">
+    <label for="{{ form.password.id }}" class="block text-sm font-semibold leading-6">
+      {{form.password.label.text }}
+    </label>
+    {{ form.password(size=32) }}
+    {% for error in form.password.errors %}
+    <span class="text-red-500 text-xs">{{ error }}</span>
+    {% endfor %}
+ 
+
+  {{ form.submit(value="Create my account") }}
+</form>
+</div>
+{% include "components/section_social_signin.html" %}
+
+{% endblock %}
