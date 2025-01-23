@@ -8,7 +8,7 @@
   const pauseButton = document.getElementById('action-pause');
 
   pauseButton.addEventListener('click', function () {
-   
+
     if (inVideoMode()) {
       pauseVideo();
     } else {
@@ -34,6 +34,8 @@
 
   document.querySelector('#playlist').addEventListener('click', trackListOnClick);
 
+  controlTrack.addEventListener('click', trackListOnClick);
+
   const trackTheyAreRelatedTo = document.querySelector('#trackTheyAreRelatedTo');
   if (trackTheyAreRelatedTo)
     trackTheyAreRelatedTo.addEventListener('click', trackListOnClick); // track from related tracks
@@ -42,9 +44,17 @@
   function trackListOnClick(event) {
 
     let target = event.target;
+    console.log('target', target);
     // action for stuff we make a js action for
-    while (target && (!target.classList || !(target.classList.contains('js-action') || target.classList.contains('normal-link') || target.classList.contains('track')))) {
-      target = target.parentElement;
+    // while (target && (!target.classList || !(target.classList.contains('js-action') || target.classList.contains('normal-link') || target.classList.contains('track')))) {
+    //   target = target.parentElement;
+    // }
+    if(target === playButton) return;
+    if(target === pauseButton) return;
+    if (target.closest('#track-control')) {
+      target = target.closest('#track-control');
+    } else {
+      target = target.closest('.track');
     }
     const classList = target.classList;
     // no js-action for normal links
@@ -92,21 +102,20 @@
 
   function playVideo(target) {
 
-    console.log(target)
+
     var track = target.closest('.track');
-    console.log(track)
+
     if (track === null) {
       const trackId = controlTrack.getAttribute('data-target-track-id');
       track = document.getElementById(trackId);
-      console.log(track)
     }
 
- 
+
     if (!track)
       return;
     setVideoMode();
     var startTime = 0;
-    
+
     if (isVideoTrackCurrent(track)) {
       // Called from the play button -> plyay from current time
       if (target.classList.contains('playVideoTrack') || target.closest('#action-play')) {
