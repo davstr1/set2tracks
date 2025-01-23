@@ -11,7 +11,7 @@
 </div>
 {% endif %}
 
-<div data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="flex items-center track  hover:bg-blue-950 md:rounded-lg cursor-pointer">
+<div id="track-{{track.id}}" data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="flex items-center track  hover:bg-blue-950 md:rounded-lg cursor-pointer">
   <div class="p-2 w-3/12 flex flex-col items-center relative  ">
     <img class="cover_art rounded-xl p-1 w-full" src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
     <div class="bg-base-content discreet h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>

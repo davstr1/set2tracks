@@ -4,6 +4,28 @@
   const playlist = document.getElementById('playlist');
   const controlTrack = document.getElementById('track-control');
   const trackProgress = document.getElementById('track-progress');
+  const playButton = document.getElementById('action-play');
+  const pauseButton = document.getElementById('action-pause');
+
+  pauseButton.addEventListener('click', function () {
+   
+    if (inVideoMode()) {
+      pauseVideo();
+    } else {
+      pausePreview();
+    }
+  });
+
+  playButton.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inVideoMode()) {
+      playVideo(e.target);
+    } else {
+      playPreview();
+    }
+  });
+
   let mouseX = 0;
 
   // Track mouse position whenever it moves
@@ -70,18 +92,27 @@
 
   function playVideo(target) {
 
-    const track = target.closest('.track');
+    console.log(target)
+    var track = target.closest('.track');
+    console.log(track)
+    if (track === null) {
+      const trackId = controlTrack.getAttribute('data-target-track-id');
+      track = document.getElementById(trackId);
+      console.log(track)
+    }
 
+ 
     if (!track)
       return;
     setVideoMode();
     var startTime = 0;
-
+    
     if (isVideoTrackCurrent(track)) {
       // Called from the play button -> plyay from current time
-      if (target.classList.contains('playVideoTrack')) {
+      if (target.classList.contains('playVideoTrack') || target.closest('#action-play')) {
         startTime = yt.player.getCurrentTime();
       } else {
+        console.log('play from mouse')
         // Called from the track itself -> play from mouse start time
         startTime = getVideoTimeFromMousePosition(track);
       }
@@ -98,6 +129,8 @@
         console.log('paused')
         yt.player.seekTo(startTime, true);
         yt.player.playVideo();
+        playButton.classList.add('hidden');
+        pauseButton.classList.remove('hidden');
         return;
       } else if (playerState === YT.PlayerState.CUED) {
         // first time, a straight seekTo doesn't do it
@@ -122,7 +155,11 @@
 
 
   function pauseVideo(target) {
-    if (typeof yt.player !== 'undefined' && yt.player.getPlayerState() === 1) yt.player.pauseVideo()
+    if (typeof yt.player !== 'undefined' && yt.player.getPlayerState() === 1) {
+      yt.player.pauseVideo()
+      playButton.classList.remove('hidden');
+      pauseButton.classList.add('hidden');
+    }
   }
 
 
@@ -479,9 +516,11 @@
     const title = activeTrack.querySelector('.title').textContent;
     const artist = activeTrack.querySelector('.artist_name').textContent;
     const coverArt = activeTrack.querySelector('.cover_art').src;
+    const trackId = activeTrack.getAttribute('id');
     controlTrack.querySelector('.title').textContent = title;
     controlTrack.querySelector('.artist_name').textContent = artist;
     controlTrack.querySelector('.cover_art').src = coverArt;
+    controlTrack.setAttribute('data-target-track-id', trackId);
   }
 
   function inVideoMode() {
