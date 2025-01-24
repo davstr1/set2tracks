@@ -11,9 +11,9 @@
 </div>
 {% endif %}
 
-<div id="track-{{track.id}}" data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="flex items-center track  hover:bg-blue-950 md:rounded-lg cursor-pointer">
-  <div class="p-2 w-3/12  md:w-2/12 lg:w-auto flex flex-col items-center relative  ">
-    <img class="cover_art rounded-xl p-1 w-full lg:h-20 lg:w-20" src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
+<div id="track-{{track.id}}" data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="flex items-center track  hover:bg-blue-950 md:rounded-lg cursor-pointer lg:py-2">
+  <div class="p-2 w-3/12  md:w-2/12  flex flex-col items-center lg:justify-center relative  ">
+    <img class="block cover_art rounded-xl p-1   lg:h-20 lg:w-20" src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
     <div class="bg-base-content discreet h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>
   </div>
 
@@ -71,7 +71,7 @@
     {% endif %}
   </div>
 
-  <div class="track-ext hidden lg:flex lg:w-4/12 lg:items-end p-2   space-x-2  buttons justify-center w-auto   lg:justify-end  relative lg:right-auto lg:bottom-auto">
+  <div class="track-ext hidden lg:flex lg:w-4/12 lg:pr-10 p-2   space-x-2  buttons justify-center w-auto   lg:justify-end  relative lg:right-auto lg:bottom-auto">
     {% if track.artist_name and track.id != 1 %}
     <div class="sm:visible-hover-track text-center sm:p-0 p-5  sm:bg-transparent rounded-xl">
 
