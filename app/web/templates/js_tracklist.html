@@ -125,12 +125,26 @@
 
     const spotifyUrl = track.querySelector('.spotify').getAttribute('href');
     const appleUrl = track.querySelector('.apple').getAttribute('href');
+    // data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url
+    const relatedElm = track.querySelector('.related');
+    const relatedTracksUrl = relatedElm.getAttribute('data-related-tracks-url');
+    const relatedTracksCheckUrl = relatedElm.getAttribute('data-related_tracks-check-url');
 
-
+    console.log('relatedTracksUrl', relatedTracksUrl);
+    console.log('relatedTracksCheckUrl', relatedTracksCheckUrl);
     const popoverTrack = document.getElementById('popover-track');
     popoverTrack.querySelector('.close').addEventListener('click', function () {
       popoverTrack.classList.add('hidden');
       unblockScrolling();
+    });
+    popoverTrack.addEventListener('click', function (event) {
+      if (event.target === this) {
+        popoverTrack.classList.add('hidden');
+        unblockScrolling();
+      }
+      if (event.target.classList.contains('related')) {
+        openRelatedTracks(event.target);
+      }
     });
     popoverTrack.classList.remove('hidden');
     blockScrolling()
@@ -147,6 +161,9 @@
 
     popoverTrack.querySelector('.spotify').href = spotifyUrl;
     popoverTrack.querySelector('.apple').href = appleUrl;
+    
+    popoverTrack.querySelector('.related').setAttribute('data-related-tracks-url', relatedTracksUrl);
+    popoverTrack.querySelector('.related').setAttribute('data-related_tracks-check-url', relatedTracksCheckUrl);
 
     updatePopOverTrackGenres(popoverTrack, track);
   }
