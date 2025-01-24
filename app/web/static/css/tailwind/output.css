@@ -3043,6 +3043,10 @@ input[type=password]:focus {
   margin: 1.25rem;
 }
 
+.m-10 {
+  margin: 2.5rem;
+}
+
 .-mx-3 {
   margin-left: -0.75rem;
   margin-right: -0.75rem;
@@ -3302,6 +3306,18 @@ input[type=password]:focus {
 
 .mb-10 {
   margin-bottom: 2.5rem;
+}
+
+.mt-64 {
+  margin-top: 16rem;
+}
+
+.mb-32 {
+  margin-bottom: 8rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
 }
 
 .line-clamp-1 {

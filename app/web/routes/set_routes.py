@@ -1,6 +1,7 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from flask_cors import cross_origin
+from requests import get
 from web.lib.json_schemas import generate_video_object_with_tracklist
 from lang import Lang
 from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, is_set_in_queue, pre_queue_set, upsert_set_browsing_history
@@ -244,6 +245,14 @@ def set(set_id):
     # print(most_common_tempos)
     #pprint(get_set_avg_characteristics(set_id))
     
+    channel = get_channel_by_id(set['channel_id'])
+    channel.sets_visible = sorted(
+            [set_item for set_item in channel.sets if (not set_item.hidden and set_item.published)],
+            key=lambda set_item: set_item.publish_date,
+            reverse=True
+        )
+    channel.nb_sets_visible = len(channel.sets_visible)
+    
     current_url = request.url
     user_id = get_user_id()
     
@@ -262,7 +271,7 @@ def set(set_id):
     json_schema = generate_video_object_with_tracklist(set, canonical_url)
    
 
-    return render_template('set.html', set=set,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l,json_schema=json_schema,canonical_url=canonical_url)
+    return render_template('set.html', set=set,channel=channel,tpl_utils=tpl_utils,user_playlists=user_playlists,current_url=current_url,l=l,json_schema=json_schema,canonical_url=canonical_url)
 
 
 
