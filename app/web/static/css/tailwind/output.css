@@ -5423,6 +5423,10 @@ input[type=password]:focus {
     flex-direction: column;
   }
 
+  .md\:items-end {
+    align-items: flex-end;
+  }
+
   .md\:items-center {
     align-items: center;
   }
@@ -5441,6 +5445,10 @@ input[type=password]:focus {
 
   .md\:p-4 {
     padding: 1rem;
+  }
+
+  .md\:p-6 {
+    padding: 1.5rem;
   }
 
   .md\:pl-3 {
