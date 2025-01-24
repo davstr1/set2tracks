@@ -65,7 +65,7 @@
     </div>
     <h1 class="mb-5">An unexpected error occurred. Please try again later.</h1>
 
-    {% if is_admin %}
+    {% if is_admin or 1 %}
     <div class="error-container" >
         <div class="traceback">
             <strong>{{error_message}}</strong>

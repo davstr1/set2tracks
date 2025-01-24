@@ -2951,6 +2951,50 @@ input[type=password]:focus {
   bottom: 4rem;
 }
 
+.bottom-\[-10px\] {
+  bottom: -10px;
+}
+
+.left-10 {
+  left: 2.5rem;
+}
+
+.left-\[-10px\] {
+  left: -10px;
+}
+
+.top-1\/2 {
+  top: 50%;
+}
+
+.top-2\/3 {
+  top: 66.666667%;
+}
+
+.top-1\/4 {
+  top: 25%;
+}
+
+.top-3\/4 {
+  top: 75%;
+}
+
+.-bottom-3\/4 {
+  bottom: -75%;
+}
+
+.bottom-3\/4 {
+  bottom: 75%;
+}
+
+.top-5 {
+  top: 1.25rem;
+}
+
+.top-full {
+  top: 100%;
+}
+
 .z-0 {
   z-index: 0;
 }
@@ -2993,6 +3037,10 @@ input[type=password]:focus {
 
 .m-8 {
   margin: 2rem;
+}
+
+.m-5 {
+  margin: 1.25rem;
 }
 
 .-mx-3 {
@@ -3093,6 +3141,11 @@ input[type=password]:focus {
 .my-2 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.my-5 {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .-ml-1 {
@@ -3247,6 +3300,10 @@ input[type=password]:focus {
   margin-left: 0px;
 }
 
+.mb-10 {
+  margin-bottom: 2.5rem;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -3288,6 +3345,10 @@ input[type=password]:focus {
 
 .aspect-video {
   aspect-ratio: 16 / 9;
+}
+
+.aspect-square {
+  aspect-ratio: 1 / 1;
 }
 
 .h-1 {
@@ -3368,6 +3429,10 @@ input[type=password]:focus {
 
 .h-1\/6 {
   height: 16.666667%;
+}
+
+.h-0 {
+  height: 0px;
 }
 
 .max-h-40 {
@@ -3520,6 +3585,10 @@ input[type=password]:focus {
   width: 10rem;
 }
 
+.w-0 {
+  width: 0px;
+}
+
 .min-w-\[200px\] {
   min-width: 200px;
 }
@@ -3573,6 +3642,14 @@ input[type=password]:focus {
   flex-grow: 1;
 }
 
+.origin-bottom-right {
+  transform-origin: bottom right;
+}
+
+.origin-top-left {
+  transform-origin: top left;
+}
+
 .-translate-x-1\/2 {
   --tw-translate-x: -50%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -3585,6 +3662,11 @@ input[type=password]:focus {
 
 .translate-x-full {
   --tw-translate-x: 100%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.rotate-45 {
+  --tw-rotate: 45deg;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -3854,6 +3936,22 @@ input[type=password]:focus {
   border-top-width: 0px;
 }
 
+.border-l-\[10px\] {
+  border-left-width: 10px;
+}
+
+.border-r-\[10px\] {
+  border-right-width: 10px;
+}
+
+.border-t-\[10px\] {
+  border-top-width: 10px;
+}
+
+.border-b-\[10px\] {
+  border-bottom-width: 10px;
+}
+
 .border-dashed {
   border-style: dashed;
 }
@@ -3958,8 +4056,40 @@ input[type=password]:focus {
   border-color: rgb(73 66 95 / var(--tw-border-opacity));
 }
 
+.border-gray-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity));
+}
+
+.border-red-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(248 113 113 / var(--tw-border-opacity));
+}
+
 .border-t-transparent {
   border-top-color: transparent;
+}
+
+.border-l-transparent {
+  border-left-color: transparent;
+}
+
+.border-r-transparent {
+  border-right-color: transparent;
+}
+
+.border-t-primary {
+  --tw-border-opacity: 1;
+  border-top-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+}
+
+.border-b-transparent {
+  border-bottom-color: transparent;
+}
+
+.border-r-primary {
+  --tw-border-opacity: 1;
+  border-right-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
 }
 
 .bg-\[\#101129\] {
@@ -4083,6 +4213,11 @@ input[type=password]:focus {
 .bg-red-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(239 68 68 / var(--tw-bg-opacity));
+}
+
+.bg-green-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(74 222 128 / var(--tw-bg-opacity));
 }
 
 .bg-opacity-50 {
@@ -4232,6 +4367,11 @@ input[type=password]:focus {
 .px-8 {
   padding-left: 2rem;
   padding-right: 2rem;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 .pb-16 {
@@ -5244,6 +5384,10 @@ input[type=password]:focus {
 
   .md\:w-2\/12 {
     width: 16.666667%;
+  }
+
+  .md\:w-10\/12 {
+    width: 83.333333%;
   }
 
   .md\:grid-cols-2 {

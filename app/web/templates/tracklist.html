@@ -40,9 +40,14 @@
   <div>
     <div id="playlist">
       {% if tracks|length != 0 %}
+      {% set max_track = [8, tracks|length] | min %}
+      {% set insert_index = range(4, max_track + 1) | random %}
       {% for track in tracks %}
       {% set loop_index = loop.index %}
       {% include 'snippets/track.html' %}
+      {% if loop.index == insert_index %}
+      {% include 'snippets/about_inline.html' %}
+      {% endif %}
       {% endfor %}
     </div>
     <div id="track-control" class="fixed left-0 right-0 bottom-0 z-50 bg-black">
