@@ -475,13 +475,13 @@
     const activeTrack = document.querySelector('.track.active');
     if (!activeTrack) return;
     activeTrack.classList.remove('active', 'playing');
-    // activeTrack.style.setProperty('--background-width', `0%`);
+    activeTrack.style.setProperty('--background-width', `0%`);
     trackProgress.style.setProperty('width', `0%`);
   }
 
   function activateTrack(track) {
     track.classList.add('active', 'playing');
-    // track.style.setProperty('--background-width', `0%`);
+    track.style.setProperty('--background-width', `0%`);
     trackProgress.style.setProperty('width', `0%`);
     updateControlTrack(track);
   }
@@ -493,7 +493,7 @@
         return;
       }
       const percentageWidth = parseFloat((previewPlayer.currentTime / previewPlayer.duration * 100).toFixed(2));
-      // track.style.setProperty('--background-width', `${percentageWidth}%`);
+      track.style.setProperty('--background-width', `${percentageWidth}%`);
       trackProgress.style.setProperty('width', `${percentageWidth}%`);
 
       if (percentageWidth >= 100) {

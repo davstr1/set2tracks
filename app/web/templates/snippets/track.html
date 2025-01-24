@@ -12,12 +12,12 @@
 {% endif %}
 
 <div id="track-{{track.id}}" data-track-id="{{track.id}}" data-start_time="{{track.start_time}}" data-end_time="{{track.end_time}}" data-preview-url="{{track.preview_uri}}" class="flex items-center track  hover:bg-blue-950 md:rounded-lg cursor-pointer">
-  <div class="p-2 w-3/12 flex flex-col items-center relative  ">
-    <img class="cover_art rounded-xl p-1 w-full" src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
+  <div class="p-2 w-3/12  md:w-2/12 lg:w-auto flex flex-col items-center relative  ">
+    <img class="cover_art rounded-xl p-1 w-full lg:h-20 lg:w-20" src="{{ track.cover_art }}" alt="{{ track.title }} cover art">
     <div class="bg-base-content discreet h-1 tooltip" data-tip="{{ (track.artist_popularity_spotify) | int }}% popular artist" style="width: {{ track.artist_popularity_spotify }}%;">&nbsp;</div>
   </div>
 
-  <div class="w-8/12 pointer-events-none md:pointer-events-auto">
+  <div class="w-8/12 lg:w-4/12 pointer-events-none md:pointer-events-auto">
 
     <div class="tooltip flex text-left text-[#AEAFB0]" data-tip="{{ track.title}} (click to search in tracks)">
       {% if track.title != "Track not found" %}
@@ -27,23 +27,23 @@
     {% if track.id != 1 %}
     <div class="tooltip flex text-[#AEAFB0]" data-tip="{{ track.artist_name}} (click to search in tracks)">
       {% if track.artist_name %}
-      <a class="artist_name normal-link text-left font-light text-xs line-clamp-1  hover:underline " href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
+      <a class="artist_name normal-link text-left font-light text-xs md:text-sm line-clamp-1  hover:underline " href="{{url_for('track.tracks',s=track.artist_name)}}">{{ track.artist_name }}</a>
       {% else %}
       -
       {% endif %}
 
     </div>
+    <div class="md:hidden flex text-xs text-gray-600">{{ track.release_year if track.release_year else '-'}}</div>
     {% if track.label %}
-    <div class="flex tooltip text-xs text-gray-500 mt-2" data-tip="Search tracks from label">
-      <a class="label normal-link  text-left line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
-      <span class="md:hidden ml-4">{{ track.release_year if track.release_year else '-'}}</span>
+    <div class="tooltip flex text-gray-500 lg:hidden " data-tip="Search tracks from label">
+      <a class="label normal-link  pl-0 text-left  text-xs md:text-sm line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
     </div>
     {% endif %}
 
     {% if track.genres %}
-    <div class="genre hidden md:flex max-w-fit flex-wrap max-h[2rem] overflow-hidden tooltip" data-tip="Search tracks with genre">
+    <div class="genre hidden md:flex lg:hidden max-w-fit flex-wrap max-h[2rem] overflow-hidden tooltip" data-tip="Search tracks with genre">
       {% for genre in track.genres %}
-      <a class="normal-link text-xs text-gray-500 hover:text-primary opacity-70 hover:opacity-100" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
+      <a class="normal-link text-xs md:text-sm text-gray-500 hover:text-primary opacity-70 hover:opacity-100" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
       {% if not loop.last %} <span class="text-xs w-2"></span>{% endif %}
       {% endfor %}
     </div>
@@ -53,12 +53,25 @@
     {% endif %}
   </div>
 
-  <div class="hidden discreet  p-2 w-20 top-12 right-2 md:block lg:text-right sm:top-auto sm:right-auto sm:text-left tooltip " data-tip="Released {{ 'the ' + track.release_date + '-' +  (track.release_year | string) if track.release_date else ('in ' + (track.release_year | string) if track.release_year else 'date unknown') }}">
-    <div>{{ track.release_year if track.release_year else '-'}}</div>
-    <div class="-mt-2"><span class="text-xs">{{ track.release_date if track.release_date }}</span></div>
+  <div class="hidden lg:flex lg:flex-col lg:w-4/12">
+    <div class=" flex text-xs text-gray-600">{{ track.release_year if track.release_year else '-'}}{{ '-' if track.release_date }}{{ track.release_date if track.release_date }}</div>
+    {% if track.label %}
+    <div class="tooltip flex text-gray-500" data-tip="Search tracks from label">
+      <a class="label normal-link  pl-0 text-left  text-xs md:text-sm line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+    </div>
+    {% endif %}
+
+    {% if track.genres %}
+    <div class="genre hidden md:flex max-w-fit flex-wrap max-h[2rem] overflow-hidden tooltip" data-tip="Search tracks with genre">
+      {% for genre in track.genres %}
+      <a class="normal-link text-xs md:text-sm text-gray-500 hover:text-primary opacity-70 hover:opacity-100" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
+      {% if not loop.last %} <span class="text-xs w-2"></span>{% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 
-  <div class="track-ext hidden md:flex p-2   space-x-2  buttons justify-center w-auto   lg:justify-end  relative lg:right-auto lg:bottom-auto">
+  <div class="track-ext hidden lg:flex lg:w-4/12 lg:items-end p-2   space-x-2  buttons justify-center w-auto   lg:justify-end  relative lg:right-auto lg:bottom-auto">
     {% if track.artist_name and track.id != 1 %}
     <div class="sm:visible-hover-track text-center sm:p-0 p-5  sm:bg-transparent rounded-xl">
 
@@ -78,8 +91,8 @@
 
 
 
-      <a class="spotify normal-link relative lg:w-6 lg:h-6 h-8 w-8 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='spotify')}}">
-        <svg class="pointer-events-none lg:w-6 lg:h-6 h-8 w-8 absolute z-20 fill-base">
+      <a class=" spotify normal-link relative lg:w-6 lg:h-6 h-8 w-8 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='spotify')}}">
+        <svg class="pointer-events-none lg:w-6 lg:h-6 h-8 w-8 absolute z-10 fill-base">
           <use xlink:href="#icon-spotify"></use>
         </svg>
         <div class="lg:w-6 lg:h-6 h-8 w-8  rounded-full bg-base-content  hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
@@ -90,11 +103,11 @@
         </svg>
         <div class="lg:w-6 lg:h-6 h-8 w-8  rounded-md bg-base-content  hover:bg-primary absolute z-0 {% if not tpl_utils.apple_has_track(track) %} hypotetic{% endif %}"></div>
       </a>
-      <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
+      <!-- <a target="_blank" href="#" data-tip="Add to playlists and other options..." class="js-action text-lg font-semibold cursor-pointer tooltip showTrackContextMenu lg:relative lg:top-auto lg:right-auto">
         <svg class="lg:w-6 lg:h-6 h-8 w-8  fill-base-content hover:fill-primary">
           <use xlink:href="#icon-plus"></use>
         </svg>
-      </a>
+      </a> -->
 
     </div>
 
