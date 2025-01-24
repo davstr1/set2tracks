@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="set2tracks">
 <style>
-    
-        /* # QnDirty fix to a mysterious page width problem on mobile Page would not take up all horizontal space+there is horizontal scrollbar Yet no element seems to cause an overflow @TODO : investigate that, when i retire, if i have time...and want to. #
+    /* # QnDirty fix to a mysterious page width problem on mobile Page would not take up all horizontal space+there is horizontal scrollbar Yet no element seems to cause an overflow @TODO : investigate that, when i retire, if i have time...and want to. #
      */
 
     html,
@@ -89,11 +88,11 @@
                             <!-- Dropdown menu with content-fitting width and text-right alignment -->
                             {% if current_user.is_authenticated %}
                             <div class="absolute hidden group-hover:flex group-hover:flex-col  border-2 border-[#9E7FFF] bg-[#101129] rounded-lg shadow-md mt-0 z-50  w-max py-2 right-0">
-                               
+
                                 <!-- <a href="#" class="block px-6 py-3 text-sm text-primary font-bold text-right whitespace-nowrap">Go Premium</a> -->
                                 <div class="text-center block">[{{current_user.fname}}]</div>
                                 <a href="{{ url_for('users.logout') }}" class="block px-6 py-3 text-sm text-right">Log out</a>
-                             
+
                             </div>
                             {% endif %}
                         </div>
@@ -108,14 +107,25 @@
         </nav>
 
         <!-- Mobile menu -->
-        <div id="mobile-menu" class=" rounded-lg border-2 border-[#9E7FFF] bg-[#101129] text-[#9E7FFF] absolute left-0 right-0  hidden peer-checked:flex flex-col  z-50">
+        <div id="mobile-menu" class=" rounded-lg border-2 border-[#8b7eb4] bg-[#101129] text-[#9E7FFF] absolute left-0 right-0  hidden peer-checked:flex flex-col  z-50">
             <!-- <div class="pt-2 pb-3 space-y-1">
                     <a href="{{ url_for('set.sets') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Explore") }}</a>
                     <a href="{{ url_for('playlist.my_playlists') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("My Playlists") }}</a>
                 </div> -->
-            <div class="pt-4 pb-3 border-t-2 border-inherit">
-                <a href="{{ url_for('set.sets') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Explore") }}</a>
+            <div class="pt-4 pb-3 border-t-2  border-[#49425f]">
+                <a href="{{ url_for('set.sets') }}" class="inline-block pl-3 pr-6 py-2 text-base font-medium">{{ _("Explore") }}</a>
+            </div>
 
+            <div class="pt-4 pb-3 border-t-2  border-[#49425f]">
+                <a href="{{ url_for('set.sets') }}" class="inline-block pl-8 pr-6 py-2 text-base font-medium">Sets</a>
+            </div>
+
+            <div class="pt-4 pb-3 border-t-2  border-[#49425f]">
+                <a href="{{ url_for('track.tracks') }}" class="inline-block pl-8 pr-6 py-2 text-base font-medium">Tracks</a>
+            </div>
+
+            <div class="pt-4 pb-3 border-t-2  border-[#49425f]">
+                <a href="{{ url_for('channel.channels') }}" class="inline-block pl-8 pr-6 py-2 text-base font-medium">Channels</a>
             </div>
 
 

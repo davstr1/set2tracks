@@ -3850,6 +3850,10 @@ input[type=password]:focus {
   border-top-width: 2px;
 }
 
+.border-t-0 {
+  border-top-width: 0px;
+}
+
 .border-dashed {
   border-style: dashed;
 }
@@ -3914,6 +3918,44 @@ input[type=password]:focus {
 
 .border-transparent {
   border-color: transparent;
+}
+
+.border-\[\#9884d2\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(152 132 210 / var(--tw-border-opacity));
+}
+
+.border-\[\#988ac2\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(152 138 194 / var(--tw-border-opacity));
+}
+
+.border-\[rgb\(152\2c 138\2c 194\)\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(152 138 194 / var(--tw-border-opacity));
+}
+
+.border-\[\] {
+  border-color: ;
+}
+
+.border-\[\#\] {
+  border-color: #;
+}
+
+.border-\[\#8b7eb4\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(139 126 180 / var(--tw-border-opacity));
+}
+
+.border-\[\#b2a8d4\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(178 168 212 / var(--tw-border-opacity));
+}
+
+.border-\[\#49425f\] {
+  --tw-border-opacity: 1;
+  border-color: rgb(73 66 95 / var(--tw-border-opacity));
 }
 
 .border-t-transparent {
@@ -4250,6 +4292,18 @@ input[type=password]:focus {
 
 .pr-8 {
   padding-right: 2rem;
+}
+
+.pr-6 {
+  padding-right: 1.5rem;
+}
+
+.pl-6 {
+  padding-left: 1.5rem;
+}
+
+.pl-8 {
+  padding-left: 2rem;
 }
 
 .text-left {
