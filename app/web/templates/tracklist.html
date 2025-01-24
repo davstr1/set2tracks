@@ -51,8 +51,8 @@
       {% endfor %}
     </div>
 
-    <div id="track-control" class="fixed left-0 right-0 bottom-0 z-50">
-      <div class="container mx-auto w-full  xl:w-3/4 bg-black ">
+    <div id="track-control" class="fixed left-0 right-0 bottom-0 z-50 ">
+      <div class="container mx-auto w-full  xl:w-3/4 bg-black rounded-t-xl">
         {% set track = tracks[0] %}
         <div class="flex items-center lg:py-2">
           <div class="p-2 w-3/12  md:w-2/12  flex flex-col items-center lg:justify-center relative ">
@@ -64,12 +64,12 @@
           </div>
           <div class="w-2/12 md:w-1/12  bg-grey-500  text-white">
             <div id="action-pause" class="cursor-pointer ">
-              <svg class=" fill-white pointer-events-none  aspect-square p-4 lg:p-6">
+              <svg class=" fill-white pointer-events-none  aspect-square p-5 lg:p-6">
                 <use xlink:href="#icon-pause"></use>
               </svg>
             </div>
             <div id="action-play" class="hidden cursor-pointer ">
-              <svg class="fill-white pointer-events-none aspect-square p-4 lg:p-6">
+              <svg class="fill-white pointer-events-none aspect-square p-5 lg:p-6">
                 <use xlink:href="#icon-play"></use>
               </svg>
             </div>
