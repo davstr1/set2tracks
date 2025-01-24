@@ -35,13 +35,13 @@
     </div>
     {% if track.label %}
     <div class="flex tooltip text-xs text-gray-500 mt-2" data-tip="Search tracks from label">
-      <a class="normal-link  text-left line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+      <a class="label normal-link  text-left line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
       <span class="md:hidden ml-4">{{ track.release_year if track.release_year else '-'}}</span>
     </div>
     {% endif %}
 
     {% if track.genres %}
-    <div class="hidden md:flex max-w-fit flex-wrap max-h[2rem] overflow-hidden tooltip" data-tip="Search tracks with genre">
+    <div class="genre hidden md:flex max-w-fit flex-wrap max-h[2rem] overflow-hidden tooltip" data-tip="Search tracks with genre">
       {% for genre in track.genres %}
       <a class="normal-link text-xs text-gray-500 hover:text-primary opacity-70 hover:opacity-100" href="{{url_for('track.tracks',genre=genre.name)}}">{{ genre.name }}</a>
       {% if not loop.last %} <span class="text-xs w-2"></span>{% endif %}
@@ -70,7 +70,7 @@
       <div class="relative inline-block lg:w-6 lg:h-6 bg-base-content discreet bg-transparent "></div>
       {% endif %}
 
-      <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="js-action lg:w-6 lg:h-6 h-8 w-8 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
+      <a data-related-tracks-url="{{url_for('set.related_tracks',track_id=track.id)}}" data-related_tracks-check-url="{{url_for('set.jax_check_save_related_tracks',track_id=track.id)}}" class="related js-action lg:w-6 lg:h-6 h-8 w-8 tooltip openRelatedTracks" data-tip="{{ 'Check' if track.has_related_tracks else 'Fetch' }} Related Tracks">
         <svg class=" lg:w-6 lg:h-6 h-8 w-8  fill-base-content hover:fill-primary{{ ' border-b-2 border-t-2 border-current' if track.has_related_tracks }}">
           <use xlink:href="#icon-related-tracks"></use>
         </svg>
@@ -78,13 +78,13 @@
 
 
 
-      <a class="normal-link relative lg:w-6 lg:h-6 h-8 w-8 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='spotify')}}">
+      <a class="spotify normal-link relative lg:w-6 lg:h-6 h-8 w-8 tooltip openTrackOnPlatform " data-tip="{% if tpl_utils.spotify_has_track(track) %}Open{% else %}Search{% endif %} track on Spotify" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='spotify')}}">
         <svg class="pointer-events-none lg:w-6 lg:h-6 h-8 w-8 absolute z-20 fill-base">
           <use xlink:href="#icon-spotify"></use>
         </svg>
         <div class="lg:w-6 lg:h-6 h-8 w-8  rounded-full bg-base-content  hover:bg-primary absolute z-0  {% if not tpl_utils.spotify_has_track(track) %} hypotetic{% endif %}"></div>
       </a>
-      <a class="normal-link lg:w-6 lg:h-6 h-8 w-8  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='apple')}}">
+      <a class="apple normal-link lg:w-6 lg:h-6 h-8 w-8  tooltip openTrackOnPlatform" data-tip="{% if tpl_utils.apple_has_track(track) %}Open{% else %}Search{% endif %} track on Apple Music" {% if current_user.is_authenticated %} target="_blank" {%endif%} href="{{url_for('track.track_link', track_id=track.id, music_service='apple')}}">
         <svg class="lg:w-6 lg:h-6 h-8 w-8  pointer-events-none absolute z-20 fill-base ">
           <use xlink:href="#icon-apple-no-square"></use>
         </svg>
@@ -102,8 +102,8 @@
     {% endif %}
   </div>
 
-  <div class="p-2 w-1/12 flex flex-col items-center">
-    <svg class="h-4 w-4  fill-white">
+  <div class="mobileOptions lg:hidden p-2 w-1/12 flex flex-col items-center cursor-pointer">
+    <svg class="h-4 w-4  fill-white pointer-events-none">
       <use xlink:href="#icon-dots-vertical"></use>
     </svg>
   </div>

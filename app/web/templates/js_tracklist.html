@@ -49,14 +49,15 @@
     // while (target && (!target.classList || !(target.classList.contains('js-action') || target.classList.contains('normal-link') || target.classList.contains('track')))) {
     //   target = target.parentElement;
     // }
-    if(target === playButton) return;
-    if(target === pauseButton) return;
+    if (target === playButton) return;
+    if (target === pauseButton) return;
     if (target.closest('#track-control')) {
       target = target.closest('#track-control');
-    } else {
-      target = target.closest('.track');
+      // } else {
+      // target = target.closest('.track');
     }
     const classList = target.classList;
+    console.log('classList', classList);
     // no js-action for normal links
     if (classList.contains('normal-link')) return;
 
@@ -70,6 +71,7 @@
     if (classList.contains('showTrackContextMenu')) return showContextMenu(target);
     if (classList.contains('playPreview')) return playPreview(target);
     if (classList.contains('pausePreview')) return pausePreview(target);
+    if (classList.contains('mobileOptions')) return openMobileOptions(target);
 
     // If none of the aboe, then we are clicking on a track
     const track = target;
@@ -94,6 +96,88 @@
   // =====================================
   //           Playlist button actions
   // =====================================
+
+  function openMobileOptions(target) {
+
+    const track = target.closest('.track');
+    if (!track) {
+      console.log('no track found');
+      return;
+    }
+    //showContextMenu(track);
+    console.log('open mobile options');
+
+
+
+    const titleElm = track.querySelector('.title');
+    const title = titleElm.textContent;
+    // const titleUrl = titleElm.getAttribute('href');
+
+    const artistElm = track.querySelector('.artist_name');
+    const artistName = artistElm.textContent;
+    const artistUrl = artistElm.getAttribute('href');
+
+    const labelElm = track.querySelector('.label');
+    const labelName = labelElm?.textContent || '-';
+    const labelUrl = labelElm?.getAttribute('href') || '#';
+
+    const coverArt = track.querySelector('.cover_art').src;
+
+    const spotifyUrl = track.querySelector('.spotify').getAttribute('href');
+    const appleUrl = track.querySelector('.apple').getAttribute('href');
+
+
+    const popoverTrack = document.getElementById('popover-track');
+    popoverTrack.querySelector('.close').addEventListener('click', function () {
+      popoverTrack.classList.add('hidden');
+      unblockScrolling();
+    });
+    popoverTrack.classList.remove('hidden');
+    blockScrolling()
+
+    popoverTrack.querySelector('.title').textContent = title;
+    popoverTrack.querySelectorAll('.artist').forEach(artist => {
+      artist.querySelector('.name').textContent = artistName;
+    });
+    popoverTrack.querySelectorAll('.artist')[1].href = artistUrl;
+
+    popoverTrack.querySelector('.label').href = labelUrl;
+    popoverTrack.querySelector('.label').querySelector('.name').textContent = labelName;
+    popoverTrack.querySelector('.cover_art').src = coverArt;
+
+    popoverTrack.querySelector('.spotify').href = spotifyUrl;
+    popoverTrack.querySelector('.apple').href = appleUrl;
+
+    updatePopOverTrackGenres(popoverTrack, track);
+  }
+
+  function updatePopOverTrackGenres(popOverTrack, track) {
+    // Get the first genre link classList from popOverTrack
+    const firstGenreLink = popOverTrack.querySelector('.genre a');
+    if (!firstGenreLink) return;
+
+    const classListArray = Array.from(firstGenreLink.classList);
+
+    // Extract title and href from each genre link inside 'track'
+    const genreLinks = track.querySelectorAll('.genre a');
+    const genreData = Array.from(genreLinks).map(link => ({
+      title: link.textContent.trim(),
+      href: link.getAttribute('href')
+    }));
+
+    // Clear existing content in popOverTrack .genre
+    const genreContainer = popOverTrack.querySelector('.genre');
+    genreContainer.innerHTML = '';
+
+    // Populate popOverTrack with new genre links
+    genreData.forEach(({ title, href }) => {
+      const newLink = document.createElement('a');
+      newLink.href = href;
+      newLink.textContent = title;
+      newLink.classList.add(...classListArray);
+      genreContainer.appendChild(newLink);
+    });
+  }
 
   function isVideoTrackCurrent(track) {
     if (yt.player.getCurrentTime() === 0) return false; // video not started, consider it not current
@@ -784,6 +868,22 @@
     playlist.classList.remove(classToRemove);
   }
 
+
+  function blockScrolling() {
+    scrollPosition = window.scrollY;
+    document.documentElement.style.scrollBehavior = 'auto'; // Prevents smooth scrolling glitches
+    document.documentElement.style.position = 'fixed';
+    document.documentElement.style.top = `-${scrollPosition}px`;
+    document.documentElement.style.width = '100%';
+  }
+
+  function unblockScrolling() {
+    document.documentElement.style.removeProperty('position');
+    document.documentElement.style.removeProperty('top');
+    document.documentElement.style.removeProperty('width');
+    document.documentElement.style.scrollBehavior = '';  // Restore scroll behavior
+    window.scrollTo(0, scrollPosition);
+  }
 
 
 </script>
