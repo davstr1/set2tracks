@@ -919,21 +919,38 @@
   }
 
 
+  // function blockScrolling() {
+  //   scrollPosition = window.scrollY;
+  //   document.documentElement.style.scrollBehavior = 'auto'; // Prevents smooth scrolling glitches
+  //   document.documentElement.style.position = 'fixed';
+  //   document.documentElement.style.top = `-${scrollPosition}px`;
+  //   document.documentElement.style.width = '100%';
+  // }
+
+  // function unblockScrolling() {
+  //   document.documentElement.style.removeProperty('position');
+  //   document.documentElement.style.removeProperty('top');
+  //   document.documentElement.style.removeProperty('width');
+  //   document.documentElement.style.scrollBehavior = '';  // Restore scroll behavior
+  //   window.scrollTo(0, scrollPosition);
+  // }
+
   function blockScrolling() {
     scrollPosition = window.scrollY;
-    document.documentElement.style.scrollBehavior = 'auto'; // Prevents smooth scrolling glitches
-    document.documentElement.style.position = 'fixed';
-    document.documentElement.style.top = `-${scrollPosition}px`;
-    document.documentElement.style.width = '100%';
-  }
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosition}px`;
+    document.body.style.left = '0';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+}
 
-  function unblockScrolling() {
-    document.documentElement.style.removeProperty('position');
-    document.documentElement.style.removeProperty('top');
-    document.documentElement.style.removeProperty('width');
-    document.documentElement.style.scrollBehavior = '';  // Restore scroll behavior
+function unblockScrolling() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.overflow = '';
     window.scrollTo(0, scrollPosition);
-  }
+}
+
 
 
 </script>

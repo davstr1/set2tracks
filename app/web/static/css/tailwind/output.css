@@ -3475,8 +3475,16 @@ input[type=password]:focus {
   max-height: 20vh;
 }
 
+.max-h-full {
+  max-height: 100%;
+}
+
 .min-h-screen {
   min-height: 100vh;
+}
+
+.min-h-full {
+  min-height: 100%;
 }
 
 .w-1\/12 {
@@ -3754,6 +3762,10 @@ input[type=password]:focus {
   resize: both;
 }
 
+.scroll-m-0 {
+  scroll-margin: 0px;
+}
+
 .appearance-none {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -3897,6 +3909,10 @@ input[type=password]:focus {
   overflow: visible;
 }
 
+.overflow-scroll {
+  overflow: scroll;
+}
+
 .overflow-x-auto {
   overflow-x: auto;
 }
@@ -3907,6 +3923,14 @@ input[type=password]:focus {
 
 .overflow-x-hidden {
   overflow-x: hidden;
+}
+
+.overflow-y-visible {
+  overflow-y: visible;
+}
+
+.overflow-y-scroll {
+  overflow-y: scroll;
 }
 
 .truncate {

@@ -1,54 +1,60 @@
 <div id="popover-track" class="hidden fixed inset-0 z-50 w-full h-full  bg-black  top-16  p-4 bg-opacity-50 backdrop-blur-md">
-  <div class="close fixed inset-x-0 bottom-16 p-4  text-center text-white font-bold bg-black">Close</div>
-  <div class="flex items-center">
-    <div class="w-3/12 p-2 text-white">
-      <img class="cover_art" src="{{ track.cover_art }}" alt="">
+
+  <div class="overflow-y-auto max-h-[80vh]">
+    <div class="flex items-center">
+      <div class="w-3/12 p-2 text-white">
+        <img class="cover_art" src="{{ track.cover_art }}" alt="">
+      </div>
+      <div class="w-9/12 p-2 pl-0 text-white text-xs overflow-hidden">
+        <div class="title font-bold line-clamp-1">{{track.title}}</div>
+        <div class="artist line-clamp-1 "><span class="name">{{track.artist_name}}</span></div>
+      </div>
     </div>
-    <div class="w-9/12 p-2 pl-0 text-white text-xs overflow-hidden relative">
-      <div class="title font-bold line-clamp-1">{{track.title}}</div>
-      <div class="artist line-clamp-1 "><span class="name">{{track.artist_name}}</span></div>
+
+
+    <div class="p-4 m-2">Discover tracks from same </div>
+    <a href="" class="artist block py-4 m-4 p-8 bg-gray-700 text-gray-400 rounded-full"><span class="font-extralight inline-block w-12">Artist</span> <span class="name">{{track.artist_name}}</span></a>
+    <a href="" class="label block p-4 m-4 px-8 bg-gray-700 text-gray-400 rounded-full"><span class="font-extralight inline-block w-12">Label</span> <span class="name">{{track.label}}</span></a>
+
+    <div class="p-4 m-2 mb-0">Genre </div>
+    <div class=" mx-4">
+      <div class="genre flex overflow-x-auto space-x-2 py-4 whitespace-nowrap">
+        {% for genre in track.genres %}
+        <a href="" class="p-4 py-2  bg-gray-700 text-gray-400 rounded-full last:-mr-2">{{genre.name}}</a>
+        {% endfor %}
+      </div>
     </div>
-  </div>
-  <div class="p-4 m-2">Discover tracks from same </div>
-  <a href="" class="artist block py-4 m-4 p-8 bg-gray-700 text-gray-400 rounded-full"><span class="font-extralight inline-block w-12">Artist</span> <span class="name">{{track.artist_name}}</span></a>
-  <a href="" class="label block p-4 m-4 px-8 bg-gray-700 text-gray-400 rounded-full"><span class="font-extralight inline-block w-12">Label</span> <span class="name">{{track.label}}</span></a>
 
-  <div class="p-4 m-2 mb-0">Genre </div>
-  <div class=" mx-4">
-    <div class="genre flex overflow-x-auto space-x-2 py-4 whitespace-nowrap">
-      {% for genre in track.genres %}
-      <a href="" class="p-4 py-2  bg-gray-700 text-gray-400 rounded-full last:-mr-2">{{genre.name}}</a>
-      {% endfor %}
+
+
+
+
+
+    <div class="p-4 m-2">Open Track in</div>
+
+
+    <div class="flex m-4 items-center  justify-between ">
+      <a href="#" class="spotify w-1/2 flex justify-center ">
+        <svg class="pointer-events-none h-12 w-12 fill-base">
+          <use xlink:href="#icon-spotify"></use>
+        </svg>
+      </a>
+      <a href="#" class="apple w-1/2 text-center flex justify-center">
+        <svg class="h-12 w-12  pointer-events-none fill-base ">
+          <use xlink:href="#icon-apple"></use>
+        </svg>
+      </a>
     </div>
-  </div>
- 
-
-
-
-  
-
-  <div class="p-4 m-2">Open Track in</div>
-
-
-  <div class="flex m-4 items-center  justify-between ">
-    <a href="#" class="spotify w-1/2 flex justify-center ">
-      <svg class="pointer-events-none h-12 w-12 fill-base">
-        <use xlink:href="#icon-spotify"></use>
-      </svg>
+    <hr class="border-t-2 border-gray-700 mx-4">
+    <a href="#" class="related js-action block p-4 m-4 mt-8 px-8 bg-gray-700 text-gray-400 rounded-full">
+      <div class="inline-block w-12 align-middle">
+        <svg class="h-6 w-6  fill-base-content hover:fill-primary{{ ' border-b-2 border-t-2 border-current' if track.has_related_tracks }}">
+          <use xlink:href="#icon-related-tracks"></use>
+        </svg>
+      </div>
+      Related tracks
     </a>
-    <a href="#" class="apple w-1/2 text-center relative flex justify-center">
-      <svg class="h-12 w-12  pointer-events-none fill-base ">
-        <use xlink:href="#icon-apple"></use>
-      </svg>
-    </a>
+
+    <div class="close fixed inset-x-0 bottom-16 p-4  text-center text-white font-bold bg-black z-50">Close</div>
   </div>
-  <hr class="border-t-2 border-gray-700 mx-4">
-  <a href="#" class="related js-action block p-4 m-4 mt-8 px-8 bg-gray-700 text-gray-400 rounded-full">
-    <div class="inline-block w-12 align-middle">
-      <svg class="h-6 w-6  fill-base-content hover:fill-primary{{ ' border-b-2 border-t-2 border-current' if track.has_related_tracks }}">
-        <use xlink:href="#icon-related-tracks"></use>
-      </svg>
-    </div>
-    Related tracks
-  </a>
 </div>
