@@ -44,7 +44,7 @@
             <header class=" w-full ">
                 <nav id="navbar" class="mx-auto flex items-center justify-between py-2" aria-label="Global">
                     <!-- Mobile menu button -->
-                    <div class="lg:hidden flex items-center px-4">
+                    <div class=" flex items-center px-4 lg:pl-0">
                         <input type="checkbox" id="mobile-menu-toggle" class="peer hidden" />
                         <label for="mobile-menu-toggle" class="cursor-pointer">
 
@@ -108,7 +108,7 @@
         </nav>
 
         <!-- Mobile menu -->
-        <div id="mobile-menu" class=" rounded-lg border-2 border-[#9E7FFF] bg-[#101129] text-[#9E7FFF] absolute left-0 right-0  hidden peer-checked:flex flex-col lg:hidden z-50">
+        <div id="mobile-menu" class=" rounded-lg border-2 border-[#9E7FFF] bg-[#101129] text-[#9E7FFF] absolute left-0 right-0  hidden peer-checked:flex flex-col  z-50">
             <!-- <div class="pt-2 pb-3 space-y-1">
                     <a href="{{ url_for('set.sets') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("Explore") }}</a>
                     <a href="{{ url_for('playlist.my_playlists') }}" class="block pl-3 pr-4 py-2 text-base font-medium">{{ _("My Playlists") }}</a>
