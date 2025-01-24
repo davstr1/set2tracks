@@ -50,35 +50,37 @@
       {% endif %}
       {% endfor %}
     </div>
-    <div id="track-control" class="fixed left-0 right-0 bottom-0 z-50 bg-black">
-      {% set track = tracks[0] %}
-      <div class="flex items-center">
-        <div class="w-2/12 p-2 text-white">
-          <img class="cover_art" src="{{ track.cover_art }}" alt="">
-        </div>
-        <div class="w-8/12 p-2 pl-0 text-white text-xs overflow-hidden relative">
-          <div class="title font-bold line-clamp-1" id="scrollingText">{{track.title}}</div>
-          <div class="artist_name line-clamp-1 ">{{track.artist_name}}</div>
-        </div>
-        <div class="w-2/12 bg-grey-500 p-4 text-white">
-          <div id="action-pause" class="cursor-pointer">
-            <svg class="w-6 h-6 fill-white pointer-events-none">
-              <use xlink:href="#icon-pause"></use>
-            </svg>
-          </div>
-          <div id="action-play" class="hidden cursor-pointer">
-            <svg class="w-6 h-6 fill-white pointer-events-none">
-              <use xlink:href="#icon-play"></use>
-            </svg>
-          </div>
-        </div>
 
-      </div>
-      <div class="w-full h-1 -mt-1 relative">
-        <div id="track-progress" class="absolute top-0 left-0 h-full bg-[#9E7FFF]" style="width: 0%;"></div>
+    <div id="track-control" class="fixed left-0 right-0 bottom-0 z-50">
+      <div class="container mx-auto w-full  xl:w-3/4 bg-black ">
+        {% set track = tracks[0] %}
+        <div class="flex items-center lg:py-2">
+          <div class="p-2 w-3/12  md:w-2/12  flex flex-col items-center lg:justify-center relative ">
+            <img class="cover_art block rounded-xl p-1   lg:h-20 lg:w-20" src="{{ track.cover_art }}" alt="">
+          </div>
+          <div class="w-7/12 md:w-9/12 p-2 pl-0 text-white text-xs overflow-hidden relative">
+            <div class="title font-bold line-clamp-1" id="scrollingText">{{track.title}}</div>
+            <div class="artist_name line-clamp-1 ">{{track.artist_name}}</div>
+          </div>
+          <div class="w-2/12 md:w-1/12  bg-grey-500  text-white">
+            <div id="action-pause" class="cursor-pointer ">
+              <svg class=" fill-white pointer-events-none  aspect-square p-4 lg:p-6">
+                <use xlink:href="#icon-pause"></use>
+              </svg>
+            </div>
+            <div id="action-play" class="hidden cursor-pointer ">
+              <svg class="fill-white pointer-events-none aspect-square p-4 lg:p-6">
+                <use xlink:href="#icon-play"></use>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+        <div class="w-full h-1 -mt-1 relative">
+          <div id="track-progress" class="absolute top-0 left-0 h-full bg-[#9E7FFF]" style="width: 0%;"></div>
+        </div>
       </div>
     </div>
-
     {% else %}
     <div class=" text-gray-500 py-10">
       <p>Nothing found.

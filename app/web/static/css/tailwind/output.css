@@ -3601,6 +3601,10 @@ input[type=password]:focus {
   width: 83.333333%;
 }
 
+.w-7\/12 {
+  width: 58.333333%;
+}
+
 .min-w-\[200px\] {
   min-width: 200px;
 }
@@ -5420,6 +5424,18 @@ input[type=password]:focus {
     width: 83.333333%;
   }
 
+  .md\:w-8\/12 {
+    width: 66.666667%;
+  }
+
+  .md\:w-9\/12 {
+    width: 75%;
+  }
+
+  .md\:w-1\/12 {
+    width: 8.333333%;
+  }
+
   .md\:grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5631,6 +5647,10 @@ input[type=password]:focus {
     width: 33.333333%;
   }
 
+  .lg\:w-3\/12 {
+    width: 25%;
+  }
+
   .lg\:flex-1 {
     flex: 1 1 0%;
   }
@@ -5670,6 +5690,10 @@ input[type=password]:focus {
 
   .lg\:p-2 {
     padding: 0.5rem;
+  }
+
+  .lg\:p-6 {
+    padding: 1.5rem;
   }
 
   .lg\:px-5 {
@@ -5725,11 +5749,32 @@ input[type=password]:focus {
     font-size: 1.25rem;
     line-height: 1.75rem;
   }
+
+  .lg\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 }
 
 @media (min-width: 1280px) {
+  .xl\:left-1\/4 {
+    left: 25%;
+  }
+
+  .xl\:left-2 {
+    left: 0.5rem;
+  }
+
+  .xl\:left-2\/4 {
+    left: 50%;
+  }
+
   .xl\:w-3\/4 {
     width: 75%;
+  }
+
+  .xl\:w-3 {
+    width: 0.75rem;
   }
 }
 
