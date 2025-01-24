@@ -4661,6 +4661,11 @@ input[type=password]:focus {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.text-gray-50 {
+  --tw-text-opacity: 1;
+  color: rgb(249 250 251 / var(--tw-text-opacity));
+}
+
 .underline {
   text-decoration-line: underline;
 }
