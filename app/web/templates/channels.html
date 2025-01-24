@@ -53,9 +53,10 @@
         </svg>
       </a>
     </h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="overflow-x-auto pl-4">
+    <div class="flex md:w-auto md:grid  md:grid-cols-2 lg:grid-cols-3 gap-6">
       {% for set in channel.sets_visible[:3] %}
-      <div class=" overflow-hidden">
+      <div class="flex-shrink-0 w-5/6 md:w-auto overflow-hidden ">
         <a href="{{ url_for('set.set', set_id=set.id) }}">
           <div class="relative flex gap-0">
             <img src="{{ set.thumbnail }}" alt="{{ set.title }}" class="w-full h-48 object-cover  rounded-lg">
@@ -81,6 +82,7 @@
       </div>
       {% endfor %}
     </div>
+  </div>
     <p class="text-right">
       <a class="tooltip" data-tip="See all sets from {{channel.author}}" href="{{url_for('set.sets',s='channelid:'~channel.id)}}">
         See all ({{channel.nb_sets_visible}})
