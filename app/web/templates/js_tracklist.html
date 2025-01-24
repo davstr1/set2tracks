@@ -156,6 +156,7 @@
     console.log('relatedTracksCheckUrl', relatedTracksCheckUrl);
     const popoverTrack = document.getElementById('popover-track');
     popoverTrack.querySelector('.close').addEventListener('click', function () {
+      popoverTrack.querySelector('div').scrollTop = 0;
       popoverTrack.classList.add('hidden');
       unblockScrolling();
     });
