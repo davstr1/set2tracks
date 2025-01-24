@@ -95,7 +95,7 @@ even where the player is not behind*/
 
       <div class="discreet text-xs">
         <svg class="w-4 h-4 fill-current inline">
-        <use xlink:href="#icon-clock"></use>
+          <use xlink:href="#icon-clock"></use>
         </svg>
         Timestamps are approximate
         <div class="hidden md:block">
@@ -111,6 +111,26 @@ even where the player is not behind*/
       {% include 'tracklist.html' %}
     </div>
 
+    <div class="bg-[#131418] p-3  py-10 w-full">
+      <h1 class="lg:text-2xl text-white font-bold">
+        <a target="_blank" href="https://youtu.be/{{set.video_id}}">{{set.title}}
+          <svg class="w-6 h-6 fill-base-content hover:fill-primary hidden md:inline ">
+            <use xlink:href="#icon-link-external"></use>
+          </svg>
+        </a>
+        {%if is_admin %}
+        <a href="{{url_for('admin.set_visibility_toggle',set_id=set.id)}}" class="text-gray-600 hidden md:inline">[{{ "Show" if set.hidden else "Hide" }}]
+        </a>
+        {%endif%}
+      </h1>
+      <p class="my-2">
+        <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
+          ❤ Support your DJ!
+          <span class="inline-block lg:inline">Like, comment, and subscribe on YouTube</span>
+        </a>
+      </p>
+    </div>
+
     <script>
       document.querySelector('#add_all_tracks_to_playlist').addEventListener('click', function (event) {
         event.stopPropagation();
@@ -124,15 +144,7 @@ even where the player is not behind*/
   </div>
 
 
-  <div class="hidden md:fixed bottom-0 w-full  text-center bg-primary-content z-50 border-t-2 p-2 text-xs lg:p-4 lg:text-xl">
-    <a target="_blank" href="https://youtu.be/{{set.video_id}}" class="hover:text-primary">
-      ❤ Support your DJ!
-      <span class="inline-block lg:inline">Like, comment, and subscribe on YouTube</span>
-      <svg class="w-6 h-6 fill-current inline hover:fill-primary">
-        <use xlink:href="#icon-link-external"></use>
-      </svg>
-    </a>
-  </div>
+
 </div>
 
 <script>
@@ -188,7 +200,7 @@ even where the player is not behind*/
 
   window.addEventListener('load', function () {
     playerTopWrapHeight = playerTopWrap.offsetTop;
-    shrinkOn =   metaWrap.offsetTop - 33; // bad approximation
+    shrinkOn = metaWrap.offsetTop - 33; // bad approximation
     console.log('shrinkOn', shrinkOn)
     console.log('playerTopWrapHeight', playerTopWrapHeight)
 

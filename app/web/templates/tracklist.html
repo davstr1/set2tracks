@@ -45,7 +45,7 @@
       {% for track in tracks %}
       {% set loop_index = loop.index %}
       {% include 'snippets/track.html' %}
-      {% if loop.index == insert_index %}
+      {% if loop.index == insert_index and not current_user.is_authenticated%}
       {% include 'snippets/about_inline.html' %}
       {% endif %}
       {% endfor %}
