@@ -25,7 +25,7 @@
   function playButtonHandler(track,event=null) {
 
     if (inVideoMode()) {
-      playVideo(track);
+      playVideo(track,event);
     } else {
       playPreview(track,event);
     }
@@ -224,7 +224,7 @@
     return yt.player.getCurrentTime() >= parseFloat(track.getAttribute('data-start_time')) && yt.player.getCurrentTime() <= parseFloat(track.getAttribute('data-end_time'))
   }
 
-  function playVideo(target) {
+  function playVideo(target,event=null) {
 
 
     var track = target.closest('.track');
@@ -242,7 +242,8 @@
 
     if (isVideoTrackCurrent(track)) {
       // Called from the play button -> plyay from current time
-      if (target.classList.contains('playVideoTrack') || target.closest('#action-play')) {
+      console.log('event', target);
+      if (target.classList.contains('playVideoTrack') || event?.target?.closest('#action-play')) {
         startTime = yt.player.getCurrentTime();
       } else {
         console.log('play from mouse')
@@ -699,8 +700,10 @@
 
   function onYoutubeStateChange(event) {
     if (inPreviewMode()) return;
-
+    console.log('state change')
     if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
+      playButton.classList.remove('hidden');
+      pauseButton.classList.add('hidden');
       //clearInterval(startYoutubeActiveTrackChecking.intervalId);
       if (yt.activeTrack) {
         yt.activeTrack.classList.remove('playing');
@@ -708,7 +711,8 @@
 
     } else if (event.data == YT.PlayerState.PLAYING) {
       setVideoMode();
-
+      playButton.classList.add('hidden');
+      pauseButton.classList.remove('hidden');
       //yt.player.addEventListener('timeupdate', checkYoutubeActiveTrack);
 
       if (yt.activeTrack) {
