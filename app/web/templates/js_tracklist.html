@@ -814,6 +814,7 @@
     console.log('YouTube player ready bro');
 
     const player = e.target;
+    player.unMute();
     const url = new URL(window.location.href);
     console.log('url', url);
     const tParam = url.searchParams.get('t');
@@ -870,6 +871,7 @@
       playerVars: {
         start: 0,
         autoplay: 1,
+        mute: 1
       },
       events: {
         'onReady': yt.onReady,
