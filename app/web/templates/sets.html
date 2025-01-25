@@ -146,7 +146,7 @@
       <div class=" overflow-hidden">
         <a href="{{ url_for('set.set', set_id=set.id) }}">
           <div class="relative flex gap-0">
-            <img src="{{ set.thumbnail }}" alt="{{ set.title }}" class="w-full h-48 object-cover  rounded-lg">
+            <img src="{{ tpl_utils.youtube_thumbnail(set.thumbnail,'mqdefault') }}" alt="{{ set.title }}" class="w-full h-48 object-cover  rounded-lg">
             <div class="absolute inset-0 "></div>
             <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
               <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>

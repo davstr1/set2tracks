@@ -5,6 +5,7 @@
 #     seconds = seconds % 60
 #     return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
 
+import re
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, date
@@ -519,3 +520,78 @@ def format_set_queue_error(error, video_id = None):
    
     return error
     
+    
+def youtube_thumbnail(url: str, resolution: str, output_format: str = "webp") -> str:
+    """
+    Takes a YouTube thumbnail URL and returns a URL with the desired resolution and format.
+    
+    Available resolution options:
+    - "default" (120x90)
+    - "mqdefault" (320x180)
+    - "hqdefault" (480x360)
+    - "sddefault" (640x480)
+    - "maxresdefault" (1280x720)
+    - "1" (first frame)
+    - "2" (second frame)
+    - "3" (third frame)
+
+    Available formats:
+    - "webp" (default)
+    - "jpg"
+
+    Example usage:
+    >>> get_youtube_thumbnail("https://i.ytimg.com/vi/iKeak9Jy_rg/maxresdefault.jpg", "hqdefault")
+    'https://i.ytimg.com/vi/iKeak9Jy_rg/hqdefault.webp'
+
+    :param url: The original YouTube thumbnail URL.
+    :param resolution: The desired resolution type.
+    :param output_format: The desired image format ("webp" or "jpg").
+    :return: Modified URL with the selected resolution and format.
+    """
+    available_resolutions = {"default", "mqdefault", "hqdefault", "sddefault", "maxresdefault", "1", "2", "3"}
+    available_formats = {"webp", "jpg"}
+    
+    if resolution not in available_resolutions:
+        raise ValueError(f"Invalid resolution. Choose from {available_resolutions}")
+    
+    if output_format not in available_formats:
+        raise ValueError(f"Invalid format. Choose from {available_formats}")
+    
+    match = re.match(r"https://i\.ytimg\.com/(vi|vi_webp)/([\w-]+)/([\w-]+)\.(jpg|webp)", url)
+    if not match:
+        raise ValueError("Invalid YouTube thumbnail URL format.")
+    
+    video_id = match.group(2)
+    return f"https://i.ytimg.com/vi_webp/{video_id}/{resolution}.{output_format}"
+
+
+
+def apple_music_thumbnail(url: str, size: str = "100x100") -> str:
+    """
+    Modifies an Apple Music image URL to return the desired resolution.
+
+    Available size options:
+    - "100x100"
+    - "200x200"
+    - "400x400"
+    - "600x600"
+    - "1000x1000"
+
+    :param url: The original Apple Music image URL.
+    :param size: The desired image size (e.g., "600x600").
+    :return: Modified URL with the selected resolution.
+    """
+    pattern = r"(https://is\d+-ssl\.mzstatic\.com/image/thumb/.+/)[Hh]?\d+x\d+(bb|cc)\.jpg$"
+    match = re.match(pattern, url)
+    
+    if not match:
+        print("Invalid Apple Music thumbnail URL format : " + url)
+        return url
+
+    new_url = re.sub(r"/([Hh]?\d+x\d+)(bb|cc)\.jpg$", rf"/{size}\2.jpg", url)
+    return new_url
+
+# Example usage
+# print(get_apple_music_thumbnail("https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b5/6c/d7/b56cd7a0-15f1-a8c7-fcda-d13bc9e10cf2/mzi.xxnsirvd.jpg/400x400bb.jpg", "600x600"))
+
+

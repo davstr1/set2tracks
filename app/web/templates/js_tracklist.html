@@ -7,10 +7,10 @@
   const playButton = document.getElementById('action-play');
   const pauseButton = document.getElementById('action-pause');
 
-  if (!document.getElementById('playerMetaWrap')) {
+  if (document.getElementById('playerMetaWrap') ) {
     // not a set page, then play button is shown
-    playButton.classList.remove('hidden');
-    pauseButton.classList.add('hidden');
+    playButton.classList.add('hidden');
+    pauseButton.classList.remove('hidden');
 
   }
 
@@ -293,6 +293,10 @@
       playButton.classList.remove('hidden');
       pauseButton.classList.add('hidden');
     }
+  }
+
+  function isVideoPlaying(){
+    return yt?.player.getPlayerState() === 1;
   }
 
 
