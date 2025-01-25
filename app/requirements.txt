@@ -20,6 +20,7 @@ dnspython==2.6.1
 email_validator==2.1.1
 fake-useragent==1.5.1
 Flask==3.0.2
+Flask-Compress==1.17
 flask-babel==4.0.0
 Flask-Cors==4.0.1
 Flask-Dance==7.1.0

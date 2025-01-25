@@ -1,10 +1,10 @@
 from web import create_app
 import os, glob
-
+from flask_compress import Compress
 
 
 app = create_app()
-
+Compress(app)
 # Define the path to your templates directory
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 # Use glob to list all files within the templates directory
