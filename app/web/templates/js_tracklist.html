@@ -71,10 +71,16 @@
     if (target.closest('#track-control')) {
       target = target.closest('#track-control');
     }
-    const classList = target.classList;
+    var classList = target.classList;
     console.log('classList', classList);
     // no js-action for normal links
+    if(target.closest('.track-ext')){
+      target = target.closest('a');
+      classList = target.classList;
+    }
     if (classList.contains('normal-link')) return;
+ 
+  
 
     event.preventDefault();
     event.stopPropagation();
