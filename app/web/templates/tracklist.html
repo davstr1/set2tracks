@@ -1,7 +1,6 @@
 {% include 'snippets/track_css.html' %}
 {% include 'snippets/track_svg.html' %}
 
-
 <div class="fixed inset-0 bg-transparent z-50 pointer-events-auto hidden" id="block-interactions"></div>
 
 <div class="w-64  bg-primary-content p-4 m-4 rounded-xl shadow-xl border-2 absolute z-50 invisible" id="track-options-contextual-menu">
@@ -94,6 +93,7 @@
 <audio id="previewPlayer" controls class="absolute  bottom-2 left-1/2 transform -translate-x-1/2 z-50 hidden">
   Your browser does not support the audio element.
 </audio>
-
-{% include 'snippets/popover_track.html' %}
+{% if track is defined %}
+{% include 'snippets/popover_track.html' with context %}
+{% endif %}
 {% include 'js_tracklist.html' %}
