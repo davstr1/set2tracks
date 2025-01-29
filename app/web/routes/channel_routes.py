@@ -46,9 +46,29 @@ def channels(page=1):
     
     is_paginated = channels.has_next or channels.has_prev
     
+    canonical_url = url_for('channel.channels')
+    
+    if not search:
+    
+        if order_by == 'channel_popularity':
+            page_title = f'Top {str(results_count)} Youtube DJ Channels - ' + Lang.APP_NAME
+            page_meta = f'Discover the most popular Youtube DJ Channels. Explore top DJs, tracklists, and new music' 
+    
+        elif order_by == 'az':
+            page_title = f'A-Z List of Youtube DJ Channels - ' + Lang.APP_NAME
+            page_meta = f'Find the best DJ channels on YouTube, sorted alphabetically. Explore tracklists, artists, and mixes.'
+        else:
+            page_title = f'Newly Added added DJ channels" - ' + Lang.APP_NAME
+            page_meta = f'Browse recently added YouTube DJ channels. Discover fresh DJ mixes, tracklists, and music trends.'
+            
+    else:
+        page_title = f'"Search Results for {search} in DJ channels" - ' + Lang.APP_NAME
+        page_meta = f'Find YouTube DJ channels related to  "{search}. Explore tracklists, new mixes, and trending DJs"'
+    
     
     l = {
-        'page_title' : 'Top 1000 DJ Channels - ' + Lang.APP_NAME
+        'page_title' : page_title,
+        'page_description' : page_meta,
     }
     
     
@@ -59,6 +79,7 @@ def channels(page=1):
                            tpl_utils=tpl_utils, 
                            pagination=pagination, 
                            is_paginated=is_paginated, 
+                           canonical_url=canonical_url,
                            order_by=order_by,
                            page=page,
                            per_page=per_page,
