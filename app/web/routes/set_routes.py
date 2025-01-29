@@ -37,14 +37,18 @@ def sets():
     if search and search.startswith('trackid:'):
         track_id = int(search.split(':')[1])
         track = get_track_by_id(track_id)
+        page_title = f"DJ Sets featuring \"{track['title']} - {Lang.APP_NAME}"
+        page_meta = f"Discover DJ sets featuring {track['title']}, get full tracklists, preview tracks, and export to Spotify or Apple Music"
         
         if track:
-            page_title = f"DJ Sets playing \"{track['title']}\" - {Lang.APP_NAME}"
+            page_title = f"DJ Sets featuring \"{track['title']} - {Lang.APP_NAME}"
+            page_meta = f"Discover DJ sets featuring {track['title']}, get full tracklists, preview tracks, and export to Spotify or Apple Music"
     elif search and search.startswith('channelid:'):
         channel_id = search.split(':')[1]
         channel = get_channel_by_id(channel_id)
         if channel:
             page_title = f"DJ Sets by {channel.author} - {Lang.APP_NAME}"
+            page_meta = f"Explore DJ sets by {channel.author}, discover tracklists, preview songs and export to Spotify or Apple Music"
         
         
     
@@ -70,11 +74,18 @@ def sets():
     
     is_paginated = sets_page.has_next or sets_page.has_prev
     
-    if not page_title:
-        page_title = Lang.APP_NAME + ' - ' + 'Find tracks from your favorite DJ sets'
     
+    search_cap = search[:1].upper() + search[1:]
+    if not page_title:
+        if search:
+            page_title = f"{search_cap} DJ sets - {Lang.APP_NAME}"
+            page_meta = f"Explore  {search_cap} DJ sets, explore tracklists, preview tracks and export to Spotify or Apple Music"
+        else:
+            page_title = f'{Lang.APP_NAME} - Find tracks from DJ sets | Music discovery for DJs'
+            page_meta = f'Find tracks from your favorite DJ sets ! Explore {nb_sets_total} sets ! Discover tracklists, preview music, and export to Spotify & Apple Music.'
     l = {
         'page_title': page_title,
+        'page_description': page_meta
     }  
     
     #playlists_user = get_playlists_from_user(1)
