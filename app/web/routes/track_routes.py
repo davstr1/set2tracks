@@ -240,10 +240,12 @@ def tracks():
     
     user_id = get_user_id()
     
-    if user_id:
-        user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
-    else:
-        user_playlists = []
+    # if user_id:
+    #     user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
+    # else:
+    #     user_playlists = []
+    # Ditch this for now
+    user_playlists = []
         
     current_url = request.url
 
