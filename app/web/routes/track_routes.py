@@ -1,4 +1,3 @@
-from operator import is_
 from flask import Blueprint, flash, make_response, redirect, render_template, request, url_for
 from web.lib.format import apple_track_url, spotify_track_url
 from web.lib.utils import get_compatible_keys
