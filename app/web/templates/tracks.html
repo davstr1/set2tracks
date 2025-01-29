@@ -21,6 +21,7 @@
 
 <form id="search_tracks" action="{{ url_for('track.tracks') }}">
   <input type="hidden" name="genre" value="{{ genre }}">
+  <input type="hidden" name="label" value="{{ label }}">
 
   <div class="flex space-y-1">
     <!-- Left side with the search field -->
@@ -41,6 +42,9 @@
       <div class="mt-2">
         {% if genre %}
         <span x-text="genre" class="p-2 border rounded-xl mr-1 border-primary text-primary cursor-pointer hover:border-gray-400 hover:text-gray-400 hover:line-through" onclick="document.querySelector('input[name=\'genre\']').value='';document.getElementById('search_tracks').submit();">Genre:{{genre}}</span>
+        {% endif %}
+        {% if label %}
+        <span x-text="label" class="p-2 border rounded-xl mr-1 border-primary text-primary cursor-pointer hover:border-gray-400 hover:text-gray-400 hover:line-through" onclick="document.querySelector('input[name=\'label\']').value='';document.getElementById('search_tracks').submit();">Label:{{label}}</span>
         {% endif %}
         {% with min=year_min_default, max=year_max_default, min_val=year_min, max_val=year_max,min_val_name='year_min', max_val_name='year_max', label='Year' %}
         {% include 'snippets/tracks_display_filter.html' %}

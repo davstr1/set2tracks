@@ -36,7 +36,7 @@
     <div class="md:hidden flex text-xs text-gray-600">{{ track.release_year if track.release_year else '-'}}</div>
     {% if track.label %}
     <div class="tooltip flex text-gray-500 lg:hidden " data-tip="Search tracks from label">
-      <a class="label normal-link  pl-0 text-left  text-xs md:text-sm line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+      <a class="label normal-link  pl-0 text-left  text-xs md:text-sm line-clamp-1" href="{{url_for('track.tracks',label=track.label)}}">{{ track.label }}</a>
     </div>
     {% endif %}
 
@@ -57,7 +57,7 @@
     <div class=" flex text-xs text-gray-600">{{ track.release_year if track.release_year else '-'}}{{ '-' if track.release_date }}{{ track.release_date if track.release_date }}</div>
     {% if track.label %}
     <div class="tooltip flex text-gray-500" data-tip="Search tracks from label">
-      <a class="label normal-link  pl-0 text-left  text-xs md:text-sm line-clamp-1" href="{{url_for('track.tracks',s=track.label)}}">{{ track.label }}</a>
+      <a class="label normal-link  pl-0 text-left  text-xs md:text-sm line-clamp-1" href="{{url_for('track.tracks',label=track.label)}}">{{ track.label }}</a>
     </div>
     {% endif %}
 

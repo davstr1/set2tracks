@@ -98,6 +98,7 @@ def get_tracks(
         valence_min=None,valence_max=None,
         order_by=None,asc=None,
         genre=None,
+        label=None,
         keys=''):
     
     query = Track.query
@@ -116,6 +117,9 @@ def get_tracks(
             
     if genre:
         query = query.join(Track.genres).filter(Genre.name.ilike(f"%{genre}%"))
+        
+    if label:
+        query = query.filter(Track.label.ilike(f"%{label}%"))
         
     if search and search.strip():
         query = query.filter(

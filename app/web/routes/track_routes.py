@@ -1,3 +1,4 @@
+from unittest import result
 from flask import Blueprint, flash, make_response, redirect, render_template, request, url_for
 from web.lib.format import apple_track_url, spotify_track_url
 from web.lib.utils import get_compatible_keys
@@ -95,6 +96,7 @@ def tracks():
     
     keys = request.args.get('keys', '', type=str)
     genre = request.args.get('genre', '', type=str)
+    label = request.args.get('label', '', type=str)
     
     
     order_by = request.args.get('order_by', '', type=str)
@@ -164,10 +166,25 @@ def tracks():
         order_by=order_by,
         keys=keys,
         genre=genre,
+        label=label,
         asc=asc
         )
+    
+    
+    results_count_str = str(results_count)
+    if label:
+        page_title = results_count_str + ' tracks from label ' + label + ' – Discover,Prelisten & Export'
+        page_meta = f'Explore {label} tracks, prelisten instantly, find similar tracks, and export your favorites to Spotify & Apple Music.'
+    elif genre:
+        page_title = results_count_str + ' ' + genre + ' tracks – For DJs & Music Lovers'
+        page_meta = f'Dive into {genre} music! Prelisten, find related tracks & labels, and export your playlists to Spotify & Apple Music.'
+    else:
+        page_title = results_count_str + ' tracks on ' + Lang.APP_NAME + ' – DJ’s Music Discovery Tool'
+        page_meta = f'Discover fresh tracks, explore genres & labels, prelisten, and export directly to Spotify & Apple Music. Free for DJs & music lovers!'
+  
     l = {
-        'page_title' : 'Top 1000 Tracks - ' + Lang.APP_NAME
+        'page_title' : page_title,
+        'page_description' : page_meta,
     }
     
     def get_pagination_url(page):
@@ -294,6 +311,7 @@ def tracks():
                             valence_max_default=min_maxes['valence_max'],
                             keys=keys,
                             genre=genre,
+                            label=label,
                             order_by=order_by,
                             asc=asc,
                            tpl_utils=tpl_utils,
