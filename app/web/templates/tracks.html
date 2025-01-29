@@ -80,7 +80,7 @@
 
       </div>
 
-      
+
       <div class="flex justify-between">
         <div class="relative h-10 w-24 min-w-[200px] my-8">
           <select name="order_by" class="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 empty:!bg-gray-900 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50">
@@ -136,10 +136,25 @@
 </form>
 
 <script>
-  const panel = document.getElementById('filters-panel');
+
+  function ensureElement(id, parent = document.body, tag = 'div', classes = '') {
+    // let's do that to ensure no error is thrown if the element doesn't exist, 
+    // because we just postponed the feature but don't want to refactor everything
+    let element = document.getElementById(id);
+    if (!element) {
+      element = document.createElement(tag);
+      element.id = id;
+      element.className = classes;
+      element.style.display = 'none'; // Hidden by default
+      parent.appendChild(element);
+    }
+    return element;
+  }
+
+  const panel = ensureElement('filters-panel');
   const mainContent = document.getElementById('main-content');
-  const toggleFiltersPanelButton = document.getElementById('toggle-filters-panel');
-  const closeFiltersPanelButton = document.getElementById('close-panel');
+  const toggleFiltersPanelButton = ensureElement('toggle-filters-panel', document.body, 'button');
+  const closeFiltersPanelButton = ensureElement('close-panel', document.body, 'button');
 
 
   const FILTERS_COOKIE_NAME = 'filters_panel_visibility';

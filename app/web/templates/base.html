@@ -325,24 +325,40 @@
 
         if (!menu.classList.contains('hidden')) {
             setTimeout(() => {
-            document.addEventListener('click', closeMenuOnClickOutside);
-        }, 0);
+                document.addEventListener('click', closeMenuOnClickOutside);
+            }, 0);
         }
 
     });
 
 
     function closeMenuOnClickOutside(event) {
+
         var menu = document.getElementById('mobile-menu');
         var menuContent = document.getElementById('mobile-menu-content');
-        var toggleButton = document.getElementById('mobile-menu-toggle');
+        var menuZone = document.getElementById('topMenuWrap');
+
+        // if click is physically inside the menuzone, return
+        // since menuzone is absolute pos, outisde the dom of other elm
+        var rect = menuZone.getBoundingClientRect();
+        var x = event.clientX;
+        var y = event.clientY;
+
+        // Check if the click is inside the menuZone
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+            return; // Click is inside, do nothing
+        }
+
         console.log('clicked outside')
         console.log(event.target)
-        if (!menuContent.contains(event.target) && event.target !== toggleButton) {
+        if (!menuContent.contains(event.target)) {
             console.log('clicked outside fo real moro')
-            menu.classList.add('hidden');
+            if (!menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+
             document.removeEventListener('click', closeMenuOnClickOutside);
-        }else{
+        } else {
             console.log('clicked inside')
         }
     }
