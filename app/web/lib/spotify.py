@@ -70,7 +70,8 @@ def convert_audio_features(data):
     
     
 def add_tracks_audio_features_spotify(tracks):
-    
+    # no more audio features bro
+    return tracks
     track_ids = [track.get('key_track_spotify') for track in tracks if track.get('key_track_spotify')]
     track_ids = list(set(track_ids))
 
@@ -306,9 +307,9 @@ def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
             
             
         logger.info('Spotify data added to tracks.')
-        logger.info('Adding audio features...')
+        #logger.info('Adding audio features...')
        
-        tracks_json = add_tracks_audio_features_spotify(tracks_json)
+        #tracks_json = add_tracks_audio_features_spotify(tracks_json)
         
         # Todo : order tracks by start_time
         
