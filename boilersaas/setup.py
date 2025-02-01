@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="boilersaas",
-    version="0.7.0",
+    version="0.7.1",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     include_package_data=True,
