@@ -162,7 +162,8 @@ and then edit them there.
 
 Build then publish the package on Pypi:
 
-```python setup.py sdist bdist_wheel```
+```pip install build```
+```python -m build```
 
 ```twine upload dist/* --v  ``` 
 
