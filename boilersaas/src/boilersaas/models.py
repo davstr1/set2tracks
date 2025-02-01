@@ -19,7 +19,8 @@ class User(db.Model,UserMixin):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Store hashed passwords
     type = db.Column(db.Enum(UserType), nullable=False)
-    reg_date = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    #reg_date = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    reg_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     last_login = db.Column(db.DateTime, nullable=True)
     lang = db.Column(db.String(2), nullable=False, default='en')
     connect_method = db.Column(db.Enum(UserConnectMethod), nullable=False)
