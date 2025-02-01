@@ -66,8 +66,11 @@ def worker_set_queue():
             total_start = time.time()  # Start measuring total execution time
 
             start = time.time()
-            track_info = await shazam_search_track("one more time", semaphore)
+            track_info = await shazam_search_track("6 Underground – Sneaker Pimps", semaphore)
             print(track_info)
+            if track_info is None:
+                print("No track found")
+                return
             print(f"Shazam search time: {time.time() - start:.2f} seconds")
             print('---------')
 
