@@ -1,3 +1,4 @@
+import asyncio
 import sys
 
 
@@ -111,6 +112,9 @@ def add_apple_track_data_from_json(tracks):
         
     return tracks
 
+async def add_apple_track_data_from_json_async(tracks):
+    """ Async wrapper for add_apple_track_data_from_json """
+    return await asyncio.to_thread(add_apple_track_data_from_json, tracks)
 
 
 

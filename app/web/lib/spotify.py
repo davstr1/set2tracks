@@ -1,3 +1,4 @@
+import asyncio
 from itertools import islice
 import json
 import os
@@ -333,6 +334,10 @@ def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
 
     return tracks_json
 
+
+async def add_tracks_spotify_data_from_json_async(tracks_json, try_count=0, max_tries=3):
+    """ Async wrapper for add_tracks_spotify_data_from_json """
+    return await asyncio.to_thread(add_tracks_spotify_data_from_json, tracks_json, try_count, max_tries)
 
 
 

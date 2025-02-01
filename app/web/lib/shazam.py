@@ -100,9 +100,9 @@ async def shazam_related_tracks(track_id, limit=20):
         logger.info('Transformed related tracks data')
         
         logger.debug(f"Get label info for tracks")
-        tracks = await shazam_add_tracks_label([track for track in transformed])
-        
-        return tracks
+       # tracks = await shazam_add_tracks_label(transformed)
+        return transformed
+        #return transformed
     
     except FailedDecodeJson as json_error:
         logger.error(f"FailedDecodeJson error in shazam_related_tracks for track id {track_id} : {json_error}")
@@ -181,3 +181,42 @@ def sync_process_segments(folder_path,results_path):
     loop.close()
     return result
 
+import asyncio
+import logging
+from shazamio import Shazam
+
+logger = logging.getLogger(__name__)
+
+async def shazam_search_track(track_name, semaphore, MAX_RETRIES=3, RETRY_DELAY=0):
+    async with semaphore:
+        shazam = Shazam()
+        logger.info(f"Searching for track: {track_name}")
+
+        retries = 0
+        while retries < MAX_RETRIES:
+            try:
+                search_result = await asyncio.wait_for(
+                    shazam.search_track(track_name,1), timeout=3
+                )
+                if search_result :#and "tracks" in search_result and search_result["tracks"]["hits"]:
+                    return search_result
+                    # first_track = search_result["tracks"]["hits"][0]["track"]
+                    # return {
+                    #     "title": first_track.get("title"),
+                    #     "artist": first_track.get("subtitle"),
+                    #     "key_track_shazam": first_track.get("key")
+                    # }
+
+            except asyncio.TimeoutError:
+                logger.error(f"Timeout searching for track: {track_name}")
+            except Exception as e:
+                logger.error(f"Error searching for track {track_name}: {e}")
+
+            retries += 1
+            if retries < MAX_RETRIES:
+                backoff_delay = RETRY_DELAY * (2 ** (retries - 1))  # Exponential backoff
+                logger.info(f"Retrying... attempt {retries + 1} in {backoff_delay} seconds.")
+                await asyncio.sleep(backoff_delay)
+
+        logger.warning(f"Failed to find track: {track_name} after {MAX_RETRIES} attempts.")
+        return None
