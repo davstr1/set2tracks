@@ -18,6 +18,8 @@ class Config:
     try:
         EXPLAIN_TEMPLATE_LOADING = False # Suppress detailed template loading messages
         SQLALCHEMY_DATABASE_URI = f"postgresql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT',25060)}/{os.getenv('DB_NAME')}"
+        SQLALCHEMY_DATABASE2_URI = f"postgresql://{os.getenv('DB_USERNAME2', 'dummy_user')}:{os.getenv('DB_PASSWORD2', 'dummy_pass')}@" \
+                           f"{os.getenv('DB_HOST2', 'localhost')}:{os.getenv('DB_PORT2', '25060')}/{os.getenv('DB_NAME2', 'dummy_db')}"
         SECRET_KEY = os.environ['SECRET_KEY'] 
         DB_TABLE_USERS = os.environ['DB_TABLE_USERS']
         DB_TABLE_INVITES = os.environ['DB_TABLE_INVITES']
