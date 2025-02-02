@@ -37,12 +37,12 @@ def sets():
     if search and search.startswith('trackid:'):
         track_id = int(search.split(':')[1])
         track = get_track_by_id(track_id)
-        page_title = f"DJ Sets featuring \"{track['title']} - {Lang.APP_NAME}"
-        page_meta = f"Discover DJ sets featuring {track['title']}, get full tracklists, preview tracks, and export to Spotify or Apple Music"
+        page_title = f"DJ Sets featuring \"{track['title']} - {track['artist_name']}\" - {Lang.APP_NAME}"
+        page_meta = f"Discover DJ sets featuring \"{track['title']} - {track['artist_name']}\", get full tracklists, preview tracks, and export to Spotify or Apple Music"
         
         if track:
-            page_title = f"DJ Sets featuring \"{track['title']} - {Lang.APP_NAME}"
-            page_meta = f"Discover DJ sets featuring {track['title']}, get full tracklists, preview tracks, and export to Spotify or Apple Music"
+            page_title = f"DJ Sets featuring \"{track['title']} - {track['artist_name']}\" - {Lang.APP_NAME}"
+            page_meta = f"Discover DJ sets featuring \"{track['title']} - {track['artist_name']}\", get full tracklists, preview tracks, and export to Spotify or Apple Music"
     elif search and search.startswith('channelid:'):
         channel_id = search.split(':')[1]
         channel = get_channel_by_id(channel_id)
@@ -274,8 +274,8 @@ def set(set_id):
         user_playlists = []
         
     l = {
-        'page_title': 'Video with playlist from "' + set.get('title') + '" - ' + set['channel'].author,
-        'page_description': f'Watch the video and explore the playlist from {set.get("title")} (by {set["channel"].author}). Discover songs, preview tracks, and export to Spotify or Apple Music'
+        'page_title':  set.get('title') + '" - ' + set['channel'].author + ' - Playlist & Video ' ,
+        'page_description': f'Watch  {set.get("title")} and explore the full playlist curated by EstiloSónico. Discover tracklist details, preview songs, and export to Spotify or Apple Music.'
     }      
 
     canonical_url = url_for('set.set', set_id=set_id, _external=True)
