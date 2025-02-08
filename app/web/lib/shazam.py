@@ -187,9 +187,10 @@ from shazamio import Shazam
 
 logger = logging.getLogger(__name__)
 
-async def shazam_search_track(track_name, semaphore, MAX_RETRIES=3, RETRY_DELAY=0):
+async def shazam_search_track(track_name,  semaphore, MAX_RETRIES=3, RETRY_DELAY=0,shazam=None):
     async with semaphore:
-        shazam = Shazam()
+        if not shazam:
+            shazam = Shazam()
         logger.info(f"Searching for track: {track_name}")
 
         retries = 0

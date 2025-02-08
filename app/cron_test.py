@@ -2,7 +2,10 @@ import asyncio
 import json
 import logging
 import time
+
+from shazamio import Shazam
 #from web.lib.process_shazam_json import transform_track_data
+
 from web.lib.apple import  add_apple_track_data_from_json_async
 from web.lib.spotify import  add_tracks_spotify_data_from_json_async
 from web.lib.shazam import shazam_search_track, shazam_add_tracks_label
@@ -66,7 +69,8 @@ def worker_set_queue():
             total_start = time.time()  # Start measuring total execution time
 
             start = time.time()
-            track_info = await shazam_search_track("6 Underground – Sneaker Pimps", semaphore)
+            shazam =Shazam()
+            track_info = await shazam_search_track("6 Underground – Sneaker Pimps", semaphore, shazam=shazam)
             print(track_info)
             if track_info is None:
                 print("No track found")
