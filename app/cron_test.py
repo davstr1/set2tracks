@@ -1,6 +1,8 @@
 import asyncio
 import json
 import logging
+import pprint
+import re
 import time
 
 from shazamio import Shazam
@@ -55,6 +57,24 @@ def transform_track_data(response: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         "release_year": None,  # Not found in the provided data, adjust if necessary
         "release_date": None  # Not found in the provided data, adjust if necessary
     }
+    
+async def process_single_track(track_title, semaphore, shazam):
+    """ Fetch, transform, and process each track as soon as it's available. """
+    track_info = await shazam_search_track(track_title, semaphore, shazam=shazam)
+    if track_info is None:
+        print(f"No track found for {track_title}")
+        return None
+
+    track = [transform_track_data(track_info)]
+    
+    # Process track data immediately
+    await asyncio.gather(
+        shazam_add_tracks_label(track, 30, shazam=shazam),  # Process single track
+        add_tracks_spotify_data_from_json_async(track),  # Process single track
+        add_apple_track_data_from_json_async(track)  # Process single track
+    )
+    pprint.pprint(track)
+    return track  # Optional: for debugging or logging
 
 
 
@@ -67,39 +87,60 @@ def worker_set_queue():
         async def main():
             semaphore = asyncio.Semaphore(50)  # Limit concurrent requests
             total_start = time.time()  # Start measuring total execution time
-
+            track_list = []
             start = time.time()
             shazam =Shazam()
-            track_info = await shazam_search_track("6 Underground – Sneaker Pimps", semaphore, shazam=shazam)
-            print(track_info)
-            if track_info is None:
-                print("No track found")
-                return
-            print(f"Shazam search time: {time.time() - start:.2f} seconds")
-            print('---------')
-
-            start = time.time()
-            track = transform_track_data(track_info)
-            print(track)
-            print(f"Transform track data time: {time.time() - start:.2f} seconds")
-            print('---------')
-
-            track_list = [track]
+            track_titles = [
+                "Smells Like Teen Spirit",
+                "Billie Jean",
+                "Bohemian Rhapsody",
+                "Shape of You",
+                "Like a Rolling Stone",
+                "Sweet Child O' Mine",
+                "Hotel California",
+                "Hey Jude",
+                "Wonderwall",
+                "Lose Yourself",
+                "Cocaine",
+                ]
             
-            # Execute these 3 functions in parallel
-            start = time.time()
-            results = await asyncio.gather(
-                shazam_add_tracks_label(track_list),
-                add_tracks_spotify_data_from_json_async(track_list),
-                add_apple_track_data_from_json_async(track_list)
-            )
+            track_titles = [
+                "Jack - Breach",
+                "Bigger Than Prince - Hot Since 82 Remix - Green Velvet",
+                "House Every Weekend - David Zowie",
+                "Okay - Shiba San",
+                "Stay (Don't Go) - Friend Within",
+                "Shake & Pop - Green Velvet, Walter Phillips",
+                "Renegade Master (Friend Within Remix) - Wildchild",
+                "Detective - CamelPhat",
+                "You Got The Love (Mark Knight Remix) - Candi Staton, The Source",
+                "Under Control - Alesso, Calvin Harris, Hurts"
+            ]
+            
+            tasks = [process_single_track(title, semaphore, shazam) for title in track_titles]
+            processed_tracks = await asyncio.gather(*tasks)
+            # for track_title in track_titles:
+            #     track_info = await shazam_search_track(track_title, semaphore, shazam=shazam)
+            #     if track_info is None:
+            #         continue
+            #     track = transform_track_data(track_info)
+            #     track_list.append(track)
+            #     #track_list = [track]
+            
+            
+            
+
+            
+            
+            # # Execute these 3 functions in parallel
+            # results = await asyncio.gather(
+            #     shazam_add_tracks_label(track_list,30,shazam=shazam), # its then a 1 by 1 track operation. 1 track = 1 API call
+            #     add_tracks_spotify_data_from_json_async(track_list), # its then a 1 by 1 track operation. 1 track = 1 API call
+            #     add_apple_track_data_from_json_async(track_list) # the only one that parse all tracks at once. Needs to be run once ?
+            # )
 
             # Since `track` is the first return value of `asyncio.gather`, we assume
             # the functions are modifying the same track object in place (if not, adjust accordingly)
-            print(results)
-            
-            print(f"Parallel execution time: {time.time() - start:.2f} seconds")
-            print('---------')
 
             total_time = time.time() - total_start
             print(f"Total execution time: {total_time:.2f} seconds")
