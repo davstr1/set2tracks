@@ -8,9 +8,9 @@ import time
 from shazamio import Shazam
 #from web.lib.process_shazam_json import transform_track_data
 
-from app.web.lib.av_apis.apple import  add_apple_track_data_from_json_async
-from app.web.lib.av_apis.spotify import  add_tracks_spotify_data_from_json_async
-from app.web.lib.av_apis.shazam import shazam_search_track, shazam_add_tracks_label
+from web.lib.av_apis.apple import  add_apple_track_data_from_json_async
+from web.lib.av_apis.spotify import  add_tracks_spotify_data_from_json_async
+from web.lib.av_apis.shazam import shazam_search_track, shazam_add_tracks_label
 from web.lib.process_shazam_json import transform_track_data
 from web import create_app
 from boilersaas.utils.db import db
