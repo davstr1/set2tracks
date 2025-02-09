@@ -2,9 +2,13 @@ from flask import Blueprint, flash, jsonify, redirect, render_template, request,
 from flask_login import current_user
 from flask_cors import cross_origin
 from requests import get
+from web.controller.set_queue import pre_queue_set
 from web.lib.json_schemas import generate_video_object_with_tracklist
 from lang import Lang
-from web.controller import count_sets_with_all_statuses, get_all_featured_set_searches, get_browsing_history, get_channel_by_id, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_playlists_from_user, get_set_id_by_video_id, get_set_queue_status, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track, get_track_by_id, is_set_exists, is_set_in_queue, pre_queue_set, upsert_set_browsing_history
+from web.controller.utils import  get_browsing_history
+from web.controller.track import get_track_by_id
+from web.controller.channel import get_channel_by_id
+from web.controller.set import get_all_featured_set_searches, get_set_id_by_video_id,get_set_queue_status,is_set_in_queue,is_set_exists,count_sets_with_all_statuses, get_my_sets_in_queue_not_notified, get_playable_sets, get_playable_sets_number, get_set_status, get_set_with_tracks, get_sets_in_queue, get_sets_with_zero_track
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import discarded_reason_to_ux
@@ -268,8 +272,10 @@ def set(set_id):
     user_id = get_user_id()
     
     if user_id:
-        user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
-        upsert_set_browsing_history(set_id,user_id)
+        user_playlists = []
+        # Not implemented yet
+        #user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
+        #upsert_set_browsing_history(set_id,user_id)
     else:
         user_playlists = []
         
@@ -301,7 +307,9 @@ def related_tracks(track_id):
         user_id = get_user_id()
     
         if user_id:
-            user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
+            user_playlists = []
+            # Not implemented yet
+            #user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
         else:
             user_playlists = []
             

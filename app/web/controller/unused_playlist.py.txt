@@ -1,0 +1,431 @@
+def create_playlist(user_id, playlist_name,set_id=None):
+    
+    # Check for existing playlists with the same name
+    existing_playlists = Playlist.query.filter(
+        Playlist.user_id == user_id,
+        func.lower(Playlist.title).like(func.lower(f"{playlist_name}%"))
+    ).all()
+
+    # If playlists with the same name exist, add a number suffix
+    if existing_playlists:
+        base_name = playlist_name
+        count = 1
+        while any(p.title.lower() == f"{playlist_name.lower()}" for p in existing_playlists):
+            playlist_name = f"{base_name} ({count})"
+            count += 1
+    
+    
+    
+    date_now = datetime.now(timezone.utc)
+    new_playlist = Playlist(
+          user_id=user_id,
+          title=playlist_name,
+          duration=0,
+          create_date=date_now,
+          edit_date=date_now,
+          nb_tracks=0
+      )
+    if set_id:
+        new_playlist.set_id = set_id
+        
+    db.session.add(new_playlist)
+    db.session.commit()
+    return new_playlist
+
+
+def get_playlists_from_user(user_id, order_by='edit_date', search=None, page=1, per_page=10):
+    # Define the valid columns for ordering
+    valid_order_by_columns = {
+        'create_date': Playlist.create_date.desc(),
+        'edit_date': Playlist.edit_date.desc(),
+        'az': Playlist.title.asc(),
+        'duration': Playlist.duration.desc(),
+        'nb_tracks': Playlist.nb_tracks.desc()
+    }
+
+    # Check if the provided order_by column is valid
+    if order_by not in valid_order_by_columns:
+        raise ValueError(f"Invalid order_by column: {order_by}. Valid options are: {', '.join(valid_order_by_columns.keys())}")
+
+    # Get the column to order by
+    order_column = valid_order_by_columns[order_by]
+
+    # Start building the query
+    query = Playlist.query.filter_by(user_id=user_id)
+
+    # Add search filter if search term is provided
+    if search:
+        query = query.filter(Playlist.title.ilike(f"%{search}%"))
+
+    # Apply ordering
+    query = query.order_by(order_column)
+
+    # Apply pagination
+    paginated_query = query.offset((page - 1) * per_page).limit(per_page)
+
+    # Return the result
+    return paginated_query.all()
+
+
+
+def get_playlist_last_used_from_user(user_id):
+    return Playlist.query.filter_by(user_id=user_id).order_by(Playlist.edit_date.desc()).first()
+
+def get_playlist_with_tracks(playlist_id):
+    playlist = Playlist.query.get(playlist_id)
+    
+    if not playlist:
+        return None
+    
+    tracks= format_db_tracks_for_template(playlist.tracks)
+    
+    tracks_playlist = db.session.query(TrackPlaylist).filter(TrackPlaylist.playlist_id == playlist_id).all()
+    #track_playlist_dict = {tp.track_id: {'pos':tp.pos} for tp in tracks_playlist}
+    track_playlist_dict = [ {'id':tp.track_id,'pos':tp.pos} for tp in tracks_playlist]
+    
+    
+    tracks_with_pos = format_tracks_with_pos(tracks, track_playlist_dict)
+    #pprint(tracks_ordered)
+    tracks = sorted(tracks_with_pos, key=lambda track: track['pos'])
+    playlist = {
+        'id': playlist.id,
+        'title': playlist.title,
+        'duration': playlist.duration,
+        'create_date': playlist.create_date,
+        'edit_date': playlist.edit_date,
+        'nb_tracks': playlist.nb_tracks,
+        'playlist_id_spotify': playlist.playlist_id_spotify,
+        'playlist_id_apple': playlist.playlist_id_apple,
+        'set_id': playlist.set_id,
+        'user_id': playlist.user_id,
+        #'tracks': playlist.tracks
+    }
+    
+    #return playlist
+
+    return {'playlist': playlist, 'tracks': tracks}
+
+def update_playlist_edit_date(playlist_id):
+    playlist = Playlist.query.get(playlist_id)
+    if playlist:
+        playlist.edit_date = datetime.now(timezone.utc)
+        db.session.commit()
+        return True
+    return False
+
+def add_track_to_playlist(playlist_id, track_id):
+
+    # Fetch the playlist and track from the database
+    try:
+        playlist = Playlist.query.get(playlist_id)
+        track = Track.query.get(track_id)
+
+        if not playlist:
+            return {"error": "Playlist not found"}
+        if not track:
+            return {"error": "Track not found"}
+
+        existing_entry = TrackPlaylist.query.filter_by(playlist_id=playlist_id, track_id=track_id).first()
+        
+        if  existing_entry:         
+            return {"error": f"Track was already in \"{playlist.title}\""}
+        
+        
+        
+        # Determine the position of the new track
+        pos = db.session.query(db.func.max(TrackPlaylist.pos)).filter_by(playlist_id=playlist_id).scalar()
+        pos = (pos or 0) + 1
+        
+        # Add track to playlist
+        new_track_playlist_entry = TrackPlaylist(
+        track_id=track.id,
+        playlist_id=playlist.id,
+        added_date=datetime.now(timezone.utc),
+        pos=pos
+        )
+
+        db.session.add(new_track_playlist_entry)
+        playlist.nb_tracks = len(playlist.tracks)
+        
+        playlist.edit_date = datetime.now(timezone.utc)
+        playlist.duration = sum(track.duration_s or 0 for track in playlist.tracks)
+        
+        db.session.commit()
+        
+        #
+        
+        
+    except Exception as e:
+        return {"error": f"{str(e)} (playlist_id: {playlist_id}, track_id: {track_id})"}
+
+   
+    return {"message": f"Track added to \"{playlist.title}\""}
+
+
+def change_playlist_title(playlist_id, new_title):
+    
+    # TODO : check if the title is not already taken by another playlist of the user
+    try:
+        
+        existing_playlist = Playlist.query.filter_by(user_id=current_user.id, title=new_title).first()
+        if existing_playlist:
+            return {"error": "Title already taken by another playlist"}
+        
+        playlist = Playlist.query.get(playlist_id)
+        if not playlist:
+            return {"error": "Playlist not found"}
+        
+        playlist.title = new_title
+        playlist.edit_date = datetime.now(timezone.utc)
+        db.session.commit()
+        return {"message": f"Playlist title changed to \"{new_title}\""}
+    except Exception as e:
+        return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+   
+
+def delete_playlist(playlist_id):
+    try:
+        # Find the playlist
+        playlist = Playlist.query.filter_by(id=playlist_id, user_id=current_user.id).first()
+        
+        if not playlist:
+            return {"error": "Playlist not found"}
+
+        # Delete related TrackPlaylist entries
+        TrackPlaylist.query.filter_by(playlist_id=playlist_id).delete()
+        
+        # Delete the playlist
+        db.session.delete(playlist)
+        db.session.commit()
+        
+        return {"message": f"Playlist \"{playlist.title}\" deleted"}
+    except Exception as e:
+        db.session.rollback()  # Rollback in case of an error
+        return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+
+
+def add_tracks_to_playlist(playlist_id, track_ids, user_id):
+    
+   
+    
+
+    try:
+        logger.info('add_tracks_to_playlist')
+        # Fetch the playlist from the database
+        playlist = Playlist.query.get(playlist_id)
+        if not playlist:
+            logger.error('Playlist not found')
+            return {"error": "Playlist not found"}
+        
+      
+      # @TODO : veryfy against real tracks in db. Like are the tracks existing in the db ?
+        
+        unique_tracks_number = len(set(track_ids))
+        # Fetch the tracks from the database
+        tracks_in_db_count = Track.query.filter(Track.id.in_(track_ids)).count()
+        
+        are_counts_equal = unique_tracks_number == tracks_in_db_count
+        
+        if not are_counts_equal:
+            logger.error('Tracks not found')
+            return {"error": "One or more tracks was not found"}
+        
+        
+        # Check for existing entries and add new ones
+        existing_entries = TrackPlaylist.query.filter(TrackPlaylist.playlist_id == playlist_id).all()
+        existing_track_ids = {entry.track_id for entry in existing_entries}
+        
+        
+       # does not keep order mofo  
+       # track_ids_to_add = list(set(track_ids) - set(existing_track_ids))
+
+        
+        pos = db.session.query(db.func.max(TrackPlaylist.pos)).filter_by(playlist_id=playlist_id).scalar()
+        pos = (pos or 0) + 1
+        
+        # Remove duplicates while keeping the original order
+        track_ids_to_add = [track_id for track_id in track_ids if track_id not in existing_track_ids]
+
+        
+        new_entries = []
+        for track_id in track_ids_to_add:
+            if track_id == 1 or track_id in existing_track_ids : # Unkown track, do not add it
+                continue
+
+            new_entry = TrackPlaylist(
+                track_id=track_id,
+                playlist_id=playlist_id,
+                added_date=datetime.now(timezone.utc),
+                pos=pos
+            )
+        
+            new_entries.append(new_entry)
+            pos += 1
+        
+   
+        if new_entries:
+            db.session.bulk_save_objects(new_entries)
+            playlist.nb_tracks += len(new_entries)
+            playlist.duration = sum(track.duration_s or 0 for track in playlist.tracks)
+            playlist.edit_date = datetime.now(timezone.utc)
+            db.session.commit()
+            return {"message": f"{len(new_entries)} tracks added to \"{playlist.title}\""}
+        else:
+            return {"error": "No new tracks to add to the playlist"}
+
+    except Exception as e:
+        db.session.rollback()  # Rollback the session in case of an error
+        return {"error": f"{str(e)} (playlist_id: {playlist_id})"}
+
+    
+
+
+def add_track_to_playlist_last_used(track_id, user_id):
+    playlist = get_playlist_last_used_from_user(user_id)
+    autocreated_playlist_message = ''
+    if not playlist:
+        # Create a new playlist if none exists
+        playlist = create_playlist(user_id, "New Playlist")
+        autocreated_playlist_message = "(A new playlist was created for you since none existed.)"
+        
+    
+    ret = add_track_to_playlist(playlist.id, track_id)
+    if 'message' in ret and autocreated_playlist_message:
+        ret['message'] = f" {autocreated_playlist_message}" 
+    return ret
+    
+
+
+
+
+
+def remove_track_from_playlist(playlist_id, track_id,user_id):
+
+    playlist = Playlist.query.filter_by(id=playlist_id).first()
+    if not playlist:
+        return {"error": "Playlist not found"}
+    
+    track = Track.query.filter_by(id=track_id).first()
+    if not track:
+        return {"error": "Track not found"}
+    
+    track_playlist = db.session.query(TrackPlaylist).filter_by(playlist_id=playlist_id, track_id=track_id).first()
+    if not track_playlist:
+        return {"error": "Track not in playlist"}
+    
+    track_position = track_playlist.pos
+    
+    try:
+        db.session.delete(track_playlist)
+        playlist.nb_tracks = len(playlist.tracks)
+        playlist.duration = sum(track.duration_s or 0 for track in playlist.tracks)
+        playlist.edit_date = datetime.now(timezone.utc)
+        
+        db.session.query(TrackPlaylist).filter(
+        TrackPlaylist.playlist_id == playlist_id,
+        TrackPlaylist.pos > track_position
+        ).update({TrackPlaylist.pos: TrackPlaylist.pos - 1}, synchronize_session='fetch')
+        db.session.commit()
+    except Exception as e:
+        return {"error": f"{str(e)} (playlist_id: {playlist_id}, track_id: {track_id})"}
+    
+    return {"message": f"Track removed from \"{playlist.title}\""}
+
+
+def update_playlist_positions_after_track_change_position( playlist_id: int, track_id: int, new_position: int):
+    # Fetch the current position of the track
+    track_playlist = db.session.query(TrackPlaylist).filter_by(playlist_id=playlist_id, track_id=track_id).first()
+    current_position = track_playlist.pos
+    
+    # Update positions of the other tracks in the playlist
+    if new_position < current_position:
+        # Shift tracks down
+        db.session.query(TrackPlaylist).filter(
+            TrackPlaylist.playlist_id == playlist_id,
+            TrackPlaylist.pos >= new_position,
+            TrackPlaylist.pos < current_position
+        ).update({TrackPlaylist.pos: TrackPlaylist.pos + 1}, synchronize_session='fetch')
+    elif new_position > current_position:
+        # Shift tracks up
+        db.session.query(TrackPlaylist).filter(
+            TrackPlaylist.playlist_id == playlist_id,
+            TrackPlaylist.pos <= new_position,
+            TrackPlaylist.pos > current_position
+        ).update({TrackPlaylist.pos: TrackPlaylist.pos - 1}, synchronize_session='fetch')
+    
+    # Update the position of the moved track
+    track_playlist.pos = new_position
+    db.session.add(track_playlist)
+    
+    # Commit the changes
+    db.session.commit()
+    
+    
+def create_playlist_from_set_tracks(set_id, user_id):
+    try:
+        set_data = get_set_with_tracks(set_id)
+        
+        if 'error' in set_data:
+            return set_data
+        
+        if 'tracks' not in set_data:
+            return {"error": "No tracks found in set"}
+        
+        playlist_name = set_data.get('title', 'Untitled Playlist')
+        new_playlist = create_playlist(user_id, playlist_name,set_id)
+        
+        if not new_playlist:
+            return {"error": "Error creating playlist"}
+        
+        track_ids = tracks_to_tracks_ids(set_data['tracks'])
+        
+        
+        
+        response = add_tracks_to_playlist(new_playlist.id, track_ids, user_id)
+        
+        if 'error' in response:
+            return {"error": response['error']}
+        
+    except KeyError as ke:
+        return {"error": f"KeyError - missing key: {str(ke)}"}
+    except TypeError as te:
+        return {"error": f"TypeError - type mismatch: {str(te)}"}
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {str(e)}"}
+    
+    return {"message": f"Playlist \"{playlist_name}\" created successfully with {len(set_data['tracks'])} tracks", "playlist_id": new_playlist.id}
+
+
+def add_all_tracks_from_set_to_playlist(set_id, playlist_id,user_id):
+    try :
+        set_data = get_set_with_tracks(set_id)
+        if 'error' in set_data:
+            return set_data
+        
+        if 'tracks' not in set_data:
+            return {"error": "No tracks found in set"}
+        
+        track_ids = tracks_to_tracks_ids(set_data['tracks'])
+        
+        response = add_tracks_to_playlist(playlist_id, track_ids, user_id)
+        
+        if 'error' in response:
+            return {"error": response['error']}
+        
+    except KeyError as ke:
+        return {"error": f"KeyError - missing key: {str(ke)}"}
+    except TypeError as te:
+        return {"error": f"TypeError - type mismatch: {str(te)}"}
+    except Exception as e:
+        return {"error": f"An unexpected error occurred: {str(e)}"}
+    
+    return {"message": f"All tracks from set added to playlist"}    
+
+def import_playlist_from_spotify():
+    pass
+
+def export_playlist_to_spotify():
+    pass
+
+def sync_playlist_with_spotify():
+    pass

@@ -25,7 +25,7 @@ even where the player is not behind*/
 
 
 
-<div class="-mx-3 lg:-mx-5" >
+<div class="-mx-3 lg:-mx-5">
 
   <div id="playerMetaWrap" class="md:flex md:flex-col md:items-center  md:p-4 md:top-0 md:z-20 ">
 
@@ -123,7 +123,7 @@ even where the player is not behind*/
         </a>
         {%endif%}
       </h1>
-      
+
 
       <div class="text-gray-500 mt-5 mb-10">
         <a class="font-bold" href="{{url_for('set.sets',s='channelid:'+set.channel.id|string)}}">{{ set.channel.author }}</a> <span class="ml-4">{{ tpl_utils.km_number(set.channel.channel_follower_count) }} subscribers</span>
@@ -156,7 +156,7 @@ even where the player is not behind*/
                 <div class="absolute bottom-0 right-0 p-2 m-2 text-white bg-black opacity-60 rounded-lg text-xs text-right">
                   <p>{{ set.duration // 60 }} m {# {{ set.duration % 60 }}s #}</p>
                   <p>{{ set.nb_tracks }} tracks</p>
-    
+
                 </div>
               </div>
             </a>
@@ -342,18 +342,7 @@ even where the player is not behind*/
 
 
 
-  const createPlaylistButton = document.getElementById('create-playlist-from-set-tracks');
 
-  if (createPlaylistButton) {
-    createPlaylistButton.addEventListener('click', function (e) {
-      e.preventDefault();
-      const payload = {
-        "set_id": setId
-      }
-
-      return processAjax('{{ url_for("playlist.jax_create_playlist_from_set_tracks") }}', 'POST', payload);
-    });
-  }
 
 </script>
 

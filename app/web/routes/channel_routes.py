@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, url_for
 
+from web.controller.channel import get_channels
 from lang import Lang
-from web.controller import get_channels
 from web.routes.routes_utils import tpl_utils
 
 

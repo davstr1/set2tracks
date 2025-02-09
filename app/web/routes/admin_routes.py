@@ -1,8 +1,9 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-
-
+from web.controller.channel import channel_toggle_followable, channel_toggle_visibility, get_channels_with_feat
+from web.controller.set_queue import queue_discard_set, queue_reset_set
+from web.controller.set import get_hidden_sets, set_toggle_visibility
 from lang import Lang
-from web.controller import channel_toggle_followable, channel_toggle_visibility, get_channels_with_feat, get_hidden_sets, get_set_searches, queue_discard_set, queue_reset_set, search_toggle_featured, set_toggle_visibility
+from web.controller.utils import get_set_searches, search_toggle_featured
 from web.model import SetQueue
 from web.routes.routes_utils import is_admin
 from web.routes.routes_utils import tpl_utils

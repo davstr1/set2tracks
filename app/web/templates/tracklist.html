@@ -3,35 +3,7 @@
 
 <div class="fixed inset-0 bg-transparent z-50 pointer-events-auto hidden" id="block-interactions"></div>
 
-<div class="w-64  bg-primary-content p-4 m-4 rounded-xl shadow-xl border-2 absolute z-50 invisible" id="track-options-contextual-menu">
-  <!-- First Title -->
-  <h2 class="text-lg font-semibold mb-2 text-primary">Add to playlist...</h2>
-  <!-- First Section -->
-  <div class="overflow-y-auto max-h-40 mb-4">
 
-    <ul class="space-y-1">
-      {% if user_playlists|length == 0 %}
-      <div class="justify-center content-center">
-        <a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2 rounded-xl hover:bg-blue-950">Create Your First Playlist...</a>
-      </div>
-      {% else %}
-      {% for playlist in user_playlists %}
-      <li class="flex m-0"><a data-playlist-id="{{playlist.id}}" href="#" class="add-track-to-playlist p-2 rounded-xl hover:bg-blue-950"><span class="line-clamp-1">{{playlist.title}}</span></a></li>
-      {% endfor %}
-      {% endif %}
-    </ul>
-  </div>
-
-  <!-- Second Title -->
-  <h2 class="text-lg font-semibold mb-2 text-primary">Other</h2>
-  <!-- Second Section -->
-  <div class="overflow-y-auto max-h-40">
-    <ul class="space-y-1">
-      <li><a href="{{url_for('playlist.playlist_create',next=current_url)}}" class="block p-2  rounded-xl hover:bg-blue-950">Create a Playlist</a></li>
-
-    </ul>
-  </div>
-</div>
 
 
 

@@ -4,7 +4,8 @@ from boilersaas.utils.db import db
 import asyncio
 
 from shazamio import Shazam
-from web.controller import add_tracks_from_json
+
+from web.controller.set_process import add_tracks_from_json
 from web.lib.av_apis.apple import  add_apple_track_data_from_json_async
 from web.lib.av_apis.shazam import shazam_add_tracks_label, shazam_related_tracks
 from web.lib.av_apis.spotify import  add_tracks_spotify_data_from_json_async

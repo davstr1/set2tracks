@@ -1,7 +1,7 @@
 import logging
 import time
+from web.controller.set_queue import insert_set_from_queue
 from web import create_app
-from web.controller import insert_set_from_queue
 from boilersaas.utils.db import db
 
 def worker_set_queue():

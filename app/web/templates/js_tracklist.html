@@ -436,54 +436,6 @@
   }
 
 
-  // document.querySelectorAll('.add-track-to-playlist').forEach(link => {
-  //   link.addEventListener('click', function (event) {
-  //     event.preventDefault();
-  //     const playlist_id = this.getAttribute('data-playlist-id');
-  //     if (!trackWithContextMenu) { // Add all tracks from set to playlist
-
-  //       console.log('trackWithContextMenu not found');
-  //       return addAllTracksFromSetToPlaylist({ playlist_id: playlist_id, set_id: setId })
-  //         .then(response => {
-  //           if (response.status_code === 200) {
-  //             console.log(response.message);
-  //             showSystemMessage(response.message);
-  //           } else {
-  //             console.log(response.error);
-  //             showSystemMessage(response.error, 'warning');
-  //           }
-  //         });
-
-  //     }
-  //     // Add single track to playlist
-  //     const trackId = trackWithContextMenu.getAttribute('data-track-id');
-  //     addTrackToPlaylist({ track_id: trackId, playlist_id: playlist_id })
-  //       .then(response => {
-  //         if (response.status_code === 200) {
-  //           console.log(response.message);
-  //           showSystemMessage(response.message);
-  //         } else {
-  //           console.log(response.error);
-  //           showSystemMessage(response.error, 'warning');
-  //         }
-  //       });
-  //   });
-  // });
-
-  // function addTrackToPlaylist(payload) {
-  //   return processAjax('{{ url_for("playlist.jax_add_track_to_playlist") }}', 'POST', payload)
-  // }
-
-  // function addAllTracksFromSetToPlaylist(payload) {
-  //   return processAjax('{{ url_for("playlist.jax_add_all_set_tracks_to_playlist") }}', 'POST', payload)
-  // }
-
-  // function addTrackToPlaylistLastUsed(payload) {
-  //   payload.caller_url = window.location.href;
-  //   return processAjax('{{ url_for("playlist.jax_add_track_to_playlist_last_used") }}', 'POST', payload)
-  // }
-
-
 
   // =====================================
   //           Audio Player Stuff

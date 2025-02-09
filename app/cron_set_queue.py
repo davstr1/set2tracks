@@ -1,7 +1,8 @@
 import logging
 import time
+from web.controller.set import get_first_prequeued_set
+from web.controller.set_queue import queue_set, update_premiered_to_prequeued
 from web import create_app
-from web.controller import queue_set,get_first_prequeued_set, update_premiered_to_prequeued
 from web.lib.utils import as_dict
 
 def worker_set_queue():

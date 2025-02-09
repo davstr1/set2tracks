@@ -25,7 +25,7 @@ from web.lib.log_config import setup_logging
 
 
 bp = Blueprint('main', __name__,template_folder='templates')
-from web.routes import basic_bp, set_bp, spotify_bp, playlist_bp,admin_bp,channel_bp,track_bp
+from web.routes import basic_bp, set_bp, spotify_bp,admin_bp,channel_bp,track_bp #,playlist_bp
 
 def set_global_exception_handler(app):
     @app.errorhandler(Exception)
@@ -51,7 +51,7 @@ def init_extend_app(app):
     app.register_blueprint(basic_bp)
     app.register_blueprint(set_bp)
     app.register_blueprint(spotify_bp)
-    app.register_blueprint(playlist_bp)
+    #app.register_blueprint(playlist_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(channel_bp)
     app.register_blueprint(track_bp)

@@ -4,7 +4,7 @@ from xml.dom.minidom import parseString
 from flask import Blueprint, redirect, render_template, request, send_from_directory, url_for,Response
 from flask_login import current_user
 from markdown import markdown
-from web.controller import get_playable_sets, get_playable_sets_number
+from web.controller.set import get_playable_sets, get_playable_sets_number
 from lang import Lang
 
 def load_markdown_file(file_path):
