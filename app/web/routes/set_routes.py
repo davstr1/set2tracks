@@ -8,7 +8,7 @@ from web.controller import count_sets_with_all_statuses, get_all_featured_set_se
 from web.lib.format import format_db_track_for_template, format_db_tracks_for_template, format_set_queue_error
 from web.lib.related_tracks import save_related_tracks
 from web.lib.utils import discarded_reason_to_ux
-from web.lib.youtube import youtube_video_id_from_url, youtube_video_input_is_valid
+from app.web.lib.av_apis.youtube import youtube_video_id_from_url, youtube_video_input_is_valid
 from web.model import SetQueue
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected,is_admin
 from web.logger import logger

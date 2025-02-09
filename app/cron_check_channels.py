@@ -6,7 +6,7 @@ from web import create_app
 from web.controller import filter_out_existing_sets, get_channel_to_check, insert_set_from_queue, pre_queue_set, queue_set
 from boilersaas.utils.db import db
 
-from web.lib.youtube import youtube_get_channel_feed_video_ids
+from app.web.lib.av_apis.youtube import youtube_get_channel_feed_video_ids
 from web.model import SetQueue
 
 def worker_set_queue():

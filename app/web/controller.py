@@ -11,15 +11,15 @@ import requests
 from sqlalchemy import  and_, func,  or_
 from sqlalchemy.ext.mutable import MutableDict
 
-from web.lib.apple import add_apple_track_data_from_json
+from app.web.lib.av_apis.apple import add_apple_track_data_from_json
 from web.lib.audio import cut_audio
 #from web.lib.insert_set import insert_set
 from web.lib.count_unique_tracks import count_unique_tracks
 from web.lib.process_shazam_json import write_deduplicated_segments, write_segments_from_chapter
-from web.lib.shazam import sync_process_segments
-from web.lib.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
+from app.web.lib.av_apis.shazam import sync_process_segments
+from app.web.lib.av_apis.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
 from web.lib.utils import as_dict, calculate_avg_properties
-from web.lib.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
+from app.web.lib.av_apis.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
 from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetBrowsingHistory, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
 from datetime import datetime, timedelta, timezone
 from boilersaas.utils.db import db

@@ -10,7 +10,7 @@ from flask_login import current_user
 from lang import Lang
 from web.controller import add_track_to_playlist, add_track_to_playlist_last_used, change_playlist_title, create_apple_playlist_and_add_tracks, create_playlist, create_playlist_from_set_tracks, create_spotify_playlist_and_add_tracks, delete_playlist, get_apple_music_dev_token, get_apple_music_user_token, get_playlist_with_tracks, get_playlists_from_user,  remove_track_from_playlist, set_apple_music_user_token, update_playlist_edit_date, update_playlist_positions_after_track_change_position ,add_all_tracks_from_set_to_playlist
 
-from web.lib.spotify import add_tracks_to_spotify_playlist, ensure_valid_token, get_spotify_playlist_tracks_ids
+from app.web.lib.av_apis.spotify import add_tracks_to_spotify_playlist, ensure_valid_token, get_spotify_playlist_tracks_ids
 from web.routes.routes_utils import tpl_utils,get_user_id, is_connected, jax_redirect_if_not_connected
 from web.logger import logger
 

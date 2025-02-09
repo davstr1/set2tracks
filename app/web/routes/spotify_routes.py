@@ -1,6 +1,6 @@
 from flask import Blueprint, make_response, redirect, request, url_for
 
-from web.lib.spotify import get_client_auth_url, get_client_playlists, get_client_token
+from app.web.lib.av_apis.spotify import get_client_auth_url, get_client_playlists, get_client_token
 from web.logger import logger
 
 spotify_bp = Blueprint('spotify', __name__)
