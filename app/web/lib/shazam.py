@@ -33,9 +33,10 @@ def transform_shazam_data(data):
         result.append(transformed_track)
     return result
 
-async def shazam_track_add_label(track, semaphore, MAX_RETRIES=3, RETRY_DELAY=0):
+async def shazam_track_add_label(track, semaphore, MAX_RETRIES=3, RETRY_DELAY=0,shazam=None):
     async with semaphore:
-        shazam = Shazam()
+        if not shazam:
+            shazam = Shazam()
         logger.info(f"Getting label for track {track['title']}")
         
         retries = 0
@@ -63,13 +64,13 @@ async def shazam_track_add_label(track, semaphore, MAX_RETRIES=3, RETRY_DELAY=0)
         track['label'] = None
         return track
 
-async def shazam_add_tracks_label(tracks, MAX_CONCURRENT_REQUESTS=30):
+async def shazam_add_tracks_label(tracks, MAX_CONCURRENT_REQUESTS=30,shazam=None):
     logger.info(f"shazam_add_tracks_label for {len(tracks)} tracks")
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
-    tasks = [shazam_track_add_label(track, semaphore) for track in tracks]
+    tasks = [shazam_track_add_label(track, semaphore,3,0,shazam) for track in tracks]
     return await asyncio.gather(*tasks)
 
-async def shazam_related_tracks(track_id, limit=20):
+async def shazam_related_tracks(track_id, limit=20,shazam=None):
     """
     Retrieves related tracks from Shazam for a given track ID.
 
@@ -91,8 +92,9 @@ async def shazam_related_tracks(track_id, limit=20):
     """
     logger.info(f'Starting shazam_related_tracks for {track_id} with limit {limit}')
     try:
-        shazam = Shazam()
-        logger.info('Initialized Shazam client')
+        if not shazam:
+            shazam = Shazam()
+            logger.info('Initialized Shazam client')
         
         related = await shazam.related_tracks(track_id=track_id, limit=limit, proxy=PROXY_URL)
         logger.info(f'Received related tracks from Shazam {related}')
@@ -181,11 +183,6 @@ def sync_process_segments(folder_path,results_path):
     loop.close()
     return result
 
-import asyncio
-import logging
-from shazamio import Shazam
-
-logger = logging.getLogger(__name__)
 
 async def shazam_search_track(track_name,  semaphore, MAX_RETRIES=3, RETRY_DELAY=0,shazam=None):
     async with semaphore:

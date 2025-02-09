@@ -2,6 +2,8 @@ from unittest import result
 from boilersaas.utils.db import db
 
 import asyncio
+
+from shazamio import Shazam
 from web.controller import add_tracks_from_json
 from web.lib.apple import  add_apple_track_data_from_json_async
 from web.lib.shazam import shazam_add_tracks_label, shazam_related_tracks
@@ -13,11 +15,12 @@ async def async_save_related_tracks(track):
     
     try:
         track_id_shazam = track.key_track_shazam
-        tracks = await shazam_related_tracks(track_id_shazam, limit=30)
+        shazam = Shazam()
+        tracks = await shazam_related_tracks(track_id_shazam, limit=30, shazam=shazam)
         
         if tracks:                    
             tasks = [
-                shazam_add_tracks_label(tracks),
+                shazam_add_tracks_label(tracks,30, shazam=shazam),
                 add_tracks_spotify_data_from_json_async(tracks),
                 add_apple_track_data_from_json_async(tracks)
             ]
