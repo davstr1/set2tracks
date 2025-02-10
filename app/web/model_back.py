@@ -64,6 +64,9 @@ class Track(db.Model):
     artist_popularity_spotify = db.Column(db.Integer, index=True)
     
     nb_sets = db.Column(db.Integer, default=0, index=True)
+    nb_playlists = db.Column(db.Integer, default=0, index=True)
+    #sets = db.relationship('Set', secondary='track_sets', back_populates='tracks')
+    playlists = db.relationship('Playlist', secondary='track_playlists', back_populates='tracks',overlaps="playlists,tracks")
     genres = db.relationship('Genre', secondary='track_genres', back_populates='tracks')
     related_tracks_checked = db.Column(db.Boolean, default=False)
     related_tracks = db.relationship(
@@ -195,6 +198,42 @@ class SetQueue(db.Model):
     notification_email_sent = db.Column(db.Boolean, default=False, index=True)
     notification_sound_sent = db.Column(db.Boolean, default=False, index=True)
 
+    
+    
+class Playlist(db.Model):
+    __tablename__ = 'playlists'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # completed this line 
+    playlist_id_spotify = db.Column(db.String(255),  unique=True, index=True)
+    playlist_id_apple = db.Column(db.String(255),  unique=True, index=True)
+    set_id = db.Column(db.Integer, db.ForeignKey('sets.id'), nullable=True,index=True)  # completed this line
+    title = db.Column(db.String(255), nullable=False, index=True)
+    search_vector = db.Column(TSVectorType('title'))
+    
+    duration = db.Column(db.Integer, index=True)  # in seconds
+    create_date = db.Column(db.DateTime, index=True)  # Assuming this maps to 'upload_date'
+    edit_date = db.Column(db.DateTime, index=True)  # Assuming this maps to 'upload_date'
+    nb_tracks = db.Column(db.Integer, default=0, index=True)
+    
+    artist_popularity_spotify = db.Column(SmallInteger)
+    acousticness = db.Column(SmallInteger)
+    danceability = db.Column(SmallInteger)
+    energy = db.Column(SmallInteger)
+    liveness = db.Column(SmallInteger)
+    loudness = db.Column(SmallInteger)
+    instrumentalness = db.Column(SmallInteger)
+    speechiness = db.Column(SmallInteger)
+    valence = db.Column(SmallInteger)
+    
+    __table_args__ = (
+        Index('ix_playlists_search_vector', 'search_vector', postgresql_using='gin'),
+    )
+    
+    track_associations = db.relationship('TrackPlaylist', back_populates='playlist', cascade="all, delete-orphan",overlaps='playlists')
+    tracks = db.relationship('Track', secondary='track_playlists', back_populates='playlists',overlaps="track_associations")
+    
+
+
 
 class TrackSet(db.Model):
     __tablename__ = 'track_sets'
@@ -205,8 +244,18 @@ class TrackSet(db.Model):
     pos = db.Column(db.Integer, primary_key=True)  # position in the set, now part of the primary key
     track = db.relationship('Track', backref='track_sets')  # Add this relationship
     set = db.relationship('Set', backref='track_sets')  
-        
-
+    
+class TrackPlaylist(db.Model):
+    __tablename__ = 'track_playlists'
+    track_id = db.Column(db.Integer, db.ForeignKey('tracks.id'), primary_key=True)
+    playlist_id = db.Column(db.Integer, db.ForeignKey('playlists.id',ondelete='CASCADE'), primary_key=True)
+    added_date = db.Column(db.DateTime, index=True)  
+    pos = db.Column(db.Integer, primary_key=True)  
+    
+    track = db.relationship('Track', backref='track_playlists',overlaps="playlists,tracks")
+    playlist = db.relationship('Playlist', back_populates='track_associations',overlaps="playlists,tracks")
+    
+    
 class AppConfig(db.Model):
     __tablename__ = 'app_config'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -251,7 +300,7 @@ def insert_unknown_track(target, connection, **kw):
             release_date=None,
             artist_popularity_spotify=None,
             nb_sets=0,
-            #nb_playlists=0,
+            nb_playlists=0,
             related_tracks_checked=False
         )
     )
@@ -272,4 +321,12 @@ def search_sets_by_title_and_author(search_query):
     ).all()
     return results  
 
+# search for playlists and tracks
+def search_playlist(search_terms):
+    query = db.session.query(Playlist).join(TrackPlaylist).join(Track).filter(
+        search(Playlist.search_vector, 'search term') |
+        search(Track.search_vector, 'search term')
+    )
+    results = query.all()
+ 
  

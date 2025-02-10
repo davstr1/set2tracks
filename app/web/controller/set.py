@@ -2,7 +2,7 @@ import json
 from flask import url_for
 from flask_login import current_user
 from sqlalchemy import func, or_
-from web.model import Genre, Playlist, Set, SetBrowsingHistory, SetQueue, Channel, SetSearch, Track, TrackGenres, TrackSet
+from web.model import Genre, Set, SetBrowsingHistory, SetQueue, Channel, SetSearch, Track, TrackGenres, TrackSet
 from web.lib.format import format_db_tracks_for_template, format_tracks_with_times
 from datetime import datetime,timezone,timedelta
 from boilersaas.utils.db import db
@@ -401,12 +401,6 @@ def get_set_with_tracks(set_id):
     
     # Retrieve the set with the given ID along with its details
     set_instance:Set = Set.query.filter_by(id=set_id).first()
-    if current_user.is_authenticated:
-        playlist_from_set = db.session.query(Playlist).filter_by(set_id=set_id,user_id=current_user.id).first()
-    else:
-        playlist_from_set = None
-    
-    playlist_id = playlist_from_set.id if playlist_from_set else None
     
     if not set_instance:
         return {'error', 'Set not found'}
@@ -458,7 +452,6 @@ def get_set_with_tracks(set_id):
         'thumbnail': set_instance.thumbnail,
         'channel_id': set_instance.channel_id,
         'channel': channel,
-        'playlist_id':playlist_id,
         'playable_in_embed': set_instance.playable_in_embed,
         'nb_tracks': set_instance.nb_tracks,
         'tracks': tracks,

@@ -9,7 +9,7 @@ from sqlalchemy import  or_
 from sqlalchemy.ext.mutable import MutableDict
 
 from web.lib.av_apis.spotify import  add_tracks_to_spotify_playlist, create_spotify_playlist
-from web.model import AppConfig, Playlist, Set, SetBrowsingHistory, SetSearch, Track,Channel
+from web.model import AppConfig, Set, SetBrowsingHistory, SetSearch, Track,Channel
 from boilersaas.utils.db import db
 from collections import defaultdict
 
@@ -100,53 +100,56 @@ def spotify_tracks_uris_from_tracks(tracks):
 
 
 def create_spotify_playlist_and_add_tracks(playlist_name, tracks,playlist_id):
+    return
+
+    # Commented out as it's using the old playlist model. no mor playlist now.
+    # If anything we will export from set directly
     
-    
-    # check if playlist exists
-    playlist = db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).first()
+    # # check if playlist exists
+    # playlist = db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).first()
    
-    if not playlist:
-        return {"error": "Playlist not found"}
+    # if not playlist:
+    #     return {"error": "Playlist not found"}
     
-    # does this playlist belong to user ?
-    if playlist.user_id != current_user.id:
-        return {"error": "Unauthorized access to this playlist"}
+    # # does this playlist belong to user ?
+    # if playlist.user_id != current_user.id:
+    #     return {"error": "Unauthorized access to this playlist"}
     
 
-    # does this playlist exist on spotify ?
+    # # does this playlist exist on spotify ?
     
     
-    try:
-        # Create the Spotify playlist
-        new_playlist = create_spotify_playlist(playlist_name)
-        if not new_playlist:
-            return {"error": "Error creating playlist"}
-    except Exception as e:
-        return {"error": f"Error creating playlist: {str(e)}"}
+    # try:
+    #     # Create the Spotify playlist
+    #     new_playlist = create_spotify_playlist(playlist_name)
+    #     if not new_playlist:
+    #         return {"error": "Error creating playlist"}
+    # except Exception as e:
+    #     return {"error": f"Error creating playlist: {str(e)}"}
     
     
-    playlist_id_spotify = new_playlist['id']
-    db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).update({Playlist.playlist_id_spotify: playlist_id_spotify})
-    db.session.commit()
-    try:
-        # Extract track IDs
-        track_ids = [track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
+    # playlist_id_spotify = new_playlist['id']
+    # db.session.query(Playlist).filter_by(id=playlist_id,user_id=current_user.id).update({Playlist.playlist_id_spotify: playlist_id_spotify})
+    # db.session.commit()
+    # try:
+    #     # Extract track IDs
+    #     track_ids = [track['key_track_spotify'] for track in tracks if 'key_track_spotify' in track and track['key_track_spotify']]
         
-        if not track_ids:
-            return {"error": "No valid track IDs found in the provided tracks"}
+    #     if not track_ids:
+    #         return {"error": "No valid track IDs found in the provided tracks"}
 
-        response = add_tracks_to_spotify_playlist(new_playlist['id'], track_ids)
+    #     response = add_tracks_to_spotify_playlist(new_playlist['id'], track_ids)
        
-        if isinstance(response, dict) and 'error' in response:
-            return {'error': response['error']}
-    except KeyError as e:
-        return {"error": f"Missing expected key in track data: {str(e)}"}
-    except TypeError as e:
-        return {"error": f"Type error encountered: {str(e)}"}
-    except Exception as e:
-        return {"error": f"Error adding tracks to playlist: {str(e)}"}
+    #     if isinstance(response, dict) and 'error' in response:
+    #         return {'error': response['error']}
+    # except KeyError as e:
+    #     return {"error": f"Missing expected key in track data: {str(e)}"}
+    # except TypeError as e:
+    #     return {"error": f"Type error encountered: {str(e)}"}
+    # except Exception as e:
+    #     return {"error": f"Error adding tracks to playlist: {str(e)}"}
 
-    return {"playlist_id":playlist_id,"spotify_playlist_id": new_playlist['id'],"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
+    # return {"playlist_id":playlist_id,"spotify_playlist_id": new_playlist['id'],"message": f"Spotify playlist \"{playlist_name}\" created successfully with {len(track_ids)} tracks"}
 
 
 
@@ -298,9 +301,11 @@ def remove_user_extra_field(user, field):
 
 
 def update_playlist_field(playlist,field,value):
-    db.session.query(Playlist).filter_by(id=playlist['id']).update({field: value})
-    db.session.commit()
-    return True
+    return False
+    # Commented out as it's using the old playlist model. no mor playlist now.
+    # db.session.query(Playlist).filter_by(id=playlist['id']).update({field: value})
+    # db.session.commit()
+    # return True
 
 
 
