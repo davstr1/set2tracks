@@ -5,7 +5,7 @@ from web.lib.utils import get_compatible_keys
 from web.routes.routes_utils import get_user_id, is_connected, tpl_utils
 
 from lang import Lang
-from web.controller.track import get_track_by_id, get_tracks_min_maxes,get_tracks
+from web.controller.track import get_track_by_id,get_tracks
 
 
 track_bp = Blueprint('track', __name__)
