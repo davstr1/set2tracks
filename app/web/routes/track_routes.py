@@ -71,29 +71,7 @@ def tracks():
     PER_PAGE = 30
     page = request.args.get('page', 1, type=int)
     search = request.args.get('s', '', type=str)
-    year_min = request.args.get('year_min', None, type=int)
-    year_max = request.args.get('year_max', None, type=int)
-    bpm_min = request.args.get('bpm_min', None, type=int)
-    bpm_max = request.args.get('bpm_max', None, type=int)
-    vocal_min = request.args.get('vocal_min', None, type=int)
-    vocal_max = request.args.get('vocal_max', None, type=int)
-    acoustic_min = request.args.get('acoustic_min', None, type=int)
-    acoustic_max = request.args.get('acoustic_max', None, type=int)
-    speech_min = request.args.get('speech_min', None, type=int)
-    speech_max = request.args.get('speech_max', None, type=int)
-    danceability_min = request.args.get('danceability_min', None, type=int)
-    danceability_max = request.args.get('danceability_max', None, type=int)
-    energy_min = request.args.get('energy_min', None, type=int)
-    energy_max = request.args.get('energy_max', None, type=int)
-    loudness_min = request.args.get('loudness_min', None, type=int)
-    loudness_max = request.args.get('loudness_max', None, type=int)
-    valence_min = request.args.get('valence_min', None, type=int)
-    valence_max = request.args.get('valence_max', None, type=int)
-    
-    instrumental_min = 100 - vocal_max if vocal_max is not None else None
-    instrumental_max = 100 - vocal_min if vocal_min is not None else None
-    
-    keys = request.args.get('keys', '', type=str)
+
     genre = request.args.get('genre', '', type=str)
     label = request.args.get('label', '', type=str)
     
@@ -101,69 +79,12 @@ def tracks():
     order_by = request.args.get('order_by', '', type=str)
     asc = request.args.get('asc', None, type=str)
     
-    min_maxes = get_tracks_min_maxes()
-    if year_min == min_maxes['year_min']:
-        year_min = None
-    if year_max == min_maxes['year_max']:
-        year_max = None
-    if bpm_min == min_maxes['bpm_min']:
-        bpm_min = None
-    if bpm_max == min_maxes['bpm_max']:
-        bpm_max = None
-    if instrumental_min == min_maxes['instrumental_min']:
-        instrumental_min = None
-    if instrumental_max == min_maxes['instrumental_max']:
-        instrumental_max = None
-    if acoustic_min == min_maxes['acoustic_min']:
-        acoustic_min = None
-    if acoustic_max == min_maxes['acoustic_max']:
-        acoustic_max = None
-    if speech_min == min_maxes['speech_min']:
-        speech_min = None
-    if speech_max == min_maxes['speech_max']:
-        speech_max = None
-    if danceability_min == min_maxes['danceability_min']:
-        danceability_min = None
-    if danceability_max == min_maxes['danceability_max']:
-        danceability_max = None
-    if energy_min == min_maxes['energy_min']:
-        energy_min = None
-    if energy_max == min_maxes['energy_max']:
-        energy_max = None
-    if loudness_min == min_maxes['loudness_min']:
-        loudness_min = None
-    if loudness_max == min_maxes['loudness_max']:
-        loudness_max = None
-    if valence_min == min_maxes['valence_min']:
-        valence_min = None
-    if valence_max == min_maxes['valence_max']:
-        valence_max = None
-    
-    
+
     tracks,tracks_raw,results_count = get_tracks(
         search=search, 
         page=page, 
         per_page=PER_PAGE, 
-        year_min=year_min, 
-        year_max=year_max,
-        bpm_max=bpm_max,
-        bpm_min=bpm_min,
-        instrumental_min=instrumental_min,
-        instrumental_max=instrumental_max,
-        acoustic_min=acoustic_min,
-        acoustic_max=acoustic_max,
-        danceability_min=danceability_min,
-        danceability_max=danceability_max,
-        energy_min=energy_min,
-        energy_max=energy_max,
-        loudness_min=loudness_min,
-        loudness_max=loudness_max,
-        valence_min=valence_min,
-        valence_max=valence_max,
-        speech_min=speech_min,
-        speech_max=speech_max,
         order_by=order_by,
-        keys=keys,
         genre=genre,
         label=label,
         asc=asc
@@ -194,44 +115,7 @@ def tracks():
             params['order_by'] = order_by
         if page != 1:
             params['page'] = page
-        if year_min is not None:
-            params['year_min'] = year_min
-        if year_max is not None:
-            params['year_max'] = year_max
-        if bpm_min is not None:
-            params['bpm_min'] = bpm_min
-        if bpm_max is not None:
-            params['bpm_max'] = bpm_max
-        if instrumental_min is not None:
-            params['instrumental_min'] = instrumental_min
-        if instrumental_max is not None:
-            params['instrumental_max'] = instrumental_max
-        if acoustic_min is not None:
-            params['acoustic_min'] = acoustic_min
-        if acoustic_max is not None:
-            params['acoustic_max'] = acoustic_max
-        if speech_min is not None:
-            params['speech_min'] = speech_min
-        if speech_max is not None:
-            params['speech_max'] = speech_max
-        if danceability_min is not None:
-            params['danceability_min'] = danceability_min
-        if danceability_max is not None:
-            params['danceability_max'] = danceability_max
-        if energy_min is not None:
-            params['energy_min'] = energy_min
-        if energy_max is not None:
-            params['energy_max'] = energy_max
-        if loudness_min is not None:
-            params['loudness_min'] = loudness_min
-        if loudness_max is not None:
-            params['loudness_max'] = loudness_max
-        if valence_min is not None:
-            params['valence_min'] = valence_min
-        if valence_max is not None:
-            params['valence_max'] = valence_max
-        if keys:
-            params['keys'] = keys
+
         if genre:
             params['genre'] = genre
             
@@ -245,22 +129,11 @@ def tracks():
     
     is_paginated = tracks_raw.has_next or tracks_raw.has_prev
     
-    
 
-        
-    vocal_min = 100 - instrumental_max if instrumental_max is not None else None
-    vocal_max = 100 - instrumental_min if instrumental_min is not None else None
-    vocal_min_default = 100 - min_maxes['instrumental_max']
-    vocal_max_default = 100 - min_maxes['instrumental_min']
 
     
     user_id = get_user_id()
     
-    # if user_id:
-    #     user_playlists = get_playlists_from_user(user_id, order_by='edit_date',page=1,per_page=100)
-    # else:
-    #     user_playlists = []
-    # Ditch this for now
     user_playlists = []
         
     current_url = request.url
@@ -272,43 +145,7 @@ def tracks():
                            is_paginated=is_paginated,
                            search=search,
                            user_playlists=user_playlists,
-                           year_min=year_min,
-                            year_max=year_max,
-                            year_min_default=min_maxes['year_min'],
-                            year_max_default=min_maxes['year_max'],
-                            bpm_min=bpm_min,
-                            bpm_max=bpm_max,
-                            bpm_min_default=min_maxes['bpm_min'],
-                            bpm_max_default=min_maxes['bpm_max'],
-                            vocal_min=vocal_min,
-                            vocal_max=vocal_max,
-                            vocal_min_default=vocal_min_default,
-                            vocal_max_default=vocal_max_default,
-                            acoustic_min=acoustic_min,
-                            acoustic_max=acoustic_max,
-                            acoustic_min_default=min_maxes['acoustic_min'],
-                            acoustic_max_default=min_maxes['acoustic_max'],
-                            speech_min=speech_min,
-                            speech_max=speech_max,
-                            speech_min_default=min_maxes['speech_min'],
-                            speech_max_default=min_maxes['speech_max'],
-                            danceability_min=danceability_min,
-                            danceability_max=danceability_max,
-                            danceability_min_default=min_maxes['danceability_min'],
-                            danceability_max_default=min_maxes['danceability_max'],
-                            energy_min=energy_min,
-                            energy_max=energy_max,
-                            energy_min_default=min_maxes['energy_min'],
-                            energy_max_default=min_maxes['energy_max'],
-                            loudness_min=loudness_min,
-                            loudness_max=loudness_max,
-                            loudness_min_default=min_maxes['loudness_min'],
-                            loudness_max_default=min_maxes['loudness_max'],
-                            valence_min=valence_min,
-                            valence_max=valence_max,
-                            valence_min_default=min_maxes['valence_min'],
-                            valence_max_default=min_maxes['valence_max'],
-                            keys=keys,
+             
                             genre=genre,
                             label=label,
                             order_by=order_by,

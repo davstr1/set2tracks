@@ -77,19 +77,19 @@ class Track(db.Model):
     
     # Spotify API fields
     
-    acousticness = db.Column(SmallInteger, index=True)
-    danceability = db.Column(SmallInteger, index=True)
-    duration_s = db.Column(Integer, index=True)
-    energy = db.Column(SmallInteger, index=True)
-    key = db.Column(SmallInteger, index=True) # 1-11
-    mode = db.Column(SmallInteger, index=True) # 0-1
-    liveness = db.Column(SmallInteger, index=True)
-    loudness = db.Column(SmallInteger, index=True)
-    instrumentalness = db.Column(SmallInteger, index=True)
-    speechiness = db.Column(SmallInteger, index=True)
-    tempo = db.Column(SmallInteger, index=True)
-    time_signature = db.Column(SmallInteger, index=True)
-    valence = db.Column(SmallInteger, index=True)
+    # acousticness = db.Column(SmallInteger, index=True)
+    # danceability = db.Column(SmallInteger, index=True)
+    # duration_s = db.Column(Integer, index=True)
+    # energy = db.Column(SmallInteger, index=True)
+    # key = db.Column(SmallInteger, index=True) # 1-11
+    # mode = db.Column(SmallInteger, index=True) # 0-1
+    # liveness = db.Column(SmallInteger, index=True)
+    # loudness = db.Column(SmallInteger, index=True)
+    # instrumentalness = db.Column(SmallInteger, index=True)
+    # speechiness = db.Column(SmallInteger, index=True)
+    # tempo = db.Column(SmallInteger, index=True)
+    # time_signature = db.Column(SmallInteger, index=True)
+    # valence = db.Column(SmallInteger, index=True)
     
     search_vector = db.Column(TSVectorType('title', 'artist_name'))
     
@@ -137,17 +137,17 @@ class Set(db.Model):
     nb_tracks = db.Column(db.Integer, default=0, index=True)
     like_count = db.Column(db.Integer, default=0,nullable=False, index=True)
     view_count = db.Column(db.Integer, default=0,nullable=False, index=True)
-    decades = db.Column(db.ARRAY(db.Integer), nullable=True)
+    #decades = db.Column(db.ARRAY(db.Integer), nullable=True)
     
     artist_popularity_spotify = db.Column(SmallInteger)
-    acousticness = db.Column(SmallInteger)
-    danceability = db.Column(SmallInteger)
-    energy = db.Column(SmallInteger)
-    liveness = db.Column(SmallInteger)
-    loudness = db.Column(SmallInteger)
-    instrumentalness = db.Column(SmallInteger)
-    speechiness = db.Column(SmallInteger)
-    valence = db.Column(SmallInteger)
+    # acousticness = db.Column(SmallInteger)
+    # danceability = db.Column(SmallInteger)
+    # energy = db.Column(SmallInteger)
+    # liveness = db.Column(SmallInteger)
+    # loudness = db.Column(SmallInteger)
+    # instrumentalness = db.Column(SmallInteger)
+    # speechiness = db.Column(SmallInteger)
+    # valence = db.Column(SmallInteger)
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     error = db.Column(db.Text, nullable=True)
     hidden = db.Column(db.Boolean, default=False, index=True)
