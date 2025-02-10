@@ -41,10 +41,14 @@
         </li>
       </ul>
       </ul>
+    
       {% if is_admin %}
       <div class="mt-4 text-xs float-right right-0 py-4">
+        {% if status=="discarded" %}
+        <a href="{{url_for('set.sets_queue',status='discarded',msg='1 unique')}}">1 track errors</a>
+        {% endif %}
         {% if include_15min_error ==1 %}
-        <a href="{{url_for('set.sets_queue',status=status,page=page)}}">
+        <a class="inline-block ml-6" ref="{{url_for('set.sets_queue',status=status,page=page)}}">
           Exclude sets "Video shorter than 15m. errors"
         </a>
         {% else %}
@@ -82,29 +86,29 @@
                   <img src="{{url_for('static',filename='im/placeholder_128x72.png')}}" alt="" class="w-32 h-auto">
                   {% endif %}
                 </div>
-                <div >
+                <div>
                   <div class="w-full flex">
                     <a target="_blank" href="https://www.youtube.com/watch?v={{set.video_id}}">
                       <svg class="w-6 h-6 fill-base-content hover:fill-primary inline ">
                         <use xlink:href="#icon-link-external"></use>
                       </svg>
                     </a>
-                    
+
                     {% if set.set_id %}
                     {% set url = url_for('set.set', set_id=set.set_id) %}
-                    
+
                     <a href="{{url}}" class="tooltip text-sm font-semibold line-clamp-1  max-w-[230px] text-left" title="{{set.video_info_json.title }}">{{set.video_info_json.title }}</a>
                     {% else %}
                     <span class="discreet text-sm font-semibold truncate max-w-xs">{{set.video_info_json.title if set.video_info_json else set.video_id}}</span>
                     {% endif %}
-                    
+
                   </div>
                   <div class="discreet">{{set.video_info_json.channel}}</div>
 
                   {% if set.discarded_reason and set.status != 'done' %}
                   <div class="tooltip" data-tip="{{discarded_reason_to_ux(set.discarded_reason)}}">
-                  <div class="text-sm text-red-500 truncate max-w-xs  px-4 pl-0">{{discarded_reason_to_ux(set.discarded_reason)}}</div>
-                </div>
+                    <div class="text-sm text-red-500 truncate max-w-xs  px-4 pl-0">{{discarded_reason_to_ux(set.discarded_reason)}}</div>
+                  </div>
                   {% endif %}
                 </div>
 
@@ -120,7 +124,7 @@
               <p class="text-sm">{{tpl_utils.time_ago(set.queued_at)}}</p>
               <p class="text-sm">{{tpl_utils.time_ago(set.updated_at)}}</p>
             </td>
-            
+
             {% if is_admin %}
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex flex-col items-right space-x-4 space-y-2">

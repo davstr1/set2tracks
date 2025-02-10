@@ -172,7 +172,7 @@ def get_sets_with_zero_track(page=1):
     results = query.paginate(page=page, per_page=10, error_out=False)
     return results, results_count
     
-def get_sets_in_queue(page=1, status=None,include_15min_error=True):
+def get_sets_in_queue(page=1, status=None,include_15min_error=True,msg=None):
     #query = SetQueue.query
     query = SetQueue.query.outerjoin(Set, SetQueue.video_id == Set.video_id)
     query = query.with_entities(
@@ -194,24 +194,22 @@ def get_sets_in_queue(page=1, status=None,include_15min_error=True):
     # Filter by status if provided
     if status:
         query = query.filter(SetQueue.status == status)
-    else:
-        # Default filter when no specific status is provided
-        ##query = query.filter(SetQueue.status.in_(['pending', 'processing']))
-        nothing = None
         
-    if not include_15min_error:
-        
+    if msg:
+        query = query.filter(SetQueue.discarded_reason.like(f'%{msg}%'))
+        print('query was filtered by msg')
+    elif not include_15min_error:
         query = query.filter(
-        or_(
-        SetQueue.discarded_reason == None,           # Handle NULL values
-        SetQueue.discarded_reason == '',             # Handle empty strings
-        ~SetQueue.discarded_reason.like('%Video shorter than 15m%')   # Exclude '15min'
+            or_(
+                SetQueue.discarded_reason == None,  # Handle NULL values
+                SetQueue.discarded_reason == '',   # Handle empty strings
+                ~SetQueue.discarded_reason.like('%Video shorter than 15m%')  # Exclude 15min filter
+            )
         )
-    )
 
-       #~SetQueue.discarded_reason.like('%Video shorter than 15m%') | (SetQueue.discarded_reason == None)
+    print(str(query.statement))
 
-    # Get the total count before pagination
+        # Get the total count before pagination
     total_count = query.count()
 
     # Order by SetQueue.id ascending
@@ -241,25 +239,32 @@ def upsert_set_browsing_history(set_id, user_id):
     return True
 
 
-def count_sets_with_status(status, include_15min_error=True):
+def count_sets_with_status(status, include_15min_error=True,msg=None):
     query = SetQueue.query.filter_by(status=status)
     
     if not include_15min_error and status == 'discarded': # quick n dirty fix, was giving me extravagant results on "done" sets
-        query = query.filter(
-        ~SetQueue.discarded_reason.like('%Video shorter than 15m%')   # Exclude '15min'
-        )
+        if msg:
+            query = query.filter(SetQueue.discarded_reason.like(f'%{msg}%'))
+        else:
+            query = query.filter(
+            ~SetQueue.discarded_reason.like('%Video shorter than 15m%')   # Exclude '15min'
+            )
     return query.count()
 
-def count_sets_with_all_statuses(include_15min_error=True):
+def count_sets_with_all_statuses(include_15min_error=True,msg=None):
     #distinct_statuses = SetQueue.query.with_entities(SetQueue.status).distinct().all()
     distinct_statuses = [status for status in SetQueue.__table__.columns['status'].type.enums]
 
     result = {}
     for status in distinct_statuses:
-        result[status] = count_sets_with_status(status,include_15min_error) or 0
+        if msg and status == 'discarded':
+            result[status] = count_sets_with_status(status,include_15min_error,msg) or 0
+        else:
+            result[status] = count_sets_with_status(status,include_15min_error) or 0
     # Not a proper status, but used to count sets with no tracks
     result['all'] = sum(result.values())
     result['zero_track'] = Set.query.filter_by(nb_tracks=0).count() or 0
+    
     
     return result
     

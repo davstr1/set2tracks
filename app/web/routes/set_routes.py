@@ -178,6 +178,7 @@ def sets_queue():
     
     page = request.args.get('page', default=1, type=int)
     status = request.args.get('status', default=None, type=str)
+    msg = request.args.get('msg', default=None, type=str)
     if is_admin():
         include_15min_error = request.args.get('include_15min_error', default=False, type=bool)
     else:
@@ -186,11 +187,13 @@ def sets_queue():
     if status and status == 'zero_track':
         sets,nb_sets = get_sets_with_zero_track(page=page)
     else:     
-        sets,nb_sets = get_sets_in_queue(page=page, status=status, include_15min_error=include_15min_error)
+        sets,nb_sets = get_sets_in_queue(page=page, status=status, include_15min_error=include_15min_error,msg=msg)
     #my_sets = get_my_sets_in_queue(user_id=get_user_id())
     my_sets = None
     
-    count = count_sets_with_all_statuses(include_15min_error=include_15min_error)
+    print(sets,nb_sets)
+    
+    count = count_sets_with_all_statuses(include_15min_error=include_15min_error,msg=msg)
     
     def get_pagination_url(page):
      params = {}
@@ -201,6 +204,9 @@ def sets_queue():
          params['page'] = page
      if include_15min_error:
             params['include_15min_error'] = include_15min_error
+     if msg:
+        params['msg'] = msg
+        
      return url_for('set.sets_queue', **params)
 
     pagination = {}
