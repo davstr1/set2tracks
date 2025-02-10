@@ -16,7 +16,7 @@ def track_link(track_id, music_service):
     error_redirect = url_for('set.sets')
     # Music service should be either 'spotify' or 'apple'
     track = get_track_by_id(track_id=track_id)
-    print(track)
+
     if not track:
         flash('Track not found', 'error')
         return redirect(error_redirect)

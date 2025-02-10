@@ -247,19 +247,7 @@ def set(set_id):
     if not is_admin() and set_queue_status and set_queue_status != 'done':
         flash('This set is not publically accessible. Please try again later.', 'error')
         return redirect(url_for('set.sets'))
-    
-    #genres = get_set_genres_by_occurrence(set_id)
-    #pprint(genres)
-   # avg_properties = calculate_avg_properties(set['tracks'])
-    #most_common_decades = calculate_decade_distribution(set['tracks'])
-    #pprint(most_common_decades)
-    # most_common_tempos = calculate_and_sort_tempo_distribution(set['tracks'])
-    # pprint(avg_properties)
-    # pprint('------')
-    # print(most_common_decades)
-    # print(most_common_tempos)
-    #pprint(get_set_avg_characteristics(set_id))
-    
+        
     channel = get_channel_by_id(set['channel_id'])
     channel.sets_visible = sorted(
             [set_item for set_item in channel.sets if (not set_item.hidden and set_item.published)],
@@ -373,7 +361,7 @@ def insert_set_route(video_id):
     
     # check if the set already is in queue or discarded
     queued_set = is_set_in_queue(video_id)
-    print('queued_set',queued_set)
+  
     if queued_set and queued_set.status != 'done':
         if queued_set.status == 'discarded':
             ux_discarded_reason = discarded_reason_to_ux(queued_set.discarded_reason)

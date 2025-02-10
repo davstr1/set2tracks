@@ -283,7 +283,6 @@ def get_my_sets_in_queue_not_notified(user_id):
     
     set_in_queue = SetQueue.query.filter_by(user_id=user_id,play_sound=True,notification_sound_sent=False,status='done').order_by(SetQueue.id.asc()).first()
     if set_in_queue:
-        print('set_in_queue',set_in_queue)
         set_in_queue.notification_sound_sent = True
         db.session.commit()
         
@@ -426,7 +425,6 @@ def get_set_with_tracks(set_id):
     try:
         set_queue_entry = SetQueue.query.filter_by(video_id=set_instance.video_id).first()
         if set_queue_entry and set_queue_entry.video_info_json:
-            print('set_queue_entry.video_info_json',set_queue_entry.video_info_json)
             video_info_json = set_queue_entry.video_info_json
         else:
             video_info_json = {}  
