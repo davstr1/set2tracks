@@ -1,35 +1,12 @@
-import json
-import os
-import re
-import shutil
-import time
-
-from flask import url_for
-from flask_login import current_user
-import jwt
-import requests
-from sqlalchemy import  and_, func,  or_
-from sqlalchemy.ext.mutable import MutableDict
-
 from web.controller.set import extract_time_from_reason, is_set_exists, is_set_in_queue
 from web.controller.set_process import insert_set, remove_set_temp_files
-from web.lib.av_apis.apple import add_apple_track_data_from_json
-from web.lib.audio import cut_audio
-#from web.lib.insert_set import insert_set
-from web.lib.count_unique_tracks import count_unique_tracks
-from web.lib.process_shazam_json import write_deduplicated_segments, write_segments_from_chapter
-from web.lib.av_apis.shazam import sync_process_segments
-from web.lib.av_apis.spotify import add_tracks_spotify_data_from_json, add_tracks_to_spotify_playlist, create_spotify_playlist
-from web.lib.utils import as_dict, calculate_avg_properties
-from web.lib.av_apis.youtube import download_youtube_video, youbube_video_info, youtube_video_exists
-from web.model import AppConfig, Genre, Playlist, RelatedTracks, Set, SetBrowsingHistory, SetQueue, SetSearch, Track, TrackGenres, TrackPlaylist, TrackSet,Channel
+from web.lib.utils import as_dict
+from web.lib.av_apis.youtube import youbube_video_info, youtube_video_exists
+from web.model import  Set, SetQueue, Channel
 from datetime import datetime, timedelta, timezone
 from boilersaas.utils.db import db
 
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import joinedload
-from collections import defaultdict
-from web.lib.format import cut_to_if_needed, format_db_track_for_template, format_db_tracks_for_template, format_tracks_with_pos, format_tracks_with_times, prepare_track_for_insertion
+from web.lib.format import cut_to_if_needed
 
 from web.logger import logger
 
@@ -404,6 +381,7 @@ def insert_set_from_queue():
             pending_entry.status = 'discarded'
         
         logger.error(f'Set insertion {pending_entry.status}. Reason: {distarted_reason}')
+        logger.error(result)
         pending_entry.n_attempts += 1
         pending_entry.discarded_reason = clean_discarded_reason(distarted_reason, pending_entry.video_id)
         

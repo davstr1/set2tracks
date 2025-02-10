@@ -3,10 +3,11 @@
 
 import os
 import shutil
+import traceback
 from web.controller.set import validate_set_data
 from web.controller.utils import error_out
 import json
-from web.lib import count_unique_tracks
+from web.lib.count_unique_tracks import count_unique_tracks
 from web.lib.audio import cut_audio
 from web.lib.av_apis.apple import add_apple_track_data_from_json
 from web.lib.av_apis.shazam import sync_process_segments
@@ -148,7 +149,8 @@ def insert_set(video_info,delete_temp_files=True):
                 write_deduplicated_segments(shazam_json_dir, dedup_segments_filepath,AUDIO_SEGMENTS_LENGTH)
             else:
                 write_segments_from_chapter(shazam_json_dir, dedup_segments_filepath, chapters)
-
+        
+        logger.info(f'Processing segments from {dedup_segments_filepath}')
     
         if not os.path.exists(complete_songs_path) or True :
             songs = json.load(open(dedup_segments_filepath))
@@ -171,15 +173,17 @@ def insert_set(video_info,delete_temp_files=True):
             
         songs = json.load(open(complete_songs_path))
         
+        logger.info(f'Adding {len(songs)} tracks to set {set.id}')
+        
         add_tracks_from_json(songs,set,add_to_set=True)
 
         if delete_temp_files:
             shutil.rmtree(vid_dir)
 
         return {'set_id':set.id}
-    except Exception as e:
+    except Exception as e:        
         if delete_temp_files:
-            shutil.rmtree(vid_dir)
+            shutil.rmtree(vid_dir)           
         return error_out(str(e)) 
     
     

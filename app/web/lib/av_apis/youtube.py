@@ -185,7 +185,7 @@ def download_youtube_video(id: str, vid_dir: str, retry_count: int = 10) -> str:
         }],
         'fragment-retries': 1,  # Reduce retries on fragment failure
         'retries': 3,           # General retries count for failed downloads
-        'concurrent-fragments': 5,  # Download 5 fragments concurrently (default is 1)
+        'concurrent-fragments': 10,  # Download 5 fragments concurrently (default is 1)
         'http_chunk_size': 10 * 1024 * 1024,  # Chunk size (10MB for faster throughput)
         'noplaylist': True,
         'nocheckcertificate': True,
