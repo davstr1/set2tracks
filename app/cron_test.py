@@ -5,17 +5,20 @@ import pprint
 import re
 import time
 
+from requests import get
 from shazamio import Shazam
 #from web.lib.process_shazam_json import transform_track_data
 
-from web.lib.av_apis.apple import  add_apple_track_data_from_json_async
-from web.lib.av_apis.spotify import  add_tracks_spotify_data_from_json_async
-from web.lib.av_apis.shazam import shazam_search_track, shazam_add_tracks_label
-from web.lib.process_shazam_json import transform_track_data
+from web.model import Track
+from web.lib.av_apis.apple import  add_apple_track_data_from_json_async, add_apple_track_data_one
+from web.lib.av_apis.spotify import  add_track_spotify_info, add_tracks_spotify_data_from_json_async, async_add_track_spotify_info
+from web.lib.av_apis.shazam import shazam_search_track, shazam_add_tracks_label, shazam_track_add_label
 from web import create_app
 from boilersaas.utils.db import db
 from typing import Dict, Any, Optional
 
+def get_track_by_shazam_key(key_track_shazam):
+    return Track.query.filter_by(key_track_shazam=key_track_shazam).first()   
 
 def safe_get(d: Dict[str, Any], keys: list, default=None):
     """Safely retrieve nested dictionary values."""
@@ -64,15 +67,26 @@ async def process_single_track(track_title, semaphore, shazam):
     if track_info is None:
         print(f"No track found for {track_title}")
         return None
-
-    track = [transform_track_data(track_info)]
     
-    # Process track data immediately
-    await asyncio.gather(
-        shazam_add_tracks_label(track, 30, shazam=shazam),  # Process single track
-        add_tracks_spotify_data_from_json_async(track),  # Process single track
-        add_apple_track_data_from_json_async(track)  # Process single track
-    )
+    track = transform_track_data(track_info)
+    
+    
+    track_already_there = get_track_by_shazam_key(track.get("key_track_shazam"))
+    if track_already_there is not None :
+        print(f"Track already exists: {track.get('title')} by {track.get('artist_name')}")
+        
+    else:   
+        print(f"Processing track: {track.get('title')} by {track.get('artist_name')}")
+    
+        #track = [track] # next funcion is expecting a list of tracks
+    
+        # Process track data immediately
+        await asyncio.gather(
+            shazam_track_add_label(track, semaphore, shazam=shazam),  
+            async_add_track_spotify_info(track), 
+            add_apple_track_data_one(track) 
+        )
+        
     pprint.pprint(track)
     return track  # Optional: for debugging or logging
 
@@ -117,30 +131,14 @@ def worker_set_queue():
                 "Under Control - Alesso, Calvin Harris, Hurts"
             ]
             
+            track_titles = [
+                'Never Too Much - Luther Vandross',
+                "Bigger Than Prince - Hot Since 82 Remix - Green Velvet",
+            ]
+            
             tasks = [process_single_track(title, semaphore, shazam) for title in track_titles]
             processed_tracks = await asyncio.gather(*tasks)
-            # for track_title in track_titles:
-            #     track_info = await shazam_search_track(track_title, semaphore, shazam=shazam)
-            #     if track_info is None:
-            #         continue
-            #     track = transform_track_data(track_info)
-            #     track_list.append(track)
-            #     #track_list = [track]
-            
-            
-            
 
-            
-            
-            # # Execute these 3 functions in parallel
-            # results = await asyncio.gather(
-            #     shazam_add_tracks_label(track_list,30,shazam=shazam), # its then a 1 by 1 track operation. 1 track = 1 API call
-            #     add_tracks_spotify_data_from_json_async(track_list), # its then a 1 by 1 track operation. 1 track = 1 API call
-            #     add_apple_track_data_from_json_async(track_list) # the only one that parse all tracks at once. Needs to be run once ?
-            # )
-
-            # Since `track` is the first return value of `asyncio.gather`, we assume
-            # the functions are modifying the same track object in place (if not, adjust accordingly)
 
             total_time = time.time() - total_start
             print(f"Total execution time: {total_time:.2f} seconds")

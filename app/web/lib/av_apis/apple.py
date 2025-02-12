@@ -117,6 +117,12 @@ async def add_apple_track_data_from_json_async(tracks):
     return await asyncio.to_thread(add_apple_track_data_from_json, tracks)
 
 
+async def add_apple_track_data_one(track):
+    """ Async wrapper for add_apple_track_data_from_json """
+    ret = await asyncio.to_thread(add_apple_track_data_from_json, [track])
+    return ret[0]
+
+
 
 
 

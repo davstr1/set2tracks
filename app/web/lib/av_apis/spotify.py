@@ -241,6 +241,23 @@ def add_tracks_and_artist_spotify(track_title, artist_name,write_to_file=False):
 
 import concurrent.futures
 
+
+
+async def async_add_track_spotify_info(track):
+    return await asyncio.to_thread(add_track_spotify_info, track)
+
+
+def add_track_spotify_info(track):
+        if track and 'title' in track and 'artist_name' in track:
+ 
+            song_info = add_tracks_and_artist_spotify(track['title'], track['artist_name'])
+            if song_info:
+                track.update(song_info)
+            else:
+                logger.error(f'Error adding Spotify data to track: {track}')
+                # @TODO : add error handling
+        return track
+
 def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
     
     #json.dump(tracks_json, open('tracks.json', 'w'), indent=4)
@@ -267,20 +284,11 @@ def add_tracks_spotify_data_from_json(tracks_json,try_count=0,max_tries=3):
     logger.info(f'Adding Spotify data to {len(tracks_unique)} unique tracks. Vs {len(tracks_json)} tracks total.')
 
     
-    def process_track(track):
-        if track and 'title' in track and 'artist_name' in track:
- 
-            song_info = add_tracks_and_artist_spotify(track['title'], track['artist_name'])
-            if song_info:
-                track.update(song_info)
-            else:
-                logger.error(f'Error adding Spotify data to track: {track}')
-                # @TODO : add error handling
-        return track
+    
     
     try:
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            processed_tracks = list(executor.map(process_track, tracks_unique.values()))
+            processed_tracks = list(executor.map(add_track_spotify_info, tracks_unique.values()))
             
 
         try:

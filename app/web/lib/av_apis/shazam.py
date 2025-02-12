@@ -35,6 +35,11 @@ def transform_shazam_data(data):
 
 async def shazam_track_add_label(track, semaphore, MAX_RETRIES=3, RETRY_DELAY=0,shazam=None):
     async with semaphore:
+       
+        if safe_get(track, 'label'):
+            logger.info(f"Label already exists for track {track['title']}")
+            return track
+        
         if not shazam:
             shazam = Shazam()
         logger.info(f"Getting label for track {track['title']}")
@@ -100,9 +105,7 @@ async def shazam_related_tracks(track_id, limit=20,shazam=None):
         logger.info(f'Received related tracks from Shazam {related}')
         transformed = transform_shazam_data(related)
         logger.info('Transformed related tracks data')
-        
-        logger.debug(f"Get label info for tracks")
-       # tracks = await shazam_add_tracks_label(transformed)
+    
         return transformed
         #return transformed
     
