@@ -160,4 +160,7 @@ def get_track_by_id(track_id,format_for_template=True):
     
 def tracks_to_tracks_ids(tracks):
     return [track['id'] for track in tracks]
+
+def get_track_by_shazam_key(key_track_shazam):
+    return Track.query.filter_by(key_track_shazam=key_track_shazam).first()   
  
