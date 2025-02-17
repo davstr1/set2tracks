@@ -61,9 +61,6 @@ async def get_track_info_from_title_artist(track_title_artist, semaphore, shazam
     else:   
         print(f"Processing track: {track.get('title')} by {track.get('artist_name')}")
     
-        #track = [track] # next funcion is expecting a list of tracks
-    
-        # Process track data immediately
         await asyncio.gather(
             shazam_track_add_label(track, semaphore, shazam=shazam),  
             async_add_track_spotify_info(track), 
