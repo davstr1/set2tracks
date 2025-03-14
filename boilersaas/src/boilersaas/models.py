@@ -1,4 +1,5 @@
 #from flask_migrate import current
+from sqlalchemy import func
 from .utils.db import db
 from .types import UserType,UserConnectMethod
 from flask_login import UserMixin
@@ -20,7 +21,7 @@ class User(db.Model,UserMixin):
     password = db.Column(db.String(255), nullable=False)  # Store hashed passwords
     type = db.Column(db.Enum(UserType), nullable=False)
     #reg_date = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
-    reg_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    reg_date = db.Column(db.DateTime, nullable=False, default=func.now())
     last_login = db.Column(db.DateTime, nullable=True)
     lang = db.Column(db.String(2), nullable=False, default='en')
     connect_method = db.Column(db.Enum(UserConnectMethod), nullable=False)
