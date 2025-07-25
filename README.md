@@ -1,7 +1,7 @@
 
 # Set2Tracks is Dead… and Alive!
 
-![screenshot](https://github.com/davstr1/set2tracks/s2t-screen.jpg)
+![screenshot](s2t-screen.jpg)
 
 ## Context
 
