@@ -355,7 +355,8 @@ def insert_set_from_queue():
     'StringDataRightTruncation',
     'not available on this ap',
     'ffmpeg exited',
-    '[0;31mERROR'
+    '[0;31mERROR',
+    'Private video',
     ]
     
     premiere_keywords = [

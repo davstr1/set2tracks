@@ -1,94 +1,72 @@
 
-# TODO 
+# Set2Tracks is Dead… and Alive!
 
+![screenshot](https://github.com/davstr1/set2tracks/s2t-screen.jpg)
 
-- check how to overright translations from web/translations
-- integrate fb login
-- integrate https://www.paddle.com/
-- admin user management dashboard
-- user page
-- Integrate crypto payment recurrent 
-- Integrate affiliate thing. But how then ?
-- Admin protected area
-- page_title function and app name CONSTANT
-- End the translation
-- Translate emails
+## Context
 
+In early 2025, Set2Tracks got a warm welcome in this [r/beatmatch thread](https://www.reddit.com/r/Beatmatch/comments/1i2pohr/a_free_tool_to_discover_tracks_from_dj_sets/).  
+Thanks to everyone who checked it out, upvoted, and sent feedback!
 
+## What is it?
 
-# Yet Another SAAS boilerplate, but whyyy ?
-Just like quite every dev in the world, i didn't find something that ticked all my boxes. 
+Set2Tracks is a free tool that helps DJs and music lovers discover new tracks, by automatically converting YouTube DJ sets into full tracklists.
 
-Something for flask, FREE that lets you straight out of the box like a pip install and a config file,
-then booom you have fully functioning user registration, payment integration, tailwindcss, pre templates for logo, landing page and dashboard, so you can **just care about building the damn MVP for your SAAS**. 
-(which is more than enough of a job for a man).
+You can quickly scan entire sets, listen to previews, browse tracks by genre or label, and link straight to Spotify or Apple Music (support the artists, yo).
 
-And if you have several apps, update all this in a breeze.
-I mean something free, intented at code savyish guys, and with no cowbells and gimmicks.
+This all came from my own frustration trying to ID tracks in the sets I liked.  
+Maybe it helps others too—whether you're digging for new sounds, prepping for a gig, or just building a collection.
 
+## So, what happened?
 
-# Warning : MVP, WIP
+I thought about turning it into a Chrome extension so users could add their own sets (maybe with a small subscription).  
+But hosting costs would’ve gone up, since every set needs to be downloaded and processed…
 
-Yes, so far this is an MVP, so no tests, no rainbows or wonderfull CI/CD pipeline...
-Also, not written by an expert python wizard, a .1% hotshot x10 dev, even if i have coding skills and experience.
+And honestly, this is one of those tools people love to find for free—but wouldn’t really pay for (there’s no strong PAIN POINT here, and, well… DJs aren’t known for paying for this stuff).  
+Promotion? Not easy:  
+Reddit worked once, but mod teams are ruthless (even for free stuff—been there, deleted that).  
+Elsewhere? Not without $$$ and very uncertain ROI.
 
-Projet gives me a tiggling sense i should be ashamed of it at least a bit, which they say is good for an MVP .
-Just maybe don't use it to run a jet plane full of passengers. Or do what you want but don't blame me after.
+Plus, life called: I’ve got other, more urgent priorities right now (like actually making a living…).  
+So I can’t go all-in on this, even though I still think it’s cool and appreciated all the encouragement. I don’t want it to totally disappear.
 
-Anyway it "works on my machine", and my mum loves it so shut up and dance.
+## So… here’s the codebase.
 
+Yeah, it’s straight-up shameful, messy, spaghetti beginner code.  
+I’m frankly not proud of it.  
+But it works, and maybe you’ll find something useful.
+
+## DON’T:  
+Ask me for help with the codebase—really, sorry, I don’t have the bandwidth.
+
+## DO:  
+Let me know if you do anything with it!  
+[Ping me on Reddit](https://www.reddit.com/user/Doodadio/)
 
 
 # Working on my machine so far
 
 Python 3.11.5 (Naked, in a virtual environment)
 
-- user registration
-- user login
-- user login with Google
-- lost password
-- invite mode (where you send invite links)
-- translation (half assed but working)
-- dashboard, landing page
-- pre made templates for all or that. (don't expect content thaugh. For this you'll have to fight personally with Tailwind)
-
-# Roadmap that's actually going to be done
-Cause i need it for all my projects, and i will need all my project for being able to eat one day.
-- all the main login providers (fb,x...)
-- chargebee integration (and stripe, but for my own needs, that would be chargebee)
-- a proper admin dashboard
-
-# Roadmap that "would be great"
-- tests tests tests and pipeline
-- "boilersaas", perhaps the name sucks. But not sure anyone care.
-- Tell me if you think about something.
-
 
 
 # Install
 
-## First Get the thing (yep..)
+## First Get the thing, yep...
 
 ```
-gh repo clone davstr1/flask-boilersaas
-```
+gh repo clone davstr1/set2tracks
 or just download it.
 
 ## 1 - Setup 
 
 On terminal
 
-You probably want to be inside a new virtual env first.
+You probably want to be inside a new virtual env first. (pyenv)
 
 ```
 ./setup.sh
 ```
-
-Or if you want to develop the boilerplate itself, contribute to the project :
-```
-./setup.sh dev
-```
-Will install ./boilerplate locally instead of from a remote pip. So you can edit it and see immediatly the results.
 
 ## 2 - Fill app/web/.env with your data
 
@@ -113,31 +91,12 @@ python app/web/run.py
 pip install -r requirements.txt
 ```
 
-or if you want to developp the boilersaas, ( and contribute to the project) : 
-
-```
-pip install -r requirements_dev.txt
-```
-
-Then don't pip install the boilersaas from Pypi,
-but do an editable install instead :
-
-```
-pip install -e ./boilersaas
-```
-
-Now you can edit ./boilersaas and see immediate results.
-
-
 ### 2 - Edit environment variables
 
 Copy example.env into a .env, and fill it with your data.
 
 
 ## Notes
-
-- DEV : don't ditch the /boilerplate folder.
-This has css tailwind is listening too, which are crucial to the whole shebang.
 
 - PROD : All you really need in prod is the content of the "web" folder.
 
@@ -156,20 +115,6 @@ to
 
 
 and then edit them there.
-
-
-# Quick memo for myself
-
-Build then publish the package on Pypi:
-
-```pip install build```
-```python -m build```
-
-```twine upload dist/* --v  ``` 
-
-To create custom requirements, substracted from requirements
-
-``` pipdeptree --warn silence --freeze | grep -E '^\S' | grep -v '==/local' | { grep -vxFf requirements.txt || true; echo "flask-boilerplate"; } | sort -u > requirements_custom.txt ``` 
 
 
 # Still here ??

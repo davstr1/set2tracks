@@ -16,7 +16,7 @@ import logging
 
 
 # Setup Flask-Dance Google Blueprint
-google_blueprint = make_google_blueprint(
+googl_auth = make_google_blueprint(
     client_id=app.config.get('GOOGLE_CLIENT_ID'),
     client_secret=app.config.get('GOOGLE_CLIENT_SECRET'),
     scope=["openid","https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
@@ -25,11 +25,11 @@ google_blueprint = make_google_blueprint(
 
 
 
-google_blueprint.storage = SQLAlchemyStorage(OAuth, db.session, user=current_user,user_required=False)
+googl_auth.storage = SQLAlchemyStorage(OAuth, db.session, user=current_user,user_required=False)
 
 
 
-@google_blueprint.route('/google/after_authorize')
+@googl_auth.route('/google/after_authorize')
 def after_authorize():
     if not app.config.get('SIGNUP_OPTIONS')['allow_google']:
         flash(_('Google registration is not currently allowed.'), 'error')
