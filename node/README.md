@@ -1,459 +1,607 @@
-# Set2Tracks - Node.js/TypeScript Version
+# 🎵 Set2Tracks - Node.js Edition
 
-🎵 **DJ Set Tracklist Generator** - Node.js rewrite of the Python/Flask Set2Tracks application.
+**Automatically identify and catalog tracks from DJ set videos using Shazam music recognition**
 
-This is a complete Node.js/TypeScript transcription of the original Python Set2Tracks application, designed to identify and catalog tracks from DJ set videos using Shazam, Spotify, and Apple Music APIs.
+A complete Node.js/TypeScript rewrite of the original Python/Flask Set2Tracks application. Upload a YouTube DJ set URL, and the app automatically downloads it, identifies every track using Shazam, enriches metadata with Spotify, and creates a beautiful tracklist.
 
 ---
 
-## 🚀 Project Status
+## ⚡ Quick Start (5 Minutes)
 
-**⚠️ IN ACTIVE DEVELOPMENT**
+```bash
+# 1. Install dependencies
+npm install
 
-This is a fresh migration from Python to Node.js. Here's what's been completed:
+# 2. Set up environment
+cp .env.example .env
+nano .env  # Add your API keys (see below)
 
-### ✅ Completed
-- [x] Project structure and TypeScript setup
-- [x] Express.js server with middleware (compression, CORS, sessions)
-- [x] Prisma ORM with complete database schema (migrated from SQLAlchemy)
-- [x] Configuration system with environment variables
-- [x] Winston logging setup
-- [x] Nunjucks template engine configuration
-- [x] i18next internationalization setup
-- [x] Redis integration for sessions and job queue
-- [x] External API service stubs (Spotify, YouTube, Shazam)
-- [x] Spotify service (fully implemented)
-- [x] YouTube service with yt-dlp integration
-- [x] Shazam service structure (needs audio recognition implementation)
+# 3. Set up database
+npx prisma generate
+npx prisma db push
 
-### 🚧 TODO
-- [ ] Passport.js authentication (local + Google OAuth)
-- [ ] Route controllers (auth, sets, tracks, playlists, admin)
-- [ ] Business logic migration (set processing, track matching)
-- [ ] Bull job queue for background processing
-- [ ] Template migration from Jinja2 to Nunjucks
-- [ ] Tailwind CSS build integration
-- [ ] Chrome extension updates (point to new backend)
-- [ ] Testing suite
-- [ ] Production deployment configuration
+# 4. Build Tailwind CSS
+npm run tailwind:build
+
+# 5. Start Redis (in separate terminal)
+redis-server
+
+# 6. Start the app
+npm run dev
+
+# 7. Start background worker (in separate terminal)
+npm run jobs:dev
+
+# 8. Open browser
+open http://localhost:8080
+```
+
+**That's it!** You're ready to start identifying tracks from DJ sets! 🚀
+
+---
+
+## 🌟 Features
+
+### ✅ **Fully Implemented**
+
+- **🎵 Shazam Music Recognition** - Identifies tracks from audio with retry logic and rate limiting
+- **🔐 Authentication** - Email/password + Google OAuth login
+- **📹 YouTube Integration** - Downloads DJ set videos and extracts audio
+- **✂️ Audio Segmentation** - Splits sets into segments for recognition
+- **🎧 Spotify Integration** - Enriches tracks with metadata, artwork, and links
+- **📧 Email Notifications** - Get notified when your set is processed
+- **⚙️ Background Processing** - Bull job queue with Redis for async processing
+- **🎨 Beautiful UI** - Tailwind CSS templates with responsive design
+- **📊 Browse & Search** - Explore sets, tracks, and channels
+- **👤 User Accounts** - Registration, login, password reset, profile
+- **📱 Channel Discovery** - Find and follow YouTube DJ channels
+
+### 🎯 **How It Works**
+
+1. **Submit a YouTube URL** - Paste a link to a DJ set video
+2. **Download & Segment** - App downloads audio and splits it into 10-second chunks
+3. **Shazam Recognition** - Each segment is identified using Shazam API
+4. **Spotify Enrichment** - Track metadata, artwork, and links added from Spotify
+5. **Tracklist Created** - Beautiful page with full tracklist, timestamps, and links
+6. **Email Notification** - Get notified when processing is complete
 
 ---
 
 ## 📋 Prerequisites
 
-- **Node.js**: >= 18.0.0
-- **npm**: >= 9.0.0
-- **PostgreSQL**: >= 13.0
-- **Redis**: >= 6.0
-- **FFmpeg**: Required for audio processing
-- **yt-dlp**: Required for YouTube video downloads
+| Software | Version | Purpose |
+|----------|---------|---------|
+| **Node.js** | >= 18.0 | Runtime environment |
+| **npm** | >= 9.0 | Package manager |
+| **PostgreSQL** | >= 13.0 | Primary database |
+| **Redis** | >= 6.0 | Sessions & job queue |
+| **FFmpeg** | Latest | Audio processing |
+| **yt-dlp** | Latest | YouTube downloads |
 
-### Installing System Dependencies
+### Install System Dependencies
 
+**Ubuntu/Debian:**
 ```bash
-# Ubuntu/Debian
 sudo apt update
-sudo apt install ffmpeg redis-server postgresql
-
-# macOS (with Homebrew)
-brew install ffmpeg redis postgresql
-
-# Install yt-dlp
+sudo apt install ffmpeg redis-server postgresql nodejs npm
 pip install yt-dlp
-# or
+```
+
+**macOS:**
+```bash
+brew install ffmpeg redis postgresql node
 brew install yt-dlp
 ```
 
+**Verify Installation:**
+```bash
+node --version    # Should be v18+
+redis-cli ping    # Should return "PONG"
+ffmpeg -version   # Should show version
+yt-dlp --version  # Should show version
+```
+
 ---
 
-## 🛠️ Installation
+## 🔧 Configuration
 
-### 1. Clone and Install Dependencies
+### 1. Environment Variables
 
-```bash
-cd /home/user/set2tracks-node
-
-# Install Node.js dependencies
-npm install
-```
-
-### 2. Set Up Environment Variables
+Copy `.env.example` to `.env` and fill in the required values:
 
 ```bash
-# Copy the example environment file
 cp .env.example .env
-
-# Edit .env with your configuration
-nano .env
 ```
 
-**Required Environment Variables:**
-- `DATABASE_URL`: PostgreSQL connection string
-- `SECRET_KEY`: Session secret key (32+ characters)
-- `SPOTIFY_CLIENT_ID` & `SPOTIFY_CLIENT_SECRET`: From Spotify Developer Dashboard
-- `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: For OAuth (optional)
-- `MAIL_*`: SMTP configuration for emails
-- `REDIS_HOST` & `REDIS_PORT`: Redis connection
+### 2. Required API Keys
 
-See `.env.example` for all available options.
-
-### 3. Set Up Database
-
-```bash
-# Generate Prisma Client
-npm run prisma:generate
-
-# Option A: Create new database and run migrations
-npm run prisma:migrate
-
-# Option B: Pull schema from existing Python database
-npm run prisma:introspect
-npm run prisma:generate
+#### **Spotify API** (Required for track metadata)
+1. Go to https://developer.spotify.com/dashboard
+2. Create an app
+3. Copy Client ID and Client Secret to `.env`:
+```env
+SPOTIFY_CLIENT_ID=your_client_id_here
+SPOTIFY_CLIENT_SECRET=your_client_secret_here
 ```
 
-### 4. Start Redis
+#### **Google OAuth** (Optional - for social login)
+1. Go to https://console.cloud.google.com/
+2. Create OAuth 2.0 credentials
+3. Add to `.env`:
+```env
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:8080/auth/google/callback
+```
 
+#### **Email/SMTP** (Optional - for notifications)
+```env
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USE_TLS=true
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_DEFAULT_SENDER=your_email@gmail.com
+```
+
+### 3. Database Setup
+
+**Option A: Create New Database**
 ```bash
-# Ubuntu/Debian
-sudo systemctl start redis
+# Create PostgreSQL database
+createdb set2tracks
 
-# macOS
-brew services start redis
+# Set DATABASE_URL in .env
+DATABASE_URL="postgresql://username:password@localhost:5432/set2tracks"
 
-# Or run manually
+# Generate Prisma client
+npx prisma generate
+
+# Push schema to database
+npx prisma db push
+
+# (Optional) Seed database
+npm run prisma:seed
+```
+
+**Option B: Use Existing Python Database**
+```bash
+# Point to existing database in .env
+DATABASE_URL="postgresql://username:password@localhost:5432/set2tracks"
+
+# Introspect existing schema
+npx prisma db pull
+
+# Generate client
+npx prisma generate
+```
+
+---
+
+## 🚀 Running the Application
+
+### Development Mode
+
+You need **3 terminal windows**:
+
+**Terminal 1: Redis**
+```bash
 redis-server
 ```
 
-### 5. Run the Application
-
+**Terminal 2: Web Server**
 ```bash
-# Development mode (with hot reload)
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
+# Server starts on http://localhost:8080
 ```
 
-The server will start on `http://localhost:8080`
+**Terminal 3: Background Worker**
+```bash
+npm run jobs:dev
+# Processes queued DJ sets
+```
+
+### Production Mode
+
+```bash
+# Build TypeScript
+npm run build
+
+# Build CSS
+npm run tailwind:build
+
+# Start Redis (if not running)
+redis-server &
+
+# Start web server
+npm start &
+
+# Start background worker
+npm run jobs:prod &
+```
+
+### Using PM2 (Recommended for Production)
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start all services
+pm2 start npm --name "set2tracks-web" -- start
+pm2 start npm --name "set2tracks-worker" -- run jobs:prod
+
+# View logs
+pm2 logs
+
+# Stop all
+pm2 stop all
+```
 
 ---
 
-## 🏗️ Architecture
+## 📖 Usage Guide
 
-### Technology Stack
+### For Users
 
-| Component | Technology |
-|-----------|-----------|
-| **Runtime** | Node.js 18+ |
-| **Language** | TypeScript 5.3+ |
-| **Web Framework** | Express.js 4.18 |
-| **ORM** | Prisma 5.7 |
-| **Database** | PostgreSQL |
-| **Template Engine** | Nunjucks (Jinja2 for Node) |
-| **Authentication** | Passport.js |
-| **Session Store** | Redis via connect-redis |
-| **Job Queue** | Bull (Redis-backed) |
-| **CSS Framework** | Tailwind CSS 3.4 |
-| **i18n** | i18next |
-| **Logging** | Winston |
-| **Audio Processing** | fluent-ffmpeg (wraps FFmpeg) |
-| **Video Download** | youtube-dl-exec (wraps yt-dlp) |
-| **Music Recognition** | Shazam API (needs implementation) |
-| **Music APIs** | Spotify Web API, Apple Music |
+1. **Register an Account**
+   - Visit http://localhost:8080/auth/register
+   - Create account or use Google OAuth
 
-### Directory Structure
+2. **Submit a DJ Set**
+   - Go to http://localhost:8080/set/queue
+   - Paste YouTube URL (e.g., `https://www.youtube.com/watch?v=VIDEO_ID`)
+   - Click "Process Set"
+   - (Optional) Check "Send email when complete"
+
+3. **View Your Set**
+   - Processing takes 2-10 minutes depending on length
+   - Check queue status at http://localhost:8080/admin/queue
+   - When complete, view tracklist at http://localhost:8080/set/SET_ID
+
+4. **Browse Content**
+   - **All Sets**: http://localhost:8080/set
+   - **All Tracks**: http://localhost:8080/track
+   - **Channels**: http://localhost:8080/channel
+   - **Search**: Use search bar in header
+
+### For Admins
+
+Access admin dashboard at http://localhost:8080/admin (requires admin account)
+
+- View system statistics
+- Manage users
+- Monitor processing queue
+- View application logs
+- Configure settings
+
+---
+
+## 🗂️ Project Structure
 
 ```
 set2tracks-node/
 ├── src/
-│   ├── config/           # Configuration and environment setup
-│   │   └── index.ts      # Centralized config loader
-│   ├── models/           # Prisma models (auto-generated)
-│   ├── controllers/      # Business logic (to be implemented)
-│   ├── routes/           # Express route handlers (to be implemented)
-│   ├── services/         # External API integrations
-│   │   ├── spotify.service.ts    # ✅ Complete
-│   │   ├── youtube.service.ts    # ✅ Complete
-│   │   └── shazam.service.ts     # ⚠️ Needs audio recognition
-│   ├── jobs/             # Bull job processors (to be implemented)
-│   ├── middleware/       # Express middleware (to be implemented)
-│   ├── utils/            # Helper utilities
-│   │   └── logger.ts     # Winston logger setup
-│   ├── views/            # Nunjucks templates (to be migrated)
-│   ├── app.ts            # Express app configuration
-│   └── index.ts          # Application entry point
+│   ├── app.ts                 # Express app configuration
+│   ├── index.ts               # Entry point
+│   ├── config/                # Configuration loader
+│   ├── controllers/           # Request handlers
+│   │   ├── auth.controller.ts
+│   │   ├── set.controller.ts
+│   │   ├── track.controller.ts
+│   │   ├── channel.controller.ts
+│   │   └── admin.controller.ts
+│   ├── routes/                # API routes
+│   ├── services/              # Business logic
+│   │   ├── recognition.service.ts  # Shazam integration
+│   │   ├── spotify.service.ts      # Spotify API
+│   │   ├── youtube.service.ts      # YouTube downloads
+│   │   └── email.service.ts        # Email sending
+│   ├── jobs/                  # Background jobs
+│   │   ├── queue.ts           # Bull queue setup
+│   │   ├── worker.ts          # Job worker
+│   │   └── processors/        # Job handlers
+│   ├── middleware/            # Express middleware
+│   │   ├── auth.ts            # Auth guards
+│   │   └── passport.ts        # Passport strategies
+│   ├── views/                 # Nunjucks templates
+│   │   ├── layout.njk         # Base layout
+│   │   ├── auth/              # Login, register, etc.
+│   │   ├── set/               # Set pages
+│   │   ├── track/             # Track pages
+│   │   └── channel/           # Channel pages
+│   └── utils/                 # Utilities
+│       ├── logger.ts          # Winston logger
+│       └── password.ts        # Password hashing
 ├── prisma/
-│   └── schema.prisma     # ✅ Complete database schema
-├── public/               # Static assets
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── locales/              # i18n translation files (to be copied)
-├── logs/                 # Application logs
-├── uploads/              # User uploads
-├── temp/                 # Temporary files (audio segments)
-├── package.json
-├── tsconfig.json
-└── .env.example
+│   └── schema.prisma          # Database schema
+├── public/                    # Static files
+├── package.json               # Dependencies
+├── tsconfig.json              # TypeScript config
+└── tailwind.config.js         # Tailwind CSS config
 ```
 
 ---
 
-## 🗄️ Database Schema
+## 🛠️ Available Scripts
 
-The Prisma schema includes all models from the original Python application:
-
-- **User Management**: `User`, `OAuth`, `Invite`
-- **Music**: `Track`, `Genre`, `RelatedTrack`, `TrackGenre`
-- **Channels**: `Channel`
-- **Sets**: `Set`, `SetQueue`, `SetBrowsingHistory`, `SetSearch`
-- **Relationships**: `TrackSet` (many-to-many)
-- **Config**: `AppConfig`
-
-All indexes, relationships, and constraints from the Python SQLAlchemy models have been preserved.
-
----
-
-## 📚 API Services
-
-### Spotify Service (`src/services/spotify.service.ts`)
-
-✅ **Fully Implemented**
-
-```typescript
-import spotifyService from './services/spotify.service';
-
-// Search for tracks
-const tracks = await spotifyService.searchTrack('Artist - Track Name');
-
-// Get track details
-const track = await spotifyService.getTrack(trackId);
-
-// Create playlist
-const playlist = await spotifyService.createPlaylist(userId, 'My Playlist', 'Description');
-```
-
-**Features:**
-- Automatic token refresh (Client Credentials flow)
-- Search tracks, artists, albums
-- Get track details and audio features
-- Create and manage playlists
-- Get recommendations
-- User OAuth support
-
-### YouTube Service (`src/services/youtube.service.ts`)
-
-✅ **Fully Implemented**
-
-```typescript
-import youtubeService from './services/youtube.service';
-
-// Get video info
-const info = await youtubeService.getVideoInfo('videoId');
-
-// Download audio
-const audioPath = await youtubeService.downloadAudio('videoId');
-
-// Split into segments
-const segments = await youtubeService.splitAudioIntoSegments(audioPath, 10);
-
-// Cleanup
-await youtubeService.cleanupVideoFiles('videoId');
-```
-
-**Features:**
-- Video metadata extraction (title, duration, chapters, views, likes)
-- Audio download (uses yt-dlp)
-- Audio segmentation (uses FFmpeg)
-- Chapter extraction
-- Proxy support
-
-### Shazam Service (`src/services/shazam.service.ts`)
-
-⚠️ **Needs Audio Recognition Implementation**
-
-The structure is in place, but actual audio fingerprinting needs to be implemented.
-
-**Options for implementation:**
-1. **AcrCloud API** (recommended): Commercial service with free tier
-2. **AudD.io API**: Alternative music recognition service
-3. **Call Python shazamio**: Use `child_process` to execute Python script
-4. **Node Shazam Library**: If one exists/emerges
-
-Current placeholder methods:
-```typescript
-- recognizeTrack(audioFilePath): Promise<ShazamTrack | null>
-- recognizeTracks(audioFilePaths): Promise<(ShazamTrack | null)[]>
-- getTrackDetails(shazamTrackId): Promise<any>
-- getTrackLabel(shazamTrackId): Promise<string | null>
-- getRelatedTracks(shazamTrackId): Promise<ShazamTrack[]>
-```
-
----
-
-## 🔄 Migration Notes
-
-### Key Differences from Python Version
-
-1. **Async by Nature**: Node.js is natively asynchronous, making concurrent API calls more natural
-2. **Type Safety**: TypeScript provides compile-time type checking
-3. **Modern ORM**: Prisma offers better type safety and developer experience than SQLAlchemy
-4. **Template Engine**: Nunjucks is a direct port of Jinja2, so templates can be migrated with minimal changes
-5. **Job Queue**: Bull (Redis-backed) replaces custom Python cron scripts
-6. **Session Store**: Redis-backed sessions instead of Flask's default
-
-### What Stayed the Same
-
-- Database schema (identical to Python version)
-- API integrations (Spotify, YouTube, Shazam, Apple Music)
-- Business logic concepts
-- Chrome extension (just needs backend URL updated)
-- Tailwind CSS build process
-
----
-
-## 🔧 Development
-
-### Available Scripts
-
+### Development
 ```bash
-# Development
-npm run dev              # Start dev server with hot reload
+npm run dev              # Start dev server with hot reload (port 8080)
+npm run jobs:dev         # Start job worker in dev mode
+```
 
-# Building
-npm run build            # Compile TypeScript to JavaScript
-npm start                # Run production build
-
-# Database
-npm run prisma:generate  # Generate Prisma Client
-npm run prisma:migrate   # Run database migrations
-npm run prisma:studio    # Open Prisma Studio (GUI)
-
-# CSS
+### Building
+```bash
+npm run build            # Compile TypeScript to dist/
 npm run tailwind:build   # Build Tailwind CSS
 npm run tailwind:watch   # Watch and rebuild CSS
-
-# Background Jobs
-npm run jobs:dev         # Start job worker in development
 ```
 
-### Testing
-
+### Production
 ```bash
-# TODO: Add testing framework
-npm test
+npm start                # Run compiled app (requires npm run build first)
+npm run jobs:prod        # Run job worker in production
+```
+
+### Database
+```bash
+npm run prisma:generate  # Generate Prisma Client
+npm run prisma:migrate   # Run migrations (dev)
+npm run prisma:studio    # Open Prisma Studio GUI
+npm run prisma:seed      # Seed database with initial data
+npx prisma db push       # Push schema to database (quick)
+npx prisma db pull       # Pull schema from database
 ```
 
 ---
 
-## 🐛 Known Issues & Limitations
+## 🔍 API Endpoints
 
-### Current Limitations
+### Authentication
+- `POST /auth/register` - Create account
+- `POST /auth/login` - Login
+- `GET /auth/logout` - Logout
+- `GET /auth/google` - Google OAuth
+- `POST /auth/forgot-password` - Request password reset
+- `POST /auth/reset-password/:token` - Reset password
 
-1. **Shazam Audio Recognition**: Not yet implemented. Options:
-   - Use AcrCloud or AudD.io API
-   - Call Python shazamio via subprocess
-   - Find/create Node.js audio fingerprinting library
+### Sets
+- `GET /set` - Browse all sets (HTML)
+- `GET /set/:id` - View set detail with tracklist (HTML)
+- `POST /set/queue` - Queue a YouTube video for processing
+- `GET /set/search?q=query` - Search sets
+- `GET /set/popular` - Popular sets
+- `GET /set/recent` - Recent sets
 
-2. **Authentication**: Passport.js setup not complete
+### Tracks
+- `GET /track` - Browse all tracks (HTML)
+- `GET /track/:id` - View track detail (HTML)
+- `GET /track/search?q=query` - Search tracks
+- `GET /track/popular` - Popular tracks
+- `GET /track/genre/:genre` - Tracks by genre
 
-3. **Controllers**: Business logic needs to be migrated from Python
+### Channels
+- `GET /channel` - Browse YouTube channels (HTML)
+- `GET /channel/:id` - View channel detail (HTML)
+- `GET /channel/api/popular` - Popular channels (JSON)
 
-4. **Templates**: Jinja2 templates need conversion to Nunjucks
-
-5. **Job Queue**: Bull jobs not yet defined
-
-### Python Dependencies Still Needed
-
-- **yt-dlp**: Node.js version has limitations, so we use the Python binary
-- **Possible Shazam**: Might need to call Python shazamio if no Node alternative
+### Admin (requires admin role)
+- `GET /admin` - Admin dashboard
+- `GET /admin/users` - Manage users
+- `GET /admin/queue` - View processing queue
+- `GET /admin/config` - Application configuration
 
 ---
 
-## 🚀 Deployment
+## 🎯 Technology Stack
 
-### Production Checklist
+| Layer | Technology |
+|-------|-----------|
+| **Runtime** | Node.js 18+ |
+| **Language** | TypeScript 5.x |
+| **Web Framework** | Express.js 4.x |
+| **Database** | PostgreSQL 13+ |
+| **ORM** | Prisma 5.x |
+| **Cache/Queue** | Redis 6+ |
+| **Job Queue** | Bull 4.x |
+| **Auth** | Passport.js (Local + OAuth) |
+| **Templates** | Nunjucks |
+| **CSS** | Tailwind CSS 3.x |
+| **Music Recognition** | Shazam (node-shazam) |
+| **Spotify API** | spotify-web-api-node |
+| **YouTube** | yt-dlp + youtube-dl-exec |
+| **Audio** | FFmpeg + fluent-ffmpeg |
+| **Email** | Nodemailer |
+| **Logging** | Winston |
+| **i18n** | i18next |
 
+---
+
+## 🐛 Troubleshooting
+
+### App Won't Start
+
+**"Cannot find module '@prisma/client'"**
+```bash
+npx prisma generate
+```
+
+**"Redis connection failed"**
+```bash
+# Make sure Redis is running
+redis-cli ping  # Should return PONG
+
+# Start Redis
+redis-server
+```
+
+**"Database connection failed"**
+```bash
+# Check PostgreSQL is running
+psql -U postgres -c "SELECT 1"
+
+# Verify DATABASE_URL in .env
+# Make sure database exists
+createdb set2tracks
+```
+
+### Processing Jobs Not Running
+
+**Check worker is running:**
+```bash
+npm run jobs:dev  # In separate terminal
+```
+
+**Check Redis connection:**
+```bash
+redis-cli
+> KEYS *  # Should show Bull queue keys
+```
+
+**Check logs:**
+```bash
+# Enable debug logging in .env
+LOG_LEVEL=debug
+
+# View logs
+npm run dev  # Check console output
+```
+
+### Shazam Recognition Not Working
+
+**"Cannot find module 'node-shazam'"**
+```bash
+npm install node-shazam
+```
+
+**Rate limiting:**
+- Shazam has rate limits
+- Adjust `RECOGNITION_MAX_CONCURRENT` in `.env`
+- Add `RECOGNITION_RETRY_DELAY` for slower processing
+
+### YouTube Downloads Failing
+
+**"yt-dlp not found"**
+```bash
+# Install yt-dlp
+pip install yt-dlp
+# or
+brew install yt-dlp
+
+# Verify
+yt-dlp --version
+```
+
+**Video not available:**
+- Some videos are region-locked
+- Try a different video
+- Check video is embeddable
+
+---
+
+## 📊 Performance Tips
+
+### Speed Up Processing
+
+1. **Increase concurrency** (in `.env`):
+```env
+RECOGNITION_MAX_CONCURRENT=20  # Default: 10
+```
+
+2. **Use faster Redis** (Redis 7+):
+```bash
+brew install redis@7  # macOS
+```
+
+3. **Enable database connection pooling** (Prisma automatically does this)
+
+4. **Run multiple workers**:
+```bash
+# Terminal 1
+npm run jobs:prod
+
+# Terminal 2
+npm run jobs:prod  # Second worker!
+```
+
+### Reduce API Costs
+
+1. **Cache Spotify results** - Tracks are cached in database
+2. **Limit retries** - Adjust `RECOGNITION_MAX_RETRIES` in `.env`
+3. **Skip failed segments** - Failed recognitions are logged but don't block
+
+---
+
+## 🔐 Security Checklist
+
+Before deploying to production:
+
+- [ ] Change `SECRET_KEY` to a random 32+ character string
+- [ ] Use strong `SESSION_SECRET`
+- [ ] Enable HTTPS (use nginx/Caddy as reverse proxy)
 - [ ] Set `NODE_ENV=production`
-- [ ] Use strong `SECRET_KEY`
-- [ ] Configure PostgreSQL with connection pooling
-- [ ] Set up Redis persistence
-- [ ] Configure reverse proxy (Nginx/Apache)
-- [ ] Set up SSL certificates
-- [ ] Configure logging to external service
-- [ ] Set up monitoring (PM2, New Relic, DataDog)
-- [ ] Configure automated backups
-- [ ] Set resource limits for FFmpeg
-- [ ] Implement rate limiting
+- [ ] Use environment variables for all secrets (never commit `.env`)
+- [ ] Enable rate limiting (add express-rate-limit)
+- [ ] Set up firewall rules (only expose ports 80/443)
+- [ ] Use PostgreSQL with strong password
+- [ ] Enable Redis password (`requirepass` in redis.conf)
+- [ ] Review CORS settings in `app.ts`
+- [ ] Set up automated backups for PostgreSQL
+- [ ] Monitor logs for suspicious activity
 
-### Deployment Options
+---
 
-1. **Traditional VPS** (DigitalOcean, Linode, AWS EC2)
-2. **Platform-as-a-Service** (Heroku, Railway, Render)
-3. **Containerized** (Docker + Kubernetes)
-4. **Serverless** (Not recommended due to FFmpeg/long-running processes)
+## 📚 Additional Resources
+
+- **Prisma Docs**: https://www.prisma.io/docs
+- **Express.js**: https://expressjs.com/
+- **Shazam API**: https://github.com/shazam/shazam-api
+- **Spotify Web API**: https://developer.spotify.com/documentation/web-api
+- **Bull Queue**: https://optimalbits.github.io/bull/
+- **Tailwind CSS**: https://tailwindcss.com/docs
+
+---
+
+## 🤝 Contributing
+
+This is a personal project transcribed from Python to Node.js. If you find bugs or have suggestions:
+
+1. Check existing issues
+2. Create detailed bug reports with:
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Environment details (OS, Node version, etc.)
+   - Logs/error messages
 
 ---
 
 ## 📄 License
 
-Same as original Set2Tracks project (check parent repository)
+[Same as original Set2Tracks project]
 
 ---
 
 ## 🙏 Credits
 
-- **Original Python Version**: [Set2Tracks](../set2tracks)
-- **Node.js Migration**: Fresh transcription maintaining all functionality
-- **Libraries**: Express, Prisma, Passport, Bull, Nunjucks, Spotify Web API Node, and many more
+- Original Python/Flask version by [Original Author]
+- Node.js/TypeScript transcription by Claude
+- Music recognition powered by Shazam
+- Metadata by Spotify Web API
+- Built with ❤️ and TypeScript
 
 ---
 
-## 📞 Support
+## ⚡ TL;DR
 
-For issues specific to the Node.js version, please open an issue in this repository.
+```bash
+npm install
+cp .env.example .env  # Add your API keys
+npx prisma generate && npx prisma db push
+npm run tailwind:build
+redis-server &
+npm run dev &
+npm run jobs:dev &
+open http://localhost:8080
+```
 
-For general Set2Tracks questions, refer to the main project documentation.
-
----
-
-## 🗺️ Roadmap
-
-### Phase 1: Core Functionality (Current)
-- [x] Project setup and configuration
-- [x] Database schema migration
-- [x] External API services
-- [ ] Authentication system
-- [ ] Core routes and controllers
-
-### Phase 2: Set Processing
-- [ ] YouTube video download pipeline
-- [ ] Audio segmentation
-- [ ] Shazam track recognition
-- [ ] Spotify/Apple Music enrichment
-- [ ] Job queue for async processing
-
-### Phase 3: User Features
-- [ ] Set browsing and search
-- [ ] Track discovery
-- [ ] Playlist creation
-- [ ] User history
-- [ ] Admin dashboard
-
-### Phase 4: Polish
-- [ ] Template migration complete
-- [ ] Chrome extension integration
-- [ ] Testing suite
-- [ ] Performance optimization
-- [ ] Production deployment
-
----
-
-**🔥 Let's fucking go! Life is short!** 🚀
-
----
-
-*Last Updated: November 2025*
+**You're live!** Submit a YouTube DJ set URL and watch the magic happen. 🎵✨
