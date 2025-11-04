@@ -21,9 +21,9 @@ import './middleware/passport';
 import authRoutes from './routes/auth.routes';
 import setRoutes from './routes/set.routes';
 import trackRoutes from './routes/track.routes';
+import channelRoutes from './routes/channel.routes';
+import adminRoutes from './routes/admin.routes';
 // import spotifyRoutes from './routes/spotify.routes';
-// import channelRoutes from './routes/channel.routes';
-// import adminRoutes from './routes/admin.routes';
 // import playlistRoutes from './routes/playlist.routes';
 
 // Import middleware
@@ -169,9 +169,9 @@ class App {
     this.app.use('/auth', authRoutes);
     this.app.use('/set', setRoutes);
     this.app.use('/track', trackRoutes);
+    this.app.use('/channel', channelRoutes);
+    this.app.use('/admin', adminRoutes);
     // this.app.use('/spotify', spotifyRoutes);
-    // this.app.use('/channel', channelRoutes);
-    // this.app.use('/admin', adminRoutes);
     // this.app.use('/playlist', playlistRoutes);
 
     // Home route (must be after other routes)

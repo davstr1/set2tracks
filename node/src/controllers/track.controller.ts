@@ -49,9 +49,57 @@ export class TrackController {
   }
 
   /**
-   * Get a single track by ID
+   * Get a single track by ID (HTML page)
    */
   async getTrackById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const track = await prisma.track.findUnique({
+        where: { id: parseInt(id) },
+        include: {
+          genres: true,
+          trackSets: {
+            include: {
+              set: {
+                include: {
+                  channel: true,
+                },
+              },
+            },
+            orderBy: {
+              set: {
+                publishDate: 'desc',
+              },
+            },
+          },
+        },
+      });
+
+      if (!track) {
+        res.status(404).render('error', {
+          title: 'Track Not Found',
+          message: 'The track you are looking for could not be found.',
+          error: { status: 404 },
+        });
+        return;
+      }
+
+      res.render('track/detail', {
+        title: `${track.title} - ${track.artistName}`,
+        track,
+        user: req.user,
+      });
+    } catch (error) {
+      logger.error('Error fetching track:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Get a single track by ID (API/JSON)
+   */
+  async getTrackByIdApi(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
 

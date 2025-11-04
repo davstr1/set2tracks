@@ -67,7 +67,7 @@ export class SetController {
   }
 
   /**
-   * Get a single set by ID
+   * Get a single set by ID (HTML page)
    */
   async getSetById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
@@ -93,7 +93,11 @@ export class SetController {
       });
 
       if (!set) {
-        res.status(404).json({ error: 'Set not found' });
+        res.status(404).render('error', {
+          title: 'Set Not Found',
+          message: 'The set you are looking for could not be found.',
+          error: { status: 404 },
+        });
         return;
       }
 
@@ -115,6 +119,48 @@ export class SetController {
             datetime: new Date(),
           },
         });
+      }
+
+      res.render('set/detail', {
+        title: set.title,
+        set,
+        user: req.user,
+      });
+    } catch (error) {
+      logger.error('Error fetching set:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Get a single set by ID (API/JSON)
+   */
+  async getSetByIdApi(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const set = await prisma.set.findUnique({
+        where: { id: parseInt(id) },
+        include: {
+          channel: true,
+          trackSets: {
+            include: {
+              track: {
+                include: {
+                  genres: true,
+                },
+              },
+            },
+            orderBy: {
+              pos: 'asc',
+            },
+          },
+        },
+      });
+
+      if (!set) {
+        res.status(404).json({ error: 'Set not found' });
+        return;
       }
 
       res.json({ set });
