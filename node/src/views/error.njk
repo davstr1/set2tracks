@@ -1,0 +1,23 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<div style="text-align: center; padding: 3rem 0;">
+    <h1 style="font-size: 4rem; margin-bottom: 1rem;">{{ title or 'Error' }}</h1>
+    <p style="font-size: 1.5rem; color: #666; margin-bottom: 2rem;">
+        {{ message or 'An error occurred' }}
+    </p>
+
+    {% if error and error.stack %}
+        <details style="max-width: 800px; margin: 2rem auto; text-align: left;">
+            <summary style="cursor: pointer; padding: 1rem; background: #F3F4F6; border-radius: 0.25rem;">
+                Error Details
+            </summary>
+            <pre style="background: #1F2937; color: #F9FAFB; padding: 1rem; border-radius: 0.25rem; overflow-x: auto; margin-top: 1rem;">{{ error.stack }}</pre>
+        </details>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        <a href="/" class="btn">Go Home</a>
+    </div>
+</div>
+{% endblock %}

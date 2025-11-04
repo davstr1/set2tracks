@@ -1,0 +1,43 @@
+{% extends "../layout.njk" %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <h1>Login</h1>
+
+    <form method="POST" action="/auth/login" style="margin-top: 2rem;">
+        <input type="hidden" name="redirect" value="{{ redirect }}">
+
+        <div style="margin-bottom: 1rem;">
+            <label for="email" style="display: block; margin-bottom: 0.5rem;">Email:</label>
+            <input type="email" id="email" name="email" required
+                   style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label for="password" style="display: block; margin-bottom: 0.5rem;">Password:</label>
+            <input type="password" id="password" name="password" required
+                   style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <a href="/auth/forgot-password" style="color: #4F46E5;">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%;">Login</button>
+    </form>
+
+    {% if allowGoogle %}
+        <div style="margin: 2rem 0; text-align: center;">
+            <p style="color: #666;">- OR -</p>
+        </div>
+
+        <a href="/auth/google" class="btn" style="width: 100%; text-align: center; background: #DB4437; display: block;">
+            Continue with Google
+        </a>
+    {% endif %}
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <p>Don't have an account? <a href="/auth/register" style="color: #4F46E5;">Register</a></p>
+    </div>
+</div>
+{% endblock %}

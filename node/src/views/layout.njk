@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="{{ lang or 'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or 'Set2Tracks' }}</title>
+
+    {# Tailwind CSS - will be built separately #}
+    <link href="/css/output.css" rel="stylesheet">
+
+    {# Add any additional CSS #}
+    {% block styles %}{% endblock %}
+
+    <style>
+        /* Fallback styles in case Tailwind isn't built yet */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        nav {
+            background: #4F46E5;
+            color: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #4F46E5;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #4338CA;
+        }
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+        .alert-error {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="/" style="font-weight: bold; font-size: 1.25rem;">🎵 Set2Tracks</a>
+            <a href="/set">Sets</a>
+            <a href="/track">Tracks</a>
+            <a href="/track/genres">Genres</a>
+
+            <span style="float: right;">
+                {% if isAuthenticated %}
+                    <span>👤 {{ user.fname }}</span>
+                    <a href="/set/history">History</a>
+                    {% if user.type == 'Admin' %}
+                        <a href="/admin">Admin</a>
+                    {% endif %}
+                    <a href="/auth/logout">Logout</a>
+                {% else %}
+                    <a href="/auth/login">Login</a>
+                    <a href="/auth/register">Register</a>
+                {% endif %}
+            </span>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% if error %}
+        <div class="container">
+            <div class="alert alert-error">{{ error }}</div>
+        </div>
+    {% endif %}
+
+    {% if message %}
+        <div class="container">
+            <div class="alert alert-success">{{ message }}</div>
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #ddd; text-align: center; color: #666;">
+        <div class="container">
+            <p>&copy; 2024 Set2Tracks - DJ Set Tracklist Generator</p>
+            <p>
+                <a href="/about">About</a> |
+                <a href="/privacy">Privacy</a> |
+                <a href="/terms">Terms</a>
+            </p>
+        </div>
+    </footer>
+
+    {# Add any additional JavaScript #}
+    {% block scripts %}{% endblock %}
+</body>
+</html>

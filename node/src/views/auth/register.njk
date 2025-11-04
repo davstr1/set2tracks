@@ -1,0 +1,90 @@
+{% extends "../layout.njk" %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <h1>Register</h1>
+
+    {% if allowSite %}
+        <form method="POST" action="/auth/register" style="margin-top: 2rem;">
+            <div style="margin-bottom: 1rem;">
+                <label for="fname" style="display: block; margin-bottom: 0.5rem;">Name:</label>
+                <input type="text" id="fname" name="fname" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label for="email" style="display: block; margin-bottom: 0.5rem;">Email:</label>
+                <input type="email" id="email" name="email" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label for="password" style="display: block; margin-bottom: 0.5rem;">Password:</label>
+                <input type="password" id="password" name="password" required minlength="8"
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+                <small style="color: #666;">At least 8 characters</small>
+            </div>
+
+            {% if allowInvite %}
+                <div style="margin-bottom: 1rem;">
+                    <label for="inviteCode" style="display: block; margin-bottom: 0.5rem;">
+                        Invite Code (optional):
+                    </label>
+                    <input type="text" id="inviteCode" name="inviteCode"
+                           style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn" style="width: 100%;">Register</button>
+        </form>
+    {% else %}
+        <div class="alert alert-error" style="margin-top: 2rem;">
+            <p>Registration is currently invite-only. Please enter your invite code.</p>
+        </div>
+
+        <form method="POST" action="/auth/register" style="margin-top: 2rem;">
+            <div style="margin-bottom: 1rem;">
+                <label for="fname" style="display: block; margin-bottom: 0.5rem;">Name:</label>
+                <input type="text" id="fname" name="fname" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label for="email" style="display: block; margin-bottom: 0.5rem;">Email:</label>
+                <input type="email" id="email" name="email" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label for="password" style="display: block; margin-bottom: 0.5rem;">Password:</label>
+                <input type="password" id="password" name="password" required minlength="8"
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label for="inviteCode" style="display: block; margin-bottom: 0.5rem;">
+                    Invite Code (required):
+                </label>
+                <input type="text" id="inviteCode" name="inviteCode" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.25rem;">
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Register</button>
+        </form>
+    {% endif %}
+
+    {% if allowGoogle %}
+        <div style="margin: 2rem 0; text-align: center;">
+            <p style="color: #666;">- OR -</p>
+        </div>
+
+        <a href="/auth/google" class="btn" style="width: 100%; text-align: center; background: #DB4437; display: block;">
+            Continue with Google
+        </a>
+    {% endif %}
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <p>Already have an account? <a href="/auth/login" style="color: #4F46E5;">Login</a></p>
+    </div>
+</div>
+{% endblock %}

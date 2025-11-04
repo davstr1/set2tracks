@@ -1,0 +1,59 @@
+{% extends "layout.njk" %}
+
+{% block content %}
+<div style="text-align: center; padding: 2rem 0;">
+    <h1 style="font-size: 3rem; margin-bottom: 1rem;">🎵 Set2Tracks</h1>
+    <p style="font-size: 1.5rem; color: #666; margin-bottom: 2rem;">
+        DJ Set Tracklist Generator
+    </p>
+    <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem;">
+        Discover the tracks in your favorite DJ sets. Submit any YouTube DJ set and get a complete tracklist with Shazam, Spotify, and Apple Music links.
+    </p>
+
+    {% if not isAuthenticated %}
+        <div style="margin-bottom: 2rem;">
+            <a href="/auth/register" class="btn" style="margin-right: 1rem;">Get Started</a>
+            <a href="/auth/login" class="btn" style="background: #10B981;">Login</a>
+        </div>
+    {% endif %}
+</div>
+
+<div style="max-width: 800px; margin: 0 auto;">
+    <h2>How it works</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin: 2rem 0;">
+        <div>
+            <h3>1️⃣ Submit a Set</h3>
+            <p>Paste any YouTube DJ set URL</p>
+        </div>
+        <div>
+            <h3>2️⃣ We Process</h3>
+            <p>Our AI identifies all tracks using Shazam</p>
+        </div>
+        <div>
+            <h3>3️⃣ Get Tracklist</h3>
+            <p>View complete tracklist with timestamps</p>
+        </div>
+        <div>
+            <h3>4️⃣ Create Playlist</h3>
+            <p>Export to Spotify or Apple Music</p>
+        </div>
+    </div>
+
+    <h2 style="margin-top: 3rem;">Features</h2>
+    <ul style="list-style: none; padding: 0;">
+        <li>✅ Automatic track identification using Shazam</li>
+        <li>✅ Spotify and Apple Music integration</li>
+        <li>✅ Chapter/timestamp detection</li>
+        <li>✅ Genre tagging and discovery</li>
+        <li>✅ Related tracks recommendations</li>
+        <li>✅ Browse sets by channel, genre, artist</li>
+        <li>✅ Chrome extension for easy submission</li>
+    </ul>
+
+    <div style="text-align: center; margin-top: 3rem;">
+        <h2>Ready to discover?</h2>
+        <a href="/set" class="btn" style="font-size: 1.2rem; padding: 1rem 2rem;">Browse Sets</a>
+    </div>
+</div>
+
+{% endblock %}

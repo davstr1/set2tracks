@@ -1,0 +1,307 @@
+// Prisma schema for Set2Tracks Node.js version
+// This schema is based on the Python SQLAlchemy models
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [pg_trgm]
+}
+
+// Enums
+enum UserType {
+  Admin @map("1")
+  User  @map("2")
+  Guest @map("3")
+}
+
+enum UserConnectMethod {
+  Site     @map("site")
+  Google   @map("google")
+  GitHub   @map("github")
+  Facebook @map("fb")
+}
+
+enum SetQueueStatus {
+  premiered
+  prequeued
+  pending
+  processing
+  done
+  discarded
+  failed
+}
+
+// User Management Models
+model User {
+  id             Int                @id @default(autoincrement())
+  fname          String             @db.VarChar(255)
+  email          String             @unique @db.VarChar(255)
+  password       String             @db.VarChar(255)
+  type           UserType
+  regDate        DateTime           @default(now()) @map("reg_date")
+  lastLogin      DateTime?          @map("last_login")
+  lang           String             @default("en") @db.VarChar(2)
+  connectMethod  UserConnectMethod  @map("connect_method")
+  extraFields    Json?              @map("extra_fields")
+
+  // Relations
+  sets           Set[]
+  setQueues      SetQueue[]
+  oauthAccounts  OAuth[]
+
+  @@map("users")
+}
+
+model OAuth {
+  id           Int     @id @default(autoincrement())
+  provider     String
+  providerId   String  @map("provider_id")
+  token        String?
+  tokenSecret  String? @map("token_secret")
+  userId       Int     @map("user_id")
+
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@map("oauth")
+}
+
+model Invite {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique @db.VarChar(255)
+  inviteCode  String   @unique @map("invite_code") @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("invites")
+}
+
+// Music Models
+model Track {
+  id                        Int       @id @default(autoincrement())
+  keyTrackShazam            Int?      @unique @map("key_track_shazam")
+  keyTrackSpotify           String?   @unique @map("key_track_spotify") @db.VarChar(255)
+  keyTrackApple             String?   @unique @map("key_track_apple") @db.VarChar(255)
+  keyArtistSpotify          String?   @map("key_artist_spotify") @db.VarChar(255)
+  keyArtistApple            String?   @map("key_artist_apple") @db.VarChar(255)
+
+  title                     String    @db.VarChar(255)
+  artistName                String?   @map("artist_name") @db.VarChar(255)
+  album                     String?   @db.VarChar(255)
+  label                     String?   @db.VarChar(255)
+
+  coverArts                 Json?     @map("cover_arts")
+  previewUris               Json?     @map("preview_uris")
+  uriApple                  String?   @map("uri_apple") @db.VarChar(255)
+  releaseYear               Int?      @map("release_year")
+  releaseDate               DateTime? @map("release_date") @db.Date
+  artistPopularitySpotify   Int?      @map("artist_popularity_spotify")
+
+  nbSets                    Int       @default(0) @map("nb_sets")
+  relatedTracksChecked      Boolean   @default(false) @map("related_tracks_checked")
+
+  // Relations
+  genres                    Genre[]   @relation("TrackToGenre")
+  trackSets                 TrackSet[]
+
+  // Self-referential many-to-many for related tracks
+  relatedTracks             RelatedTrack[] @relation("TrackToRelated")
+  relatedFrom               RelatedTrack[] @relation("RelatedToTrack")
+
+  @@index([keyTrackShazam])
+  @@index([keyTrackSpotify])
+  @@index([keyTrackApple])
+  @@index([keyArtistSpotify])
+  @@index([keyArtistApple])
+  @@index([title])
+  @@index([artistName])
+  @@index([label])
+  @@index([releaseYear])
+  @@index([releaseDate])
+  @@index([artistPopularitySpotify])
+  @@index([nbSets])
+  @@map("tracks")
+}
+
+model Genre {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(255)
+  trackCount Int      @default(0) @map("track_count")
+
+  // Relations
+  tracks     Track[]  @relation("TrackToGenre")
+
+  @@index([name])
+  @@map("genres")
+}
+
+model RelatedTrack {
+  trackId          Int  @map("track_id")
+  relatedTrackId   Int  @map("related_track_id")
+  insertionOrder   Int  @map("insertion_order")
+
+  track            Track @relation("TrackToRelated", fields: [trackId], references: [id], onDelete: Cascade)
+  relatedTrack     Track @relation("RelatedToTrack", fields: [relatedTrackId], references: [id], onDelete: Cascade)
+
+  @@id([trackId, relatedTrackId])
+  @@index([trackId, insertionOrder], name: "idx_insertion_order")
+  @@map("related_tracks")
+}
+
+model TrackGenre {
+  trackId  Int   @map("track_id")
+  genreId  Int   @map("genre_id")
+
+  @@id([trackId, genreId])
+  @@map("track_genres")
+}
+
+// Channel Models
+model Channel {
+  id                    Int       @id @default(autoincrement())
+  channelId             String    @unique @map("channel_id") @db.VarChar(255)
+  nbSets                Int       @default(0) @map("nb_sets")
+  author                String?   @db.VarChar(255)
+  channelUrl            String?   @map("channel_url") @db.VarChar(255)
+  channelFollowerCount  Int?      @map("channel_follower_count")
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at")
+  hidden                Boolean   @default(false)
+  followable            Boolean   @default(false)
+
+  // Relations
+  sets                  Set[]
+
+  @@index([channelId])
+  @@index([nbSets])
+  @@index([author])
+  @@index([hidden])
+  @@index([followable])
+  @@map("channel")
+}
+
+// Set Models
+model Set {
+  id                        Int       @id @default(autoincrement())
+  videoId                   String    @unique @map("video_id") @db.VarChar(255)
+  channelId                 Int       @map("channel_id")
+  userId                    Int?      @map("user_id")
+  title                     String    @db.VarChar(255)
+
+  duration                  Int?
+  publishDate               DateTime? @map("publish_date") @db.Date
+  published                 Boolean   @default(false)
+  thumbnail                 String?   @db.VarChar(255)
+  playableInEmbed           Boolean?  @map("playable_in_embed")
+  chapters                  Json?
+  nbTracks                  Int       @default(0) @map("nb_tracks")
+  likeCount                 Int       @default(0) @map("like_count")
+  viewCount                 Int       @default(0) @map("view_count")
+
+  artistPopularitySpotify   Int?      @map("artist_popularity_spotify") @db.SmallInt
+
+  updatedAt                 DateTime  @default(now()) @updatedAt @map("updated_at")
+  error                     String?   @db.Text
+  hidden                    Boolean   @default(false)
+
+  // Relations
+  channel                   Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user                      User?     @relation(fields: [userId], references: [id])
+  trackSets                 TrackSet[]
+  browsingHistory           SetBrowsingHistory[]
+
+  @@index([videoId])
+  @@index([channelId])
+  @@index([userId])
+  @@index([title])
+  @@index([duration])
+  @@index([publishDate])
+  @@index([published])
+  @@index([nbTracks])
+  @@index([likeCount])
+  @@index([viewCount])
+  @@index([hidden])
+  @@map("sets")
+}
+
+model SetSearch {
+  id        Int      @id @default(autoincrement())
+  query     String   @db.VarChar(255)
+  nbResults Int      @map("nb_results")
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("set_search")
+}
+
+model SetBrowsingHistory {
+  setId    Int      @map("set_id")
+  userId   Int      @map("user_id")
+  datetime DateTime @default(now()) @updatedAt
+
+  set      Set      @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@id([setId, userId])
+  @@unique([setId, userId], name: "uq_set_user")
+  @@index([setId, userId, datetime], name: "ix_set_user_datetime")
+  @@map("set_browsing_history")
+}
+
+model SetQueue {
+  id                      Int              @id @default(autoincrement())
+  videoId                 String           @unique @map("video_id") @db.VarChar(255)
+  userId                  Int?             @map("user_id")
+  userPremium             Boolean          @default(false) @map("user_premium")
+  status                  SetQueueStatus   @default(prequeued)
+  queuedAt                DateTime         @default(now()) @map("queued_at")
+  updatedAt               DateTime         @default(now()) @updatedAt @map("updated_at")
+  premiereEnds            DateTime?        @map("premiere_ends")
+  nAttempts               Int              @default(1) @map("n_attempts")
+  discardedReason         String?          @map("discarded_reason") @db.VarChar(255)
+  videoInfoJson           Json?            @map("video_info_json")
+  duration                Int?
+  nbChapters              Int              @default(0) @map("nb_chapters")
+  sendEmail               Boolean          @default(false) @map("send_email")
+  playSound               Boolean          @default(false) @map("play_sound")
+  notificationEmailSent   Boolean          @default(false) @map("notification_email_sent")
+  notificationSoundSent   Boolean          @default(false) @map("notification_sound_sent")
+
+  user                    User?            @relation(fields: [userId], references: [id])
+
+  @@index([videoId])
+  @@index([duration])
+  @@index([nbChapters])
+  @@index([sendEmail])
+  @@index([playSound])
+  @@index([notificationEmailSent])
+  @@index([notificationSoundSent])
+  @@map("set_queue")
+}
+
+// Junction table for many-to-many Track-Set relationship
+model TrackSet {
+  trackId   Int  @map("track_id")
+  setId     Int  @map("set_id")
+  pos       Int
+  startTime Int? @map("start_time")
+  endTime   Int? @map("end_time")
+
+  track     Track @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  set       Set   @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@id([trackId, setId, pos])
+  @@map("track_sets")
+}
+
+// App Configuration
+model AppConfig {
+  id    Int    @id @default(autoincrement())
+  key   String @unique @db.VarChar(255)
+  value String @db.VarChar(1024)
+
+  @@map("app_config")
+}
