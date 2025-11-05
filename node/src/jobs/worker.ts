@@ -11,7 +11,7 @@ import logger from '../utils/logger';
 
 logger.info('🚀 Starting job worker...');
 
-// Initialize recurring jobs (channel checks every 6 hours)
+// Initialize recurring jobs (channel checks every 10 minutes for near real-time updates)
 initializeScheduler().catch((error) => {
   logger.error('Failed to initialize scheduler:', error);
 });

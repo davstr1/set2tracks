@@ -8,7 +8,7 @@ import logger from '../utils/logger';
 
 /**
  * Schedule channel check job
- * Runs every 6 hours to check followed channels for new videos
+ * Runs every 10 minutes to check followed channels for new videos (almost real-time!)
  */
 export async function scheduleChannelCheck() {
   try {
@@ -18,20 +18,20 @@ export async function scheduleChannelCheck() {
       await channelCheckQueue.removeRepeatableByKey(job.key);
     }
 
-    // Add repeating job: every 6 hours
+    // Add repeating job: every 10 minutes (almost real-time)
     await channelCheckQueue.add(
       {
         checkAll: true,
       },
       {
         repeat: {
-          every: 6 * 60 * 60 * 1000, // 6 hours in milliseconds
+          every: 10 * 60 * 1000, // 10 minutes in milliseconds
         },
         jobId: 'channel-check-recurring',
       }
     );
 
-    logger.info('✅ Scheduled channel check job (runs every 6 hours)');
+    logger.info('✅ Scheduled channel check job (runs every 10 minutes for near real-time updates)');
   } catch (error: any) {
     logger.error('Error scheduling channel check job:', error);
   }
