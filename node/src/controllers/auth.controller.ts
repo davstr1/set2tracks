@@ -1,16 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import passport from 'passport';
-import crypto from 'crypto';
-import PasswordUtils from '../utils/password';
+import authService from '../services/domain/auth.service';
 import logger from '../utils/logger';
 import config from '../config';
-import { PassportLocalCallback } from '../types/passport';
-import prisma from '../utils/database';
+import { ConflictError, ValidationError, UnauthorizedError } from '../types/errors';
 
 /**
  * Auth Controller
- * Handles user registration, login, logout, password reset
+ * Handles HTTP requests for authentication
+ * Thin controller - delegates business logic to AuthService
  */
 export class AuthController {
   /**
@@ -77,62 +76,15 @@ export class AuthController {
         return res.redirect('/auth/register?error=' + encodeURIComponent('All fields are required'));
       }
 
-      // Validate password
-      const passwordValidation = PasswordUtils.validate(password);
-      if (!passwordValidation.valid) {
-        return res.redirect('/auth/register?error=' + encodeURIComponent(passwordValidation.message!));
-      }
-
-      // Check if site registration is allowed
-      if (!config.signup.allowSite && !inviteCode) {
-        return res.redirect('/auth/register?error=' + encodeURIComponent('Registration is invite-only'));
-      }
-
-      // Validate invite code if provided
-      if (inviteCode) {
-        const invite = await prisma.invite.findUnique({
-          where: { inviteCode },
-        });
-
-        if (!invite) {
-          return res.redirect('/auth/register?error=' + encodeURIComponent('Invalid invite code'));
-        }
-
-        if (invite.email.toLowerCase() !== email.toLowerCase()) {
-          return res.redirect('/auth/register?error=' + encodeURIComponent('Email does not match invite'));
-        }
-      }
-
-      // Check if email already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
+      // Register user through service
+      const acceptedLangs = req.acceptsLanguages(config.app.languages);
+      const user = await authService.register({
+        email,
+        password,
+        fname,
+        inviteCode,
+        acceptedLanguages: Array.isArray(acceptedLangs) ? acceptedLangs : [acceptedLangs || 'en'],
       });
-
-      if (existingUser) {
-        return res.redirect('/auth/register?error=' + encodeURIComponent('Email already registered'));
-      }
-
-      // Hash password
-      const hashedPassword = await PasswordUtils.hash(password);
-
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          email: email.toLowerCase(),
-          fname,
-          password: hashedPassword,
-          type: 'User',
-          connectMethod: 'Site',
-          lang: req.acceptsLanguages(config.app.languages) || 'en',
-        },
-      });
-
-      // Delete invite if used
-      if (inviteCode) {
-        await prisma.invite.delete({
-          where: { inviteCode },
-        });
-      }
 
       logger.info(`New user registered: ${user.email}`);
 
@@ -145,6 +97,9 @@ export class AuthController {
         return res.redirect('/');
       });
     } catch (error) {
+      if (error instanceof ValidationError || error instanceof ConflictError || error instanceof UnauthorizedError) {
+        return res.redirect('/auth/register?error=' + encodeURIComponent(error.message));
+      }
       logger.error('Registration error:', error);
       next(error);
     }
@@ -207,42 +162,13 @@ export class AuthController {
         return res.redirect('/auth/forgot-password?error=' + encodeURIComponent('Email is required'));
       }
 
-      const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-      });
+      const result = await authService.requestPasswordReset(email);
 
-      // Don't reveal if user exists
-      if (!user) {
-        return res.render('auth/forgot-password.njk', {
-          title: 'Reset Password',
-          message: 'If that email is registered, a reset link has been sent.',
-        });
-      }
-
-      // Generate reset token
-      const resetToken = crypto.randomBytes(32).toString('hex');
-      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
-
-      // Store token in user's extraFields
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          extraFields: {
-            ...((user.extraFields as any) || {}),
-            resetToken,
-            resetTokenExpiry: resetTokenExpiry.toISOString(),
-          },
-        },
-      });
-
-      // TODO: Send email with reset link
-      // await emailService.sendPasswordReset(user.email, resetToken);
-
-      logger.info(`Password reset requested for: ${user.email}`);
+      logger.info(`Password reset requested for: ${email}`);
 
       res.render('auth/forgot-password.njk', {
         title: 'Reset Password',
-        message: 'If that email is registered, a reset link has been sent.',
+        message: result.message,
       });
     } catch (error) {
       logger.error('Forgot password error:', error);
@@ -274,50 +200,19 @@ export class AuthController {
         return res.redirect(`/auth/reset-password/${token}?error=` + encodeURIComponent('All fields are required'));
       }
 
-      if (password !== confirmPassword) {
-        return res.redirect(`/auth/reset-password/${token}?error=` + encodeURIComponent('Passwords do not match'));
-      }
+      await authService.resetPassword(token, password, confirmPassword);
 
-      // Validate password
-      const passwordValidation = PasswordUtils.validate(password);
-      if (!passwordValidation.valid) {
-        return res.redirect(`/auth/reset-password/${token}?error=` + encodeURIComponent(passwordValidation.message!));
-      }
-
-      // Find user with this reset token
-      const users = await prisma.user.findMany();
-      const user = users.find((u) => {
-        const extraFields = u.extraFields as Record<string, unknown> | null;
-        if (!extraFields?.resetToken) return false;
-        if (extraFields.resetToken !== token) return false;
-        if (extraFields.resetTokenExpiry && new Date(extraFields.resetTokenExpiry as string) < new Date()) return false;
-        return true;
-      });
-
-      if (!user) {
-        return res.redirect('/auth/forgot-password?error=' + encodeURIComponent('Invalid or expired reset token'));
-      }
-
-      // Hash new password
-      const hashedPassword = await PasswordUtils.hash(password);
-
-      // Update password and clear reset token
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          password: hashedPassword,
-          extraFields: {
-            ...((user.extraFields as any) || {}),
-            resetToken: null,
-            resetTokenExpiry: null,
-          },
-        },
-      });
-
-      logger.info(`Password reset successful for: ${user.email}`);
+      logger.info('Password reset successful');
 
       res.redirect('/auth/login?message=' + encodeURIComponent('Password reset successful. Please login.'));
     } catch (error) {
+      if (error instanceof ValidationError || error instanceof UnauthorizedError) {
+        const { token } = req.params;
+        if (error.message.includes('token')) {
+          return res.redirect('/auth/forgot-password?error=' + encodeURIComponent(error.message));
+        }
+        return res.redirect(`/auth/reset-password/${token}?error=` + encodeURIComponent(error.message));
+      }
       logger.error('Reset password error:', error);
       next(error);
     }

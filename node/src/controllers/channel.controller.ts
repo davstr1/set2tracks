@@ -1,49 +1,29 @@
-import { PrismaClient } from '@prisma/client';
-import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
+import channelService from '../services/domain/channel.service';
 import logger from '../utils/logger';
 import { PAGINATION } from '../config/constants';
-
+import { NotFoundError } from '../types/errors';
 
 /**
  * Channel Controller
- * Handles operations related to YouTube channels
+ * Handles HTTP requests for YouTube channels
+ * Thin controller - delegates business logic to ChannelService
  */
 export class ChannelController {
   /**
-   * Get all channels with pagination
+   * Get all channels with pagination (HTML)
    */
   async getChannels(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 30;
-      const skip = (page - 1) * limit;
       const showAll = req.query.showAll === 'true';
 
-      const where = showAll ? {} : { hidden: false, followable: true };
-
-      const [channels, total] = await Promise.all([
-        prisma.channel.findMany({
-          where,
-          orderBy: [
-            { nbSets: 'desc' },
-            { channelFollowerCount: 'desc' },
-          ],
-          skip,
-          take: limit,
-        }),
-        prisma.channel.count({ where }),
-      ]);
+      const result = await channelService.getChannels(page, limit, showAll);
 
       res.render('channel/list', {
         title: 'DJ Channels',
-        channels,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+        ...result,
         user: req.user,
       });
     } catch (error) {
@@ -59,33 +39,11 @@ export class ChannelController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 30;
-      const skip = (page - 1) * limit;
       const showAll = req.query.showAll === 'true';
 
-      const where = showAll ? {} : { hidden: false, followable: true };
+      const result = await channelService.getChannels(page, limit, showAll);
 
-      const [channels, total] = await Promise.all([
-        prisma.channel.findMany({
-          where,
-          orderBy: [
-            { nbSets: 'desc' },
-            { channelFollowerCount: 'desc' },
-          ],
-          skip,
-          take: limit,
-        }),
-        prisma.channel.count({ where }),
-      ]);
-
-      res.json({
-        channels,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching channels:', error);
       next(error);
@@ -99,30 +57,7 @@ export class ChannelController {
     try {
       const { id } = req.params;
 
-      const channel = await prisma.channel.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          sets: {
-            where: {
-              hidden: false,
-              published: true,
-            },
-            orderBy: {
-              publishDate: 'desc',
-            },
-            take: 50,
-          },
-        },
-      });
-
-      if (!channel) {
-        res.status(404).render('error', {
-          title: 'Channel Not Found',
-          message: 'The channel you are looking for could not be found.',
-          error: { status: 404 },
-        });
-        return;
-      }
+      const channel = await channelService.getChannelById(parseInt(id));
 
       res.render('channel/detail', {
         title: channel.author || 'Channel',
@@ -130,6 +65,14 @@ export class ChannelController {
         user: req.user,
       });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).render('error', {
+          title: 'Channel Not Found',
+          message: 'The channel you are looking for could not be found.',
+          error: { status: 404 },
+        });
+        return;
+      }
       logger.error('Error fetching channel:', error);
       next(error);
     }
@@ -142,29 +85,14 @@ export class ChannelController {
     try {
       const { id } = req.params;
 
-      const channel = await prisma.channel.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          sets: {
-            where: {
-              hidden: false,
-              published: true,
-            },
-            orderBy: {
-              publishDate: 'desc',
-            },
-            take: 50,
-          },
-        },
-      });
-
-      if (!channel) {
-        res.status(404).json({ error: 'Channel not found' });
-        return;
-      }
+      const channel = await channelService.getChannelById(parseInt(id));
 
       res.json({ channel });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: 'Channel not found' });
+        return;
+      }
       logger.error('Error fetching channel:', error);
       next(error);
     }
@@ -177,19 +105,9 @@ export class ChannelController {
     try {
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
-      const channels = await prisma.channel.findMany({
-        where: {
-          hidden: false,
-          followable: true,
-        },
-        orderBy: [
-          { nbSets: 'desc' },
-          { channelFollowerCount: 'desc' },
-        ],
-        take: limit,
-      });
+      const result = await channelService.getPopularChannels(limit);
 
-      res.json({ channels });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching popular channels:', error);
       next(error);
@@ -208,25 +126,9 @@ export class ChannelController {
         return;
       }
 
-      const channels = await prisma.channel.findMany({
-        where: {
-          AND: [
-            { hidden: false },
-            {
-              OR: [
-                { author: { contains: q, mode: 'insensitive' } },
-                { channelId: { contains: q, mode: 'insensitive' } },
-              ],
-            },
-          ],
-        },
-        orderBy: {
-          nbSets: 'desc',
-        },
-        take: 50,
-      });
+      const result = await channelService.searchChannels(q);
 
-      res.json({ channels, query: q, count: channels.length });
+      res.json(result);
     } catch (error) {
       logger.error('Error searching channels:', error);
       next(error);
@@ -241,50 +143,15 @@ export class ChannelController {
       const { id } = req.params;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
-      const skip = (page - 1) * limit;
 
-      const channel = await prisma.channel.findUnique({
-        where: { id: parseInt(id) },
-      });
+      const result = await channelService.getChannelSets(parseInt(id), page, limit);
 
-      if (!channel) {
+      res.json(result);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
         res.status(404).json({ error: 'Channel not found' });
         return;
       }
-
-      const [sets, total] = await Promise.all([
-        prisma.set.findMany({
-          where: {
-            channelId: channel.id,
-            hidden: false,
-            published: true,
-          },
-          orderBy: {
-            publishDate: 'desc',
-          },
-          skip,
-          take: limit,
-        }),
-        prisma.set.count({
-          where: {
-            channelId: channel.id,
-            hidden: false,
-            published: true,
-          },
-        }),
-      ]);
-
-      res.json({
-        channel,
-        sets,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
-    } catch (error) {
       logger.error('Error fetching channel sets:', error);
       next(error);
     }

@@ -1,14 +1,13 @@
-import { PrismaClient } from '@prisma/client';
-import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
-import spotifyService from '../services/spotify.service';
+import trackService from '../services/domain/track.service';
 import logger from '../utils/logger';
 import { PAGINATION } from '../config/constants';
-
+import { NotFoundError } from '../types/errors';
 
 /**
  * Track Controller
- * Handles track browsing, searching, and discovery
+ * Handles HTTP requests for tracks
+ * Thin controller - delegates business logic to TrackService
  */
 export class TrackController {
   /**
@@ -18,31 +17,10 @@ export class TrackController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 50;
-      const skip = (page - 1) * limit;
 
-      const [tracks, total] = await Promise.all([
-        prisma.track.findMany({
-          include: {
-            genres: true,
-          },
-          orderBy: {
-            nbSets: 'desc',
-          },
-          skip,
-          take: limit,
-        }),
-        prisma.track.count(),
-      ]);
+      const result = await trackService.getTracks(page, limit);
 
-      res.json({
-        tracks,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching tracks:', error);
       next(error);
@@ -56,35 +34,7 @@ export class TrackController {
     try {
       const { id } = req.params;
 
-      const track = await prisma.track.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          genres: true,
-          trackSets: {
-            include: {
-              set: {
-                include: {
-                  channel: true,
-                },
-              },
-            },
-            orderBy: {
-              set: {
-                publishDate: 'desc',
-              },
-            },
-          },
-        },
-      });
-
-      if (!track) {
-        res.status(404).render('error', {
-          title: 'Track Not Found',
-          message: 'The track you are looking for could not be found.',
-          error: { status: 404 },
-        });
-        return;
-      }
+      const track = await trackService.getTrackById(parseInt(id));
 
       res.render('track/detail', {
         title: `${track.title} - ${track.artistName}`,
@@ -92,6 +42,14 @@ export class TrackController {
         user: req.user,
       });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).render('error', {
+          title: 'Track Not Found',
+          message: 'The track you are looking for could not be found.',
+          error: { status: 404 },
+        });
+        return;
+      }
       logger.error('Error fetching track:', error);
       next(error);
     }
@@ -104,34 +62,14 @@ export class TrackController {
     try {
       const { id } = req.params;
 
-      const track = await prisma.track.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          genres: true,
-          trackSets: {
-            include: {
-              set: {
-                include: {
-                  channel: true,
-                },
-              },
-            },
-            orderBy: {
-              set: {
-                publishDate: 'desc',
-              },
-            },
-          },
-        },
-      });
-
-      if (!track) {
-        res.status(404).json({ error: 'Track not found' });
-        return;
-      }
+      const track = await trackService.getTrackById(parseInt(id));
 
       res.json({ track });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: 'Track not found' });
+        return;
+      }
       logger.error('Error fetching track:', error);
       next(error);
     }
@@ -149,26 +87,9 @@ export class TrackController {
         return;
       }
 
-      // Basic search - can be enhanced with PostgreSQL full-text search
-      const tracks = await prisma.track.findMany({
-        where: {
-          OR: [
-            { title: { contains: q, mode: 'insensitive' } },
-            { artistName: { contains: q, mode: 'insensitive' } },
-            { album: { contains: q, mode: 'insensitive' } },
-            { label: { contains: q, mode: 'insensitive' } },
-          ],
-        },
-        include: {
-          genres: true,
-        },
-        take: 50,
-        orderBy: {
-          nbSets: 'desc',
-        },
-      });
+      const result = await trackService.searchTracks(q);
 
-      res.json({ tracks, query: q, count: tracks.length });
+      res.json(result);
     } catch (error) {
       logger.error('Error searching tracks:', error);
       next(error);
@@ -181,51 +102,11 @@ export class TrackController {
   async getPopularTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
-      const timeframe = req.query.timeframe as string; // 'week', 'month', 'all'
+      const timeframe = req.query.timeframe as 'week' | 'month' | 'all' | undefined;
 
-      let dateFilter = {};
-      if (timeframe === 'week') {
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        dateFilter = {
-          trackSets: {
-            some: {
-              set: {
-                publishDate: {
-                  gte: weekAgo,
-                },
-              },
-            },
-          },
-        };
-      } else if (timeframe === 'month') {
-        const monthAgo = new Date();
-        monthAgo.setMonth(monthAgo.getMonth() - 1);
-        dateFilter = {
-          trackSets: {
-            some: {
-              set: {
-                publishDate: {
-                  gte: monthAgo,
-                },
-              },
-            },
-          },
-        };
-      }
+      const result = await trackService.getPopularTracks(limit, timeframe);
 
-      const tracks = await prisma.track.findMany({
-        where: dateFilter,
-        include: {
-          genres: true,
-        },
-        orderBy: {
-          nbSets: 'desc',
-        },
-        take: limit,
-      });
-
-      res.json({ tracks });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching popular tracks:', error);
       next(error);
@@ -240,37 +121,14 @@ export class TrackController {
       const { genre } = req.params;
       const limit = parseInt(req.query.limit as string) || 50;
 
-      // Find genre
-      const genreObj = await prisma.genre.findFirst({
-        where: {
-          name: { equals: genre, mode: 'insensitive' },
-        },
-      });
+      const result = await trackService.getTracksByGenre(genre, limit);
 
-      if (!genreObj) {
+      res.json(result);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
         res.status(404).json({ error: 'Genre not found' });
         return;
       }
-
-      const tracks = await prisma.track.findMany({
-        where: {
-          genres: {
-            some: {
-              id: genreObj.id,
-            },
-          },
-        },
-        include: {
-          genres: true,
-        },
-        orderBy: {
-          nbSets: 'desc',
-        },
-        take: limit,
-      });
-
-      res.json({ genre: genreObj, tracks });
-    } catch (error) {
       logger.error('Error fetching tracks by genre:', error);
       next(error);
     }
@@ -281,13 +139,9 @@ export class TrackController {
    */
   async getGenres(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const genres = await prisma.genre.findMany({
-        orderBy: {
-          trackCount: 'desc',
-        },
-      });
+      const result = await trackService.getGenres();
 
-      res.json({ genres });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching genres:', error);
       next(error);
@@ -301,29 +155,14 @@ export class TrackController {
     try {
       const { spotifyId } = req.params;
 
-      const track = await prisma.track.findUnique({
-        where: { keyTrackSpotify: spotifyId },
-        include: {
-          genres: true,
-          trackSets: {
-            include: {
-              set: {
-                include: {
-                  channel: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      const result = await trackService.getTrackBySpotifyId(spotifyId);
 
-      if (!track) {
+      res.json(result);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
         res.status(404).json({ error: 'Track not found' });
         return;
       }
-
-      res.json({ track });
-    } catch (error) {
       logger.error('Error fetching track by Spotify ID:', error);
       next(error);
     }
@@ -337,27 +176,14 @@ export class TrackController {
       const { id } = req.params;
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
-      const track = await prisma.track.findUnique({
-        where: { id: parseInt(id) },
-      });
+      const result = await trackService.getRelatedTracks(parseInt(id), limit);
 
-      if (!track) {
+      res.json(result);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
         res.status(404).json({ error: 'Track not found' });
         return;
       }
-
-      // Get related tracks from database
-      const relatedTracks = await prisma.$queryRaw`
-        SELECT t.*, rt.insertion_order
-        FROM tracks t
-        INNER JOIN related_tracks rt ON t.id = rt.related_track_id
-        WHERE rt.track_id = ${parseInt(id)}
-        ORDER BY rt.insertion_order
-        LIMIT ${limit}
-      `;
-
-      res.json({ track, relatedTracks });
-    } catch (error) {
       logger.error('Error fetching related tracks:', error);
       next(error);
     }
@@ -370,22 +196,9 @@ export class TrackController {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
 
-      const tracks = await prisma.track.findMany({
-        where: {
-          releaseDate: {
-            not: null,
-          },
-        },
-        include: {
-          genres: true,
-        },
-        orderBy: {
-          releaseDate: 'desc',
-        },
-        take: limit,
-      });
+      const result = await trackService.getNewTracks(limit);
 
-      res.json({ tracks });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching new tracks:', error);
       next(error);
@@ -400,23 +213,9 @@ export class TrackController {
       const { artist } = req.params;
       const limit = parseInt(req.query.limit as string) || 50;
 
-      const tracks = await prisma.track.findMany({
-        where: {
-          artistName: {
-            contains: artist,
-            mode: 'insensitive',
-          },
-        },
-        include: {
-          genres: true,
-        },
-        orderBy: {
-          nbSets: 'desc',
-        },
-        take: limit,
-      });
+      const result = await trackService.getTracksByArtist(artist, limit);
 
-      res.json({ artist, tracks, count: tracks.length });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching tracks by artist:', error);
       next(error);
@@ -431,23 +230,9 @@ export class TrackController {
       const { label } = req.params;
       const limit = parseInt(req.query.limit as string) || 50;
 
-      const tracks = await prisma.track.findMany({
-        where: {
-          label: {
-            contains: label,
-            mode: 'insensitive',
-          },
-        },
-        include: {
-          genres: true,
-        },
-        orderBy: {
-          nbSets: 'desc',
-        },
-        take: limit,
-      });
+      const result = await trackService.getTracksByLabel(label, limit);
 
-      res.json({ label, tracks, count: tracks.length });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching tracks by label:', error);
       next(error);

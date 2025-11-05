@@ -1,12 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
+import adminService from '../services/domain/admin.service';
+import setService from '../services/domain/set.service';
+import authService from '../services/domain/auth.service';
 import logger from '../utils/logger';
-
+import { ValidationError } from '../types/errors';
 
 /**
  * Admin Controller
- * Handles administrative operations
+ * Handles HTTP requests for administrative operations
+ * Thin controller - delegates business logic to AdminService
  */
 export class AdminController {
   /**
@@ -14,46 +16,11 @@ export class AdminController {
    */
   async getDashboard(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // Get statistics
-      const [
-        totalSets,
-        totalTracks,
-        totalChannels,
-        totalUsers,
-        recentSets,
-        queuedSets,
-        recentUsers,
-      ] = await Promise.all([
-        prisma.set.count(),
-        prisma.track.count(),
-        prisma.channel.count(),
-        prisma.user.count(),
-        prisma.set.findMany({
-          take: 10,
-          orderBy: { updatedAt: 'desc' },
-          include: { channel: true },
-        }),
-        prisma.setQueue.findMany({
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-        }),
-        prisma.user.findMany({
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-        }),
-      ]);
+      const dashboardData = await adminService.getDashboardStats();
 
       res.render('admin/dashboard', {
         title: 'Admin Dashboard',
-        stats: {
-          totalSets,
-          totalTracks,
-          totalChannels,
-          totalUsers,
-        },
-        recentSets,
-        queuedSets,
-        recentUsers,
+        ...dashboardData,
         user: req.user,
       });
     } catch (error) {
@@ -69,26 +36,12 @@ export class AdminController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 50;
-      const skip = (page - 1) * limit;
 
-      const [users, total] = await Promise.all([
-        prisma.user.findMany({
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: limit,
-        }),
-        prisma.user.count(),
-      ]);
+      const result = await adminService.getUsers(page, limit);
 
       res.render('admin/users', {
         title: 'Manage Users',
-        users,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+        ...result,
         user: req.user,
       });
     } catch (error) {
@@ -102,29 +55,11 @@ export class AdminController {
    */
   async getQueueStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const [pendingQueue, processingQueue, failedQueue] = await Promise.all([
-        prisma.setQueue.findMany({
-          where: { status: 'pending' },
-          orderBy: { createdAt: 'desc' },
-          take: 50,
-        }),
-        prisma.setQueue.findMany({
-          where: { status: 'processing' },
-          orderBy: { createdAt: 'desc' },
-          take: 50,
-        }),
-        prisma.setQueue.findMany({
-          where: { status: 'failed' },
-          orderBy: { updatedAt: 'desc' },
-          take: 50,
-        }),
-      ]);
+      const queueData = await adminService.getQueueStatus();
 
       res.render('admin/queue', {
         title: 'Queue Status',
-        pendingQueue,
-        processingQueue,
-        failedQueue,
+        ...queueData,
         user: req.user,
       });
     } catch (error) {
@@ -156,13 +91,11 @@ export class AdminController {
    */
   async getConfig(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const appConfig = await prisma.appConfig.findMany({
-        orderBy: { key: 'asc' },
-      });
+      const config = await adminService.getConfig();
 
       res.render('admin/config', {
         title: 'Application Configuration',
-        config: appConfig,
+        config,
         user: req.user,
       });
     } catch (error) {
@@ -183,13 +116,9 @@ export class AdminController {
         return;
       }
 
-      const config = await prisma.appConfig.upsert({
-        where: { key },
-        update: { value },
-        create: { key, value },
-      });
+      const result = await adminService.updateConfig(key, value);
 
-      res.json({ success: true, config });
+      res.json(result);
     } catch (error) {
       logger.error('Error updating config:', error);
       next(error);
@@ -204,12 +133,9 @@ export class AdminController {
       const { id } = req.params;
       const { hidden } = req.body;
 
-      const set = await prisma.set.update({
-        where: { id: parseInt(id) },
-        data: { hidden: hidden === true || hidden === 'true' },
-      });
+      const result = await setService.toggleVisibility(parseInt(id), hidden === true || hidden === 'true');
 
-      res.json({ success: true, set });
+      res.json(result);
     } catch (error) {
       logger.error('Error toggling set visibility:', error);
       next(error);
@@ -223,11 +149,9 @@ export class AdminController {
     try {
       const { id } = req.params;
 
-      await prisma.set.delete({
-        where: { id: parseInt(id) },
-      });
+      const result = await setService.deleteSet(parseInt(id));
 
-      res.json({ success: true, message: 'Set deleted successfully' });
+      res.json(result);
     } catch (error) {
       logger.error('Error deleting set:', error);
       next(error);
@@ -242,18 +166,14 @@ export class AdminController {
       const { id } = req.params;
       const { type } = req.body;
 
-      if (!['Admin', 'User', 'Guest'].includes(type)) {
-        res.status(400).json({ error: 'Invalid user type' });
+      const result = await authService.updateUserType(parseInt(id), type);
+
+      res.json(result);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        res.status(400).json({ error: error.message });
         return;
       }
-
-      const user = await prisma.user.update({
-        where: { id: parseInt(id) },
-        data: { type },
-      });
-
-      res.json({ success: true, user });
-    } catch (error) {
       logger.error('Error updating user type:', error);
       next(error);
     }
@@ -264,40 +184,9 @@ export class AdminController {
    */
   async getSystemStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const [
-        totalSets,
-        publishedSets,
-        totalTracks,
-        totalChannels,
-        totalUsers,
-        queuePending,
-        queueProcessing,
-        queueFailed,
-      ] = await Promise.all([
-        prisma.set.count(),
-        prisma.set.count({ where: { published: true, hidden: false } }),
-        prisma.track.count(),
-        prisma.channel.count(),
-        prisma.user.count(),
-        prisma.setQueue.count({ where: { status: 'pending' } }),
-        prisma.setQueue.count({ where: { status: 'processing' } }),
-        prisma.setQueue.count({ where: { status: 'failed' } }),
-      ]);
+      const stats = await adminService.getSystemStats();
 
-      res.json({
-        sets: {
-          total: totalSets,
-          published: publishedSets,
-        },
-        tracks: totalTracks,
-        channels: totalChannels,
-        users: totalUsers,
-        queue: {
-          pending: queuePending,
-          processing: queueProcessing,
-          failed: queueFailed,
-        },
-      });
+      res.json(stats);
     } catch (error) {
       logger.error('Error fetching system stats:', error);
       next(error);

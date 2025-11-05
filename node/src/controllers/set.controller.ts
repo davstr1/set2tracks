@@ -1,19 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
-import youtubeService from '../services/youtube.service';
-import { setProcessingQueue } from '../jobs/queue';
+import setService from '../services/domain/set.service';
 import logger from '../utils/logger';
 import { PAGINATION } from '../config/constants';
-
+import { NotFoundError } from '../types/errors';
 
 /**
  * Set Controller
- *
- * Handles operations related to DJ sets (video processing, browsing, searching)
- * This is an example controller showing the pattern for migrating Python controllers
+ * Handles HTTP requests for DJ sets
+ * Thin controller - delegates business logic to SetService
  */
-
 export class SetController {
   /**
    * Get all sets with pagination
@@ -22,45 +17,10 @@ export class SetController {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
-      const skip = (page - 1) * limit;
 
-      const [sets, total] = await Promise.all([
-        prisma.set.findMany({
-          where: {
-            hidden: false,
-            published: true,
-          },
-          include: {
-            channel: true,
-            trackSets: {
-              include: {
-                track: true,
-              },
-            },
-          },
-          orderBy: {
-            publishDate: 'desc',
-          },
-          skip,
-          take: limit,
-        }),
-        prisma.set.count({
-          where: {
-            hidden: false,
-            published: true,
-          },
-        }),
-      ]);
+      const result = await setService.getPublishedSets(page, limit);
 
-      res.json({
-        sets,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching sets:', error);
       next(error);
@@ -74,52 +34,11 @@ export class SetController {
     try {
       const { id } = req.params;
 
-      const set = await prisma.set.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          channel: true,
-          trackSets: {
-            include: {
-              track: {
-                include: {
-                  genres: true,
-                },
-              },
-            },
-            orderBy: {
-              pos: 'asc',
-            },
-          },
-        },
-      });
-
-      if (!set) {
-        res.status(404).render('error', {
-          title: 'Set Not Found',
-          message: 'The set you are looking for could not be found.',
-          error: { status: 404 },
-        });
-        return;
-      }
+      const set = await setService.getSetById(parseInt(id));
 
       // Record browsing history if user is logged in
       if (req.user) {
-        await prisma.setBrowsingHistory.upsert({
-          where: {
-            setId_userId: {
-              setId: set.id,
-              userId: (req.user as any).id,
-            },
-          },
-          update: {
-            datetime: new Date(),
-          },
-          create: {
-            setId: set.id,
-            userId: (req.user as any).id,
-            datetime: new Date(),
-          },
-        });
+        await setService.recordBrowsing((req.user as any).id, set.id);
       }
 
       res.render('set/detail', {
@@ -128,6 +47,14 @@ export class SetController {
         user: req.user,
       });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).render('error', {
+          title: 'Set Not Found',
+          message: 'The set you are looking for could not be found.',
+          error: { status: 404 },
+        });
+        return;
+      }
       logger.error('Error fetching set:', error);
       next(error);
     }
@@ -140,32 +67,14 @@ export class SetController {
     try {
       const { id } = req.params;
 
-      const set = await prisma.set.findUnique({
-        where: { id: parseInt(id) },
-        include: {
-          channel: true,
-          trackSets: {
-            include: {
-              track: {
-                include: {
-                  genres: true,
-                },
-              },
-            },
-            orderBy: {
-              pos: 'asc',
-            },
-          },
-        },
-      });
-
-      if (!set) {
-        res.status(404).json({ error: 'Set not found' });
-        return;
-      }
+      const set = await setService.getSetById(parseInt(id));
 
       res.json({ set });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: 'Set not found' });
+        return;
+      }
       logger.error('Error fetching set:', error);
       next(error);
     }
@@ -178,32 +87,14 @@ export class SetController {
     try {
       const { videoId } = req.params;
 
-      const set = await prisma.set.findUnique({
-        where: { videoId },
-        include: {
-          channel: true,
-          trackSets: {
-            include: {
-              track: {
-                include: {
-                  genres: true,
-                },
-              },
-            },
-            orderBy: {
-              pos: 'asc',
-            },
-          },
-        },
-      });
-
-      if (!set) {
-        res.status(404).json({ error: 'Set not found' });
-        return;
-      }
+      const set = await setService.getSetByVideoId(videoId);
 
       res.json({ set });
     } catch (error) {
+      if (error instanceof NotFoundError) {
+        res.status(404).json({ error: 'Set not found' });
+        return;
+      }
       logger.error('Error fetching set by video ID:', error);
       next(error);
     }
@@ -221,65 +112,18 @@ export class SetController {
         return;
       }
 
-      // Check if already exists in queue or as processed set
-      const [existingQueue, existingSet] = await Promise.all([
-        prisma.setQueue.findUnique({
-          where: { videoId },
-        }),
-        prisma.set.findUnique({
-          where: { videoId },
-        }),
-      ]);
-
-      if (existingSet) {
-        res.json({
-          message: 'Set already processed',
-          set: existingSet,
-        });
-        return;
-      }
-
-      if (existingQueue) {
-        res.json({
-          message: 'Set already in queue',
-          queueItem: existingQueue,
-        });
-        return;
-      }
-
-      // Get video info from YouTube
-      logger.info(`Fetching info for video: ${videoId}`);
-      const videoInfo = await youtubeService.getVideoInfo(videoId);
-
-      // Create queue item
-      const queueItem = await prisma.setQueue.create({
-        data: {
-          videoId,
-          userId: req.user ? (req.user as any).id : null,
-          userPremium: req.user ? (req.user as any).type === 'Admin' : false,
-          status: 'pending',
-          duration: videoInfo.duration,
-          nbChapters: videoInfo.chapters?.length || 0,
-          videoInfoJson: videoInfo as any,
-          sendEmail: sendEmail || false,
-          playSound: playSound || false,
-        },
-      });
-
-      // Add job to Bull queue for processing
-      await setProcessingQueue.add({
+      const result = await setService.queueSet({
         videoId,
-        queueItemId: queueItem.id,
-      }, {
-        priority: queueItem.userPremium ? 1 : 10, // Premium users get higher priority
+        userId: req.user ? (req.user as any).id : null,
+        userType: req.user ? (req.user as any).type : null,
+        sendEmail,
+        playSound,
       });
 
       logger.info(`Set queued successfully: ${videoId}`);
 
-      res.status(201).json({
-        message: 'Set queued for processing',
-        queueItem,
-      });
+      const statusCode = result.alreadyExists ? 200 : 201;
+      res.status(statusCode).json(result);
     } catch (error) {
       logger.error('Error queueing set:', error);
       next(error);
@@ -298,43 +142,9 @@ export class SetController {
         return;
       }
 
-      // Basic search - can be enhanced with PostgreSQL full-text search
-      const sets = await prisma.set.findMany({
-        where: {
-          AND: [
-            { hidden: false },
-            { published: true },
-            {
-              OR: [
-                { title: { contains: q, mode: 'insensitive' } },
-                { channel: { author: { contains: q, mode: 'insensitive' } } },
-              ],
-            },
-          ],
-        },
-        include: {
-          channel: true,
-        },
-        take: 50,
-        orderBy: {
-          publishDate: 'desc',
-        },
-      });
+      const result = await setService.searchSets(q);
 
-      // Record search query
-      await prisma.setSearch.upsert({
-        where: { query: q },
-        update: {
-          nbResults: sets.length,
-          updatedAt: new Date(),
-        },
-        create: {
-          query: q,
-          nbResults: sets.length,
-        },
-      });
-
-      res.json({ sets, query: q, count: sets.length });
+      res.json(result);
     } catch (error) {
       logger.error('Error searching sets:', error);
       next(error);
@@ -354,22 +164,9 @@ export class SetController {
       const userId = (req.user as any).id;
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
-      const history = await prisma.setBrowsingHistory.findMany({
-        where: { userId },
-        include: {
-          set: {
-            include: {
-              channel: true,
-            },
-          },
-        },
-        orderBy: {
-          datetime: 'desc',
-        },
-        take: limit,
-      });
+      const result = await setService.getUserHistory(userId, limit);
 
-      res.json({ history });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching user history:', error);
       next(error);
@@ -383,22 +180,9 @@ export class SetController {
     try {
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
-      const sets = await prisma.set.findMany({
-        where: {
-          hidden: false,
-          published: true,
-        },
-        include: {
-          channel: true,
-        },
-        orderBy: [
-          { likeCount: 'desc' },
-          { viewCount: 'desc' },
-        ],
-        take: limit,
-      });
+      const result = await setService.getPopularSets(limit);
 
-      res.json({ sets });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching popular sets:', error);
       next(error);
@@ -412,21 +196,9 @@ export class SetController {
     try {
       const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
-      const sets = await prisma.set.findMany({
-        where: {
-          hidden: false,
-          published: true,
-        },
-        include: {
-          channel: true,
-        },
-        orderBy: {
-          publishDate: 'desc',
-        },
-        take: limit,
-      });
+      const result = await setService.getRecentSets(limit);
 
-      res.json({ sets });
+      res.json(result);
     } catch (error) {
       logger.error('Error fetching recent sets:', error);
       next(error);
