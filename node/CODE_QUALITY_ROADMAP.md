@@ -87,13 +87,40 @@ This document tracks code quality improvements for maintainability and readabili
 
 ---
 
-### 4. Custom Error Classes
+### 4. Custom Error Classes ✅ DONE (2025-11-05)
 **Impact:** Debugging | **Effort:** Low (1 hour)
 
-**What:**
-- Create error hierarchy in `src/utils/errors.ts`
-- Classes: AppError, NotFoundError, ValidationError, AuthError
-- Update global error handler middleware
+**Completed:**
+- ✅ Created comprehensive error class hierarchy (13 error types)
+  - AppError: Base class with statusCode, isOperational, code, details
+  - HTTP errors: BadRequestError (400), UnauthorizedError (401), ForbiddenError (403), NotFoundError (404), ConflictError (409), ValidationError (422), RateLimitError (429)
+  - Server errors: InternalError (500), ServiceUnavailableError (503)
+  - Domain errors: AuthError, DatabaseError, ExternalAPIError
+- ✅ Created global error handler middleware (src/middleware/errorHandler.ts)
+  - errorHandler: Catches all errors, logs appropriately, returns consistent JSON
+  - notFoundHandler: Catches undefined routes (404)
+  - asyncHandler: Wraps async handlers to catch errors
+  - Operational vs programming error distinction
+  - Development vs production error detail exposure
+- ✅ Integrated error handlers in app.ts
+- ✅ Applied ExternalAPIError in YouTube service
+
+**Error Response Format:**
+```json
+{
+  "status": "error",
+  "code": "NOT_FOUND",
+  "message": "Set with ID '123' not found",
+  "details": { "resource": "Set", "id": 123 }
+}
+```
+
+**Benefits:**
+- Consistent error responses across API
+- Proper HTTP status codes
+- Better debugging with structured logging
+- Type-safe error handling with isAppError()
+- Self-documenting error codes
 
 ---
 
