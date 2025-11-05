@@ -5,6 +5,7 @@ import path from 'path';
 import config from '../config';
 import logger from '../utils/logger';
 import { YtDlpChapter } from '../types/youtube';
+import { ExternalAPIError, InternalError } from '../types/errors';
 
 interface VideoInfo {
   id: string;
@@ -91,7 +92,7 @@ class YouTubeService {
       };
     } catch (error) {
       logger.error(`Error fetching video info for ${videoId}:`, error);
-      throw new Error(`Failed to fetch video info: ${error}`);
+      throw new ExternalAPIError('YouTube', `Failed to fetch video info for ${videoId}`, { videoId, error });
     }
   }
 
@@ -122,7 +123,7 @@ class YouTubeService {
       return finalPath;
     } catch (error) {
       logger.error(`Error downloading audio for ${videoId}:`, error);
-      throw new Error(`Failed to download audio: ${error}`);
+      throw new ExternalAPIError('YouTube', `Failed to download audio for ${videoId}`, { videoId, error });
     }
   }
 

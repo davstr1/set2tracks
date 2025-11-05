@@ -186,28 +186,14 @@ class App {
   }
 
   private initializeErrorHandling() {
-    // 404 handler
-    this.app.use((req: Request, res: Response) => {
-      res.status(404).render('error.njk', {
-        title: '404 - Page Not Found',
-        message: 'The page you are looking for does not exist.',
-        error: {},
-      });
-    });
+    // Import error handlers
+    const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
-    // Global error handler
-    this.app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-      logger.error('Unhandled error:', err);
+    // 404 handler - catches undefined routes
+    this.app.use(notFoundHandler);
 
-      const status = (err as any).status || 500;
-      const message = config.nodeEnv === 'development' ? err.message : 'Internal Server Error';
-
-      res.status(status).render('error.njk', {
-        title: `${status} - Error`,
-        message,
-        error: config.nodeEnv === 'development' ? err : {},
-      });
-    });
+    // Global error handler - catches all errors
+    this.app.use(errorHandler);
   }
 
   public async close() {
