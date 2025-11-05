@@ -1,5 +1,7 @@
 import { setProcessingQueue, emailQueue, cleanupQueue, channelCheckQueue } from './queue';
 import processSet from './processors/setProcessing.processor';
+import processChannelCheck from './processors/channelCheck.processor';
+import { initializeScheduler } from './scheduler';
 import logger from '../utils/logger';
 
 /**
@@ -8,6 +10,11 @@ import logger from '../utils/logger';
  */
 
 logger.info('🚀 Starting job worker...');
+
+// Initialize recurring jobs (channel checks every 6 hours)
+initializeScheduler().catch((error) => {
+  logger.error('Failed to initialize scheduler:', error);
+});
 
 /**
  * Set Processing Queue Processor
@@ -65,12 +72,7 @@ cleanupQueue.process(async (job) => {
  */
 channelCheckQueue.process(async (job) => {
   logger.info(`Processing channel check job ${job.id}`);
-  const { channelId } = job.data;
-
-  // TODO: Implement channel check processor
-  // - Fetch latest videos from channel
-  // - Check if any new videos since last check
-  // - Queue new videos for processing
+  await processChannelCheck(job);
 });
 
 // Graceful shutdown
