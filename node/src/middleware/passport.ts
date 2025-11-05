@@ -6,8 +6,7 @@ import config from '../config';
 import PasswordUtils from '../utils/password';
 import logger from '../utils/logger';
 import { PassportSerializeCallback, PassportDeserializeCallback } from '../types/passport';
-
-const prisma = new PrismaClient();
+import prisma from '../utils/database';
 
 /**
  * Serialize user for session

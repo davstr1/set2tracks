@@ -1,4 +1,5 @@
 import { Job } from 'bull';
+import prisma from '../../utils/database';
 import { PrismaClient } from '@prisma/client';
 import youtubeService from '../../services/youtube.service';
 import recognitionService from '../../services/recognition.service';
@@ -6,7 +7,6 @@ import spotifyService from '../../services/spotify.service';
 import logger from '../../utils/logger';
 import config from '../../config';
 
-const prisma = new PrismaClient();
 
 interface SetProcessingJobData {
   videoId: string;

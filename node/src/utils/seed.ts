@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from './database';
 import logger from './logger';
 
-const prisma = new PrismaClient();
 
 /**
  * Database Seed Script

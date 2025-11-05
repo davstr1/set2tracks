@@ -4,8 +4,7 @@ import youtubeService from '../../services/youtube.service';
 import { setProcessingQueue } from '../queue';
 import logger from '../../utils/logger';
 import { getErrorMessage } from '../../types/errors';
-
-const prisma = new PrismaClient();
+import prisma from '../../utils/database';
 
 interface ChannelCheckJobData {
   channelId?: number;

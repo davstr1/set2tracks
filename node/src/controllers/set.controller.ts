@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
 import youtubeService from '../services/youtube.service';
 import { setProcessingQueue } from '../jobs/queue';
 import logger from '../utils/logger';
 
-const prisma = new PrismaClient();
 
 /**
  * Set Controller

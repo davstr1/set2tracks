@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
 import spotifyService from '../services/spotify.service';
 import logger from '../utils/logger';
 
-const prisma = new PrismaClient();
 
 /**
  * Track Controller

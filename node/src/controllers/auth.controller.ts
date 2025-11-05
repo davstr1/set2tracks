@@ -6,8 +6,7 @@ import PasswordUtils from '../utils/password';
 import logger from '../utils/logger';
 import config from '../config';
 import { PassportLocalCallback } from '../types/passport';
-
-const prisma = new PrismaClient();
+import prisma from '../utils/database';
 
 /**
  * Auth Controller
