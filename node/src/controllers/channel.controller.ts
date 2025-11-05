@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
+import { PAGINATION } from '../config/constants';
 
 
 /**
@@ -174,7 +175,7 @@ export class ChannelController {
    */
   async getPopularChannels(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
       const channels = await prisma.channel.findMany({
         where: {
@@ -239,7 +240,7 @@ export class ChannelController {
     try {
       const { id } = req.params;
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
       const skip = (page - 1) * limit;
 
       const channel = await prisma.channel.findUnique({

@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import youtubeService from '../services/youtube.service';
 import { setProcessingQueue } from '../jobs/queue';
 import logger from '../utils/logger';
+import { PAGINATION } from '../config/constants';
 
 
 /**
@@ -20,7 +21,7 @@ export class SetController {
   async getSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
       const skip = (page - 1) * limit;
 
       const [sets, total] = await Promise.all([
@@ -351,7 +352,7 @@ export class SetController {
       }
 
       const userId = (req.user as any).id;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
       const history = await prisma.setBrowsingHistory.findMany({
         where: { userId },
@@ -380,7 +381,7 @@ export class SetController {
    */
   async getPopularSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
       const sets = await prisma.set.findMany({
         where: {
@@ -409,7 +410,7 @@ export class SetController {
    */
   async getRecentSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
       const sets = await prisma.set.findMany({
         where: {

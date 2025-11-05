@@ -5,6 +5,7 @@ import { setProcessingQueue } from '../queue';
 import logger from '../../utils/logger';
 import { getErrorMessage } from '../../types/errors';
 import prisma from '../../utils/database';
+import { JOB_PRIORITY, LIMITS } from '../../config/constants';
 
 interface ChannelCheckJobData {
   channelId?: number;
@@ -57,7 +58,7 @@ export async function processChannelCheck(job: Job<ChannelCheckJobData>): Promis
 
         // Get channel's recent uploads using YouTube API
         const recentVideos = await youtubeService.getChannelVideos(channel.channelId, {
-          maxResults: 10, // Check last 10 videos
+          maxResults: LIMITS.MAX_CHANNEL_VIDEOS, // Check last 10 videos
           order: 'date',
         });
 
@@ -123,7 +124,7 @@ export async function processChannelCheck(job: Job<ChannelCheckJobData>): Promis
                   queueItemId: queueItem.id,
                 },
                 {
-                  priority: 20, // Lower priority than user-submitted sets
+                  priority: JOB_PRIORITY.AUTO_QUEUED, // Lower priority than user-submitted sets
                 }
               );
 

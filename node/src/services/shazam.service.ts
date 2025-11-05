@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import config from '../config';
 import logger from '../utils/logger';
 import { ShazamTrack as ShazamTrackType, ShazamResponse, ShazamMetadataItem } from '../types/shazam';
+import { CONCURRENCY } from '../config/constants';
 
 /**
  * Shazam Service for track identification
@@ -33,7 +34,7 @@ interface ShazamTrack {
 
 class ShazamService {
   private proxyUrl?: string;
-  private maxConcurrentRequests: number = 30;
+  private maxConcurrentRequests: number = CONCURRENCY.MAX_SHAZAM_REQUESTS;
 
   constructor() {
     this.proxyUrl = config.apis.shazam.proxyUrl;

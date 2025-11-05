@@ -3,6 +3,7 @@ import prisma from '../utils/database';
 import { Request, Response, NextFunction } from 'express';
 import spotifyService from '../services/spotify.service';
 import logger from '../utils/logger';
+import { PAGINATION } from '../config/constants';
 
 
 /**
@@ -334,7 +335,7 @@ export class TrackController {
   async getRelatedTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
 
       const track = await prisma.track.findUnique({
         where: { id: parseInt(id) },

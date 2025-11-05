@@ -1,6 +1,7 @@
 import { channelCheckQueue } from './queue';
 import logger from '../utils/logger';
 import { getErrorMessage } from '../types/errors';
+import { SCHEDULER } from '../config/constants';
 
 /**
  * Job Scheduler
@@ -26,7 +27,7 @@ export async function scheduleChannelCheck() {
       },
       {
         repeat: {
-          every: 10 * 60 * 1000, // 10 minutes in milliseconds
+          every: SCHEDULER.CHANNEL_CHECK_INTERVAL_MS,
         },
         jobId: 'channel-check-recurring',
       }

@@ -4,6 +4,7 @@ import config from '../config';
 import logger from '../utils/logger';
 import { ShazamTrack, ShazamResponse, ShazamMetadataItem, ShazamSection } from '../types/shazam';
 import { getErrorMessage } from '../types/errors';
+import { CONCURRENCY } from '../config/constants';
 
 /**
  * Music Recognition Service using Shazam
@@ -259,7 +260,7 @@ class MusicRecognitionService {
    */
   async addLabelsToTracks(
     tracks: RecognizedTrack[],
-    maxConcurrent: number = 30
+    maxConcurrent: number = CONCURRENCY.MAX_LABEL_FETCHES
   ): Promise<RecognizedTrack[]> {
     logger.info(`Getting labels for ${tracks.length} tracks...`);
 
