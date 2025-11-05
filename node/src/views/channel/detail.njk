@@ -1,0 +1,124 @@
+{% extends "../layout.njk" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  <!-- Channel Header -->
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-6">
+    <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-12 text-white">
+      <div class="flex items-center justify-center mb-6">
+        <svg class="h-24 w-24" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>
+      </div>
+      <h1 class="text-4xl font-bold text-center">
+        {{ channel.author or 'Unknown Channel' }}
+      </h1>
+
+      <!-- Stats -->
+      <div class="mt-6 flex flex-wrap justify-center gap-8">
+        <div class="text-center">
+          <div class="text-3xl font-bold">{{ channel.nbSets }}</div>
+          <div class="text-sm opacity-90">DJ Sets</div>
+        </div>
+        {% if channel.channelFollowerCount %}
+        <div class="text-center">
+          <div class="text-3xl font-bold">{{ (channel.channelFollowerCount / 1000) | round(1) }}K</div>
+          <div class="text-sm opacity-90">Subscribers</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- YouTube Link -->
+      {% if channel.channelUrl %}
+        <div class="mt-6 text-center">
+          <a href="{{ channel.channelUrl }}"
+             target="_blank"
+             class="inline-flex items-center px-6 py-3 border-2 border-white text-base font-medium rounded-md text-white hover:bg-white hover:text-purple-600 transition-colors">
+            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            Visit YouTube Channel
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sets Section -->
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900">Latest DJ Sets</h2>
+    </div>
+
+    {% if channel.sets.length > 0 %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        {% for set in channel.sets %}
+          <a href="/set/{{ set.id }}" class="group">
+            <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+              <!-- Thumbnail -->
+              {% if set.thumbnail %}
+                <div class="relative h-48 overflow-hidden">
+                  <img src="{{ set.thumbnail }}" alt="{{ set.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                  {% if set.duration %}
+                    <div class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                      {{ (set.duration / 60) | round }} min
+                    </div>
+                  {% endif %}
+                </div>
+              {% else %}
+                <div class="h-48 bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <svg class="h-16 w-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                  </svg>
+                </div>
+              {% endif %}
+
+              <!-- Set Info -->
+              <div class="p-4">
+                <h3 class="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                  {{ set.title }}
+                </h3>
+
+                <div class="mt-2 flex items-center justify-between text-sm text-gray-600">
+                  {% if set.nbTracks > 0 %}
+                    <span class="flex items-center">
+                      <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                      </svg>
+                      {{ set.nbTracks }}
+                    </span>
+                  {% endif %}
+
+                  {% if set.viewCount %}
+                    <span class="flex items-center">
+                      <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      {{ (set.viewCount / 1000) | round(1) }}K
+                    </span>
+                  {% endif %}
+                </div>
+
+                {% if set.publishDate %}
+                  <div class="mt-2 text-xs text-gray-500">
+                    {{ set.publishDate | date('MMM D, YYYY') }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="px-4 py-12 text-center text-gray-500">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No sets yet</h3>
+        <p class="mt-1 text-sm text-gray-500">This channel hasn't published any DJ sets yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
