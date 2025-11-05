@@ -39,7 +39,7 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 

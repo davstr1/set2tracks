@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import config from '../config';
 import logger from '../utils/logger';
+import { YtDlpChapter } from '../types/youtube';
 
 interface VideoInfo {
   id: string;
@@ -65,7 +66,7 @@ class YouTubeService {
       // Extract chapters if available
       const chapters: Chapter[] = [];
       if (info.chapters && Array.isArray(info.chapters)) {
-        info.chapters.forEach((chapter: any, index: number) => {
+        info.chapters.forEach((chapter: YtDlpChapter, index: number) => {
           chapters.push({
             startTime: Math.floor(chapter.start_time || 0),
             endTime: Math.floor(chapter.end_time || info.duration),

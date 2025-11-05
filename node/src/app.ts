@@ -13,6 +13,8 @@ import Backend from 'i18next-fs-backend';
 
 import config from './config';
 import logger from './utils/logger';
+import { RedisClient } from './types/redis';
+import { NunjucksFilterValue } from './types/nunjucks';
 
 // Import passport config
 import './middleware/passport';
@@ -31,7 +33,7 @@ import { attachUser } from './middleware/auth';
 
 class App {
   public app: Application;
-  private redisClient: any;
+  private redisClient: RedisClient;
 
   constructor() {
     this.app = express();
@@ -121,8 +123,8 @@ class App {
     });
 
     // Add custom filters (similar to Jinja2)
-    env.addFilter('json', (value: any) => JSON.stringify(value));
-    env.addFilter('length', (value: any) => (Array.isArray(value) ? value.length : 0));
+    env.addFilter('json', (value: NunjucksFilterValue) => JSON.stringify(value));
+    env.addFilter('length', (value: NunjucksFilterValue) => (Array.isArray(value) ? value.length : 0));
 
     // Set view engine
     this.app.set('view engine', 'njk');

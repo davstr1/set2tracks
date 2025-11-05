@@ -5,26 +5,27 @@ import { PrismaClient, User } from '@prisma/client';
 import config from '../config';
 import PasswordUtils from '../utils/password';
 import logger from '../utils/logger';
+import { PassportSerializeCallback, PassportDeserializeCallback } from '../types/passport';
 
 const prisma = new PrismaClient();
 
 /**
  * Serialize user for session
  */
-passport.serializeUser((user: any, done) => {
+passport.serializeUser((user: User, done: PassportSerializeCallback) => {
   done(null, user.id);
 });
 
 /**
  * Deserialize user from session
  */
-passport.deserializeUser(async (id: number, done) => {
+passport.deserializeUser(async (id: number, done: PassportDeserializeCallback) => {
   try {
     const user = await prisma.user.findUnique({ where: { id } });
-    done(null, user);
+    done(null, user || false);
   } catch (error) {
     logger.error('Error deserializing user:', error);
-    done(error, null);
+    done(error as Error, false);
   }
 });
 

@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import passport from 'passport';
 import crypto from 'crypto';
 import PasswordUtils from '../utils/password';
 import logger from '../utils/logger';
 import config from '../config';
+import { PassportLocalCallback } from '../types/passport';
 
 const prisma = new PrismaClient();
 
@@ -43,14 +44,14 @@ export class AuthController {
    * Handle login POST
    */
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
-    passport.authenticate('local', (err: any, user: any, info: any) => {
+    passport.authenticate('local', (err: Error | null, user: User | false, info?: { message: string }) => {
       if (err) {
         logger.error('Login error:', err);
         return next(err);
       }
 
       if (!user) {
-        return res.redirect('/auth/login?error=' + encodeURIComponent(info.message || 'Login failed'));
+        return res.redirect('/auth/login?error=' + encodeURIComponent(info?.message || 'Login failed'));
       }
 
       req.logIn(user, (err) => {
@@ -167,7 +168,7 @@ export class AuthController {
    * Google OAuth callback
    */
   async googleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
-    passport.authenticate('google', (err: any, user: any, info: any) => {
+    passport.authenticate('google', (err: Error | null, user: User | false, info?: { message: string }) => {
       if (err) {
         logger.error('Google OAuth error:', err);
         return res.redirect('/auth/login?error=' + encodeURIComponent('Google login failed'));
@@ -287,10 +288,10 @@ export class AuthController {
       // Find user with this reset token
       const users = await prisma.user.findMany();
       const user = users.find((u) => {
-        const extraFields = u.extraFields as any;
+        const extraFields = u.extraFields as Record<string, unknown> | null;
         if (!extraFields?.resetToken) return false;
         if (extraFields.resetToken !== token) return false;
-        if (new Date(extraFields.resetTokenExpiry) < new Date()) return false;
+        if (extraFields.resetTokenExpiry && new Date(extraFields.resetTokenExpiry as string) < new Date()) return false;
         return true;
       });
 

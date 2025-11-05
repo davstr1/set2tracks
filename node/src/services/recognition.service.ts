@@ -2,6 +2,8 @@ import fs from 'fs/promises';
 import { Shazam } from 'node-shazam';
 import config from '../config';
 import logger from '../utils/logger';
+import { ShazamTrack, ShazamResponse, ShazamMetadataItem, ShazamSection } from '../types/shazam';
+import { getErrorMessage } from '../types/errors';
 
 /**
  * Music Recognition Service using Shazam
@@ -111,15 +113,15 @@ class MusicRecognitionService {
 
           // Extract track information
           const track: RecognizedTrack = {
-            keyTrackShazam: parseInt(shazamTrack.key) || 0,
+            keyTrackShazam: parseInt(shazamTrack.key || '0') || 0,
             title: shazamTrack.title || 'Unknown Title',
             artistName: shazamTrack.subtitle || 'Unknown Artist',
-            album: shazamTrack.sections?.[0]?.metadata?.find((m: any) => m.title === 'Album')?.text,
-            label: shazamTrack.sections?.[0]?.metadata?.find((m: any) => m.title === 'Label')?.text,
+            album: shazamTrack.sections?.[0]?.metadata?.find((m: ShazamMetadataItem) => m.title === 'Album')?.text,
+            label: shazamTrack.sections?.[0]?.metadata?.find((m: ShazamMetadataItem) => m.title === 'Label')?.text,
             releaseYear: this.extractReleaseYear(shazamTrack.sections),
             appleMusicUrl: shazamTrack.url,
             coverArtUrl: shazamTrack.images?.coverart || shazamTrack.share?.image,
-            spotifyId: shazamTrack.hub?.providers?.find((p: any) => p.type === 'SPOTIFY')?.actions?.[0]?.uri?.split(':').pop(),
+            spotifyId: shazamTrack.hub?.providers?.find((p: { type: string }) => p.type === 'SPOTIFY')?.actions?.[0]?.uri?.split(':').pop(),
             genres: shazamTrack.genres?.primary ? [shazamTrack.genres.primary] : undefined,
             confidence: 90, // Shazam doesn't provide confidence score
           };
@@ -140,12 +142,13 @@ class MusicRecognitionService {
             retries: attempt,
           };
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
-        logger.error(`Shazam recognition attempt ${attempt + 1} failed:`, error.message);
+        logger.error(`Shazam recognition attempt ${attempt + 1} failed:`, getErrorMessage(error));
 
         // Don't retry on certain errors
-        if (error.message?.includes('rate limit')) {
+        const errorMessage = getErrorMessage(error);
+        if (errorMessage.includes('rate limit')) {
           logger.warn('Rate limit hit, waiting longer before retry...');
           await this.sleep(5000); // Wait 5 seconds on rate limit
         }
@@ -212,13 +215,13 @@ class MusicRecognitionService {
   /**
    * Get track details by Shazam ID (for enrichment)
    */
-  async getTrackDetails(shazamTrackId: number | string): Promise<any> {
+  async getTrackDetails(shazamTrackId: number | string): Promise<ShazamTrack | null> {
     try {
       const shazam = new Shazam();
       const details = await shazam.getTrackDetails(shazamTrackId.toString());
-      return details;
-    } catch (error: any) {
-      logger.error(`Error getting Shazam track details for ${shazamTrackId}:`, error.message);
+      return details as ShazamTrack;
+    } catch (error: unknown) {
+      logger.error(`Error getting Shazam track details for ${shazamTrackId}:`, getErrorMessage(error));
       return null;
     }
   }
@@ -236,7 +239,7 @@ class MusicRecognitionService {
       for (const section of sections) {
         if (section.metadata) {
           const labelMetadata = section.metadata.find(
-            (m: any) => m.title?.toLowerCase() === 'label'
+            (m: ShazamMetadataItem) => m.title?.toLowerCase() === 'label'
           );
           if (labelMetadata?.text) {
             return labelMetadata.text;
@@ -245,8 +248,8 @@ class MusicRecognitionService {
       }
 
       return null;
-    } catch (error: any) {
-      logger.error(`Error getting label for track ${shazamTrackId}:`, error.message);
+    } catch (error: unknown) {
+      logger.error(`Error getting label for track ${shazamTrackId}:`, getErrorMessage(error));
       return null;
     }
   }
@@ -318,8 +321,8 @@ class MusicRecognitionService {
       logger.warn('Related tracks feature not yet implemented for Node.js Shazam');
 
       return [];
-    } catch (error: any) {
-      logger.error(`Error getting related tracks for ${shazamTrackId}:`, error.message);
+    } catch (error: unknown) {
+      logger.error(`Error getting related tracks for ${shazamTrackId}:`, getErrorMessage(error));
       return [];
     }
   }
@@ -340,13 +343,13 @@ class MusicRecognitionService {
   /**
    * Helper: Extract release year from Shazam sections
    */
-  private extractReleaseYear(sections: any[]): number | undefined {
+  private extractReleaseYear(sections?: ShazamSection[]): number | undefined {
     if (!sections) return undefined;
 
     for (const section of sections) {
       if (section.metadata) {
         const releasedMetadata = section.metadata.find(
-          (m: any) => m.title === 'Released'
+          (m: ShazamMetadataItem) => m.title === 'Released'
         );
         if (releasedMetadata?.text) {
           const year = parseInt(releasedMetadata.text);

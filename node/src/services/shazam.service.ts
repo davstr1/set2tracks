@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import config from '../config';
 import logger from '../utils/logger';
+import { ShazamTrack as ShazamTrackType, ShazamResponse, ShazamMetadataItem } from '../types/shazam';
 
 /**
  * Shazam Service for track identification
@@ -28,38 +29,6 @@ interface ShazamTrack {
   releaseYear?: number;
   releaseDate?: string;
   appleMusicUrl?: string;
-}
-
-interface ShazamResponse {
-  track?: {
-    key: number;
-    title: string;
-    subtitle: string; // artist name
-    share: {
-      subject: string;
-      text: string;
-      href: string;
-      image: string;
-    };
-    images?: {
-      coverart: string;
-      background: string;
-    };
-    hub?: {
-      actions?: Array<{
-        type: string;
-        uri: string;
-      }>;
-    };
-    sections?: Array<{
-      type: string;
-      metadata?: Array<{
-        title: string;
-        text: string;
-      }>;
-    }>;
-  };
-  matches?: any[];
 }
 
 class ShazamService {
@@ -131,7 +100,7 @@ class ShazamService {
   /**
    * Get track details by Shazam ID
    */
-  async getTrackDetails(shazamTrackId: number): Promise<any> {
+  async getTrackDetails(shazamTrackId: number): Promise<ShazamTrackType | null> {
     try {
       // Shazam API endpoint (unofficial)
       const url = `https://www.shazam.com/services/amapi/v1/catalog/US/songs/${shazamTrackId}`;
@@ -143,7 +112,7 @@ class ShazamService {
         },
       });
 
-      return response.data;
+      return response.data as ShazamTrackType;
     } catch (error) {
       logger.error(`Error getting Shazam track details for ${shazamTrackId}:`, error);
       throw error;
@@ -158,11 +127,11 @@ class ShazamService {
       const details = await this.getTrackDetails(shazamTrackId);
 
       // Extract label from metadata sections
-      const sections = details?.track?.sections || [];
+      const sections = details?.sections || [];
       for (const section of sections) {
         if (section.metadata) {
           const labelMetadata = section.metadata.find(
-            (m: any) => m.title?.toLowerCase() === 'label'
+            (m: ShazamMetadataItem) => m.title?.toLowerCase() === 'label'
           );
           if (labelMetadata?.text) {
             return labelMetadata.text;
@@ -227,15 +196,15 @@ class ShazamService {
     let previewUri: string | undefined;
     if (track.hub?.actions) {
       const previewAction = track.hub.actions.find(
-        (action) => action.type === 'uri' && action.uri.includes('.m4a')
+        (action) => action.type === 'uri' && action.uri && action.uri.includes('.m4a')
       );
       previewUri = previewAction?.uri;
     }
 
     return {
-      keyTrackShazam: track.key,
-      title: track.title,
-      artistName: track.subtitle,
+      keyTrackShazam: track.key || 0,
+      title: track.title || 'Unknown',
+      artistName: track.subtitle || 'Unknown Artist',
       coverArt: track.images?.coverart || track.share?.image,
       previewUri,
       appleMusicUrl: track.share?.href,

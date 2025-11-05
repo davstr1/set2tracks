@@ -1,5 +1,6 @@
 import { channelCheckQueue } from './queue';
 import logger from '../utils/logger';
+import { getErrorMessage } from '../types/errors';
 
 /**
  * Job Scheduler
@@ -32,8 +33,8 @@ export async function scheduleChannelCheck() {
     );
 
     logger.info('✅ Scheduled channel check job (runs every 10 minutes for near real-time updates)');
-  } catch (error: any) {
-    logger.error('Error scheduling channel check job:', error);
+  } catch (error: unknown) {
+    logger.error('Error scheduling channel check job:', getErrorMessage(error));
   }
 }
 

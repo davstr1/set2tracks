@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import youtubeService from '../../services/youtube.service';
 import { setProcessingQueue } from '../queue';
 import logger from '../../utils/logger';
+import { getErrorMessage } from '../../types/errors';
 
 const prisma = new PrismaClient();
 
@@ -129,8 +130,8 @@ export async function processChannelCheck(job: Job<ChannelCheckJobData>): Promis
 
               totalNewSets++;
               logger.info(`Queued new video: ${video.title} (${video.videoId})`);
-            } catch (error: any) {
-              logger.error(`Error queueing video ${video.videoId}:`, error.message);
+            } catch (error: unknown) {
+              logger.error(`Error queueing video ${video.videoId}:`, getErrorMessage(error));
             }
           }
         }
@@ -154,12 +155,12 @@ export async function processChannelCheck(job: Job<ChannelCheckJobData>): Promis
 
         // Small delay between channels to avoid rate limiting
         await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error: any) {
-        logger.error(`Error checking channel ${channel.channelId}:`, error.message);
+      } catch (error: unknown) {
+        logger.error(`Error checking channel ${channel.channelId}:`, getErrorMessage(error));
         results.push({
           channelId: channel.id,
           channelName: channel.author,
-          error: error.message,
+          error: getErrorMessage(error),
         });
       }
     }
@@ -171,7 +172,7 @@ export async function processChannelCheck(job: Job<ChannelCheckJobData>): Promis
       newSets: totalNewSets,
       results,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Channel check job failed:', error);
     throw error;
   }
@@ -210,7 +211,7 @@ if (!youtubeService.getChannelVideos) {
       if (typeof result === 'string') {
         const data = JSON.parse(result);
         if (data.entries) {
-          return data.entries.map((entry: any) => ({
+          return data.entries.map((entry: { videoId: string; title: string }) => ({
             videoId: entry.id,
             title: entry.title,
             duration: entry.duration,
@@ -223,8 +224,8 @@ if (!youtubeService.getChannelVideos) {
       }
 
       return [];
-    } catch (error: any) {
-      logger.error(`Error fetching channel videos for ${channelId}:`, error.message);
+    } catch (error: unknown) {
+      logger.error(`Error fetching channel videos for ${channelId}:`, getErrorMessage(error));
       return [];
     }
   };
