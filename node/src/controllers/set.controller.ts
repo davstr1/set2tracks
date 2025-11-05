@@ -144,7 +144,7 @@ export class SetController {
 
       const result = await setService.searchSets(q);
 
-      res.json(result);
+      res.json({ sets: result.items, query: result.query, count: result.count });
     } catch (error) {
       logger.error('Error searching sets:', error);
       next(error);
@@ -182,7 +182,7 @@ export class SetController {
 
       const result = await setService.getPopularSets(limit);
 
-      res.json(result);
+      res.json({ sets: result.items });
     } catch (error) {
       logger.error('Error fetching popular sets:', error);
       next(error);
@@ -198,7 +198,7 @@ export class SetController {
 
       const result = await setService.getRecentSets(limit);
 
-      res.json(result);
+      res.json({ sets: result.items });
     } catch (error) {
       logger.error('Error fetching recent sets:', error);
       next(error);

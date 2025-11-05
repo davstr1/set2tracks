@@ -5,6 +5,8 @@ import youtubeService from '../youtube.service';
 import { setProcessingQueue } from '../../jobs/queue';
 import { NotFoundError, ConflictError } from '../../types/errors';
 import { PAGINATION, JOB_PRIORITY } from '../../config/constants';
+import { mapToSetListDto, mapToSetDetailDto, mapToSetQueueDto } from '../../mappers';
+import { PaginatedResponse, SetListDto, SetDetailDto, QueueSubmissionResult } from '../../types/dto';
 
 /**
  * Set Service
@@ -14,7 +16,7 @@ export class SetService {
   /**
    * Get published sets with pagination
    */
-  async getPublishedSets(page: number, limit: number) {
+  async getPublishedSets(page: number, limit: number): Promise<PaginatedResponse<SetListDto>> {
     const skip = (page - 1) * limit;
 
     const [sets, total] = await Promise.all([
@@ -23,7 +25,7 @@ export class SetService {
     ]);
 
     return {
-      sets,
+      items: sets.map(mapToSetListDto),
       pagination: {
         page,
         limit,
@@ -36,27 +38,27 @@ export class SetService {
   /**
    * Get a single set by ID with full details
    */
-  async getSetById(id: number) {
+  async getSetById(id: number): Promise<SetDetailDto> {
     const set = await setRepository.findByIdWithDetails(id);
 
     if (!set) {
       throw new NotFoundError('Set', id);
     }
 
-    return set;
+    return mapToSetDetailDto(set);
   }
 
   /**
    * Get set by video ID
    */
-  async getSetByVideoId(videoId: string) {
+  async getSetByVideoId(videoId: string): Promise<SetDetailDto> {
     const set = await setRepository.findByVideoId(videoId);
 
     if (!set) {
       throw new NotFoundError('Set');
     }
 
-    return set;
+    return mapToSetDetailDto(set);
   }
 
   /**
@@ -68,7 +70,7 @@ export class SetService {
     userType: string | null;
     sendEmail?: boolean;
     playSound?: boolean;
-  }) {
+  }): Promise<QueueSubmissionResult> {
     const { videoId, userId, userType, sendEmail, playSound } = params;
 
     // Check if already exists in queue or as processed set
@@ -80,7 +82,7 @@ export class SetService {
     if (existingSet) {
       return {
         message: 'Set already processed',
-        set: existingSet,
+        set: mapToSetListDto(existingSet),
         alreadyExists: true,
       };
     }
@@ -88,7 +90,7 @@ export class SetService {
     if (existingQueue) {
       return {
         message: 'Set already in queue',
-        queueItem: existingQueue,
+        queueItem: mapToSetQueueDto(existingQueue),
         alreadyExists: true,
       };
     }
@@ -125,7 +127,7 @@ export class SetService {
 
     return {
       message: 'Set queued for processing',
-      queueItem,
+      queueItem: mapToSetQueueDto(queueItem),
       alreadyExists: false,
     };
   }
@@ -144,7 +146,7 @@ export class SetService {
     await userRepository.recordSearchQuery(query, sets.length);
 
     return {
-      sets,
+      items: sets.map(mapToSetListDto),
       query,
       count: sets.length,
     };
@@ -155,13 +157,19 @@ export class SetService {
    */
   async getUserHistory(userId: number, limit: number = PAGINATION.DEFAULT_PAGE_SIZE) {
     const history = await userRepository.findBrowsingHistory(userId, limit);
-    return { history };
+    return {
+      history: history.map((h) => ({
+        setId: h.setId,
+        datetime: h.datetime,
+        set: mapToSetListDto(h.set),
+      })),
+    };
   }
 
   /**
    * Record set browsing
    */
-  async recordBrowsing(userId: number, setId: number) {
+  async recordBrowsing(userId: number, setId: number): Promise<void> {
     await userRepository.recordSetBrowsingHistory(userId, setId);
   }
 
@@ -170,7 +178,7 @@ export class SetService {
    */
   async getPopularSets(limit: number = PAGINATION.DEFAULT_PAGE_SIZE) {
     const sets = await setRepository.findPopularSets(limit);
-    return { sets };
+    return { items: sets.map(mapToSetListDto) };
   }
 
   /**
@@ -178,7 +186,7 @@ export class SetService {
    */
   async getRecentSets(limit: number = PAGINATION.DEFAULT_PAGE_SIZE) {
     const sets = await setRepository.findRecentSets(limit);
-    return { sets };
+    return { items: sets.map(mapToSetListDto) };
   }
 
   /**
