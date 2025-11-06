@@ -3,6 +3,7 @@ import setService from '../services/domain/set.service';
 import logger from '../utils/logger';
 import { PAGINATION } from '../config/constants';
 import { NotFoundError } from '../types/errors';
+import { parsePagination, parseQueryInt, getUserId } from '../utils/request';
 
 /**
  * Set Controller
@@ -15,8 +16,7 @@ export class SetController {
    */
   async getSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const { page, limit } = parsePagination(req);
 
       const result = await setService.getPublishedSets(page, limit);
 
@@ -156,13 +156,14 @@ export class SetController {
    */
   async getUserHistory(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      if (!req.user) {
+      const userId = getUserId(req);
+
+      if (!userId) {
         res.status(401).json({ error: 'Authentication required' });
         return;
       }
 
-      const userId = (req.user as any).id;
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const limit = parseQueryInt(req.query.limit, PAGINATION.DEFAULT_PAGE_SIZE);
 
       const result = await setService.getUserHistory(userId, limit);
 
@@ -178,7 +179,7 @@ export class SetController {
    */
   async getPopularSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const limit = parseQueryInt(req.query.limit, PAGINATION.DEFAULT_PAGE_SIZE);
 
       const result = await setService.getPopularSets(limit);
 
@@ -194,7 +195,7 @@ export class SetController {
    */
   async getRecentSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const limit = parseQueryInt(req.query.limit, PAGINATION.DEFAULT_PAGE_SIZE);
 
       const result = await setService.getRecentSets(limit);
 
