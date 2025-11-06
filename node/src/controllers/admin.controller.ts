@@ -4,6 +4,8 @@ import setService from '../services/domain/set.service';
 import authService from '../services/domain/auth.service';
 import logger from '../utils/logger';
 import { ValidationError } from '../types/errors';
+import { parsePagination } from '../utils/request';
+import { sendBadRequest } from '../utils/response';
 
 /**
  * Admin Controller
@@ -34,8 +36,7 @@ export class AdminController {
    */
   async getUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const { page, limit } = parsePagination(req, { defaultLimit: 50 });
 
       const result = await adminService.getUsers(page, limit);
 
@@ -112,7 +113,7 @@ export class AdminController {
       const { key, value } = req.body;
 
       if (!key || value === undefined) {
-        res.status(400).json({ error: 'Key and value are required' });
+        sendBadRequest(res, 'Key and value are required');
         return;
       }
 
@@ -171,7 +172,7 @@ export class AdminController {
       res.json(result);
     } catch (error) {
       if (error instanceof ValidationError) {
-        res.status(400).json({ error: error.message });
+        sendBadRequest(res, error.message);
         return;
       }
       logger.error('Error updating user type:', error);

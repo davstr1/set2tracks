@@ -3,6 +3,8 @@ import channelService from '../services/domain/channel.service';
 import logger from '../utils/logger';
 import { PAGINATION } from '../config/constants';
 import { NotFoundError } from '../types/errors';
+import { parsePagination, parseQueryInt, parseQueryBoolean } from '../utils/request';
+import { sendNotFound, sendBadRequest } from '../utils/response';
 
 /**
  * Channel Controller
@@ -15,9 +17,8 @@ export class ChannelController {
    */
   async getChannels(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 30;
-      const showAll = req.query.showAll === 'true';
+      const { page, limit } = parsePagination(req, { defaultLimit: 30 });
+      const showAll = parseQueryBoolean(req.query.showAll, false);
 
       const result = await channelService.getChannels(page, limit, showAll);
 
@@ -37,9 +38,8 @@ export class ChannelController {
    */
   async getChannelsApi(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 30;
-      const showAll = req.query.showAll === 'true';
+      const { page, limit } = parsePagination(req, { defaultLimit: 30 });
+      const showAll = parseQueryBoolean(req.query.showAll, false);
 
       const result = await channelService.getChannels(page, limit, showAll);
 
@@ -90,7 +90,7 @@ export class ChannelController {
       res.json({ channel });
     } catch (error) {
       if (error instanceof NotFoundError) {
-        res.status(404).json({ error: 'Channel not found' });
+        sendNotFound(res, 'Channel not found');
         return;
       }
       logger.error('Error fetching channel:', error);
@@ -103,7 +103,7 @@ export class ChannelController {
    */
   async getPopularChannels(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const limit = parseQueryInt(req.query.limit, PAGINATION.DEFAULT_PAGE_SIZE);
 
       const result = await channelService.getPopularChannels(limit);
 
@@ -122,7 +122,7 @@ export class ChannelController {
       const { q } = req.query;
 
       if (!q || typeof q !== 'string') {
-        res.status(400).json({ error: 'Search query is required' });
+        sendBadRequest(res, 'Search query is required');
         return;
       }
 
@@ -141,15 +141,14 @@ export class ChannelController {
   async getChannelSets(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const { page, limit } = parsePagination(req);
 
       const result = await channelService.getChannelSets(parseInt(id), page, limit);
 
       res.json(result);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        res.status(404).json({ error: 'Channel not found' });
+        sendNotFound(res, 'Channel not found');
         return;
       }
       logger.error('Error fetching channel sets:', error);

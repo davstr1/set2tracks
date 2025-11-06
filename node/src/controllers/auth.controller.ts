@@ -5,6 +5,8 @@ import authService from '../services/domain/auth.service';
 import logger from '../utils/logger';
 import config from '../config';
 import { ConflictError, ValidationError, UnauthorizedError } from '../types/errors';
+import { requireBodyFields } from '../utils/request';
+import { sendUnauthorized } from '../utils/response';
 
 /**
  * Auth Controller
@@ -72,7 +74,8 @@ export class AuthController {
       const { email, password, fname, inviteCode } = req.body;
 
       // Validate input
-      if (!email || !password || !fname) {
+      const missingFields = requireBodyFields(req, ['email', 'password', 'fname']);
+      if (missingFields.length > 0) {
         return res.redirect('/auth/register?error=' + encodeURIComponent('All fields are required'));
       }
 
@@ -223,7 +226,7 @@ export class AuthController {
    */
   async getCurrentUser(req: Request, res: Response): Promise<void> {
     if (!req.user) {
-      res.status(401).json({ error: 'Not authenticated' });
+      sendUnauthorized(res, 'Not authenticated');
       return;
     }
 

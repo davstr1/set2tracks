@@ -3,6 +3,8 @@ import trackService from '../services/domain/track.service';
 import logger from '../utils/logger';
 import { PAGINATION } from '../config/constants';
 import { NotFoundError } from '../types/errors';
+import { parsePagination, parseQueryInt } from '../utils/request';
+import { sendSuccess, sendNotFound, sendBadRequest } from '../utils/response';
 
 /**
  * Track Controller
@@ -15,8 +17,7 @@ export class TrackController {
    */
   async getTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const { page, limit } = parsePagination(req, { defaultLimit: 50 });
 
       const result = await trackService.getTracks(page, limit);
 
@@ -67,7 +68,7 @@ export class TrackController {
       res.json({ track });
     } catch (error) {
       if (error instanceof NotFoundError) {
-        res.status(404).json({ error: 'Track not found' });
+        sendNotFound(res, 'Track not found');
         return;
       }
       logger.error('Error fetching track:', error);
@@ -83,7 +84,7 @@ export class TrackController {
       const { q } = req.query;
 
       if (!q || typeof q !== 'string') {
-        res.status(400).json({ error: 'Search query is required' });
+        sendBadRequest(res, 'Search query is required');
         return;
       }
 
@@ -101,7 +102,7 @@ export class TrackController {
    */
   async getPopularTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseQueryInt(req.query.limit, 50);
       const timeframe = req.query.timeframe as 'week' | 'month' | 'all' | undefined;
 
       const result = await trackService.getPopularTracks(limit, timeframe);
@@ -119,14 +120,14 @@ export class TrackController {
   async getTracksByGenre(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { genre } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseQueryInt(req.query.limit, 50);
 
       const result = await trackService.getTracksByGenre(genre, limit);
 
       res.json(result);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        res.status(404).json({ error: 'Genre not found' });
+        sendNotFound(res, 'Genre not found');
         return;
       }
       logger.error('Error fetching tracks by genre:', error);
@@ -160,7 +161,7 @@ export class TrackController {
       res.json(result);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        res.status(404).json({ error: 'Track not found' });
+        sendNotFound(res, 'Track not found');
         return;
       }
       logger.error('Error fetching track by Spotify ID:', error);
@@ -174,14 +175,14 @@ export class TrackController {
   async getRelatedTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      const limit = parseInt(req.query.limit as string) || PAGINATION.DEFAULT_PAGE_SIZE;
+      const limit = parseQueryInt(req.query.limit, PAGINATION.DEFAULT_PAGE_SIZE);
 
       const result = await trackService.getRelatedTracks(parseInt(id), limit);
 
       res.json(result);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        res.status(404).json({ error: 'Track not found' });
+        sendNotFound(res, 'Track not found');
         return;
       }
       logger.error('Error fetching related tracks:', error);
@@ -194,7 +195,7 @@ export class TrackController {
    */
   async getNewTracks(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseQueryInt(req.query.limit, 50);
 
       const result = await trackService.getNewTracks(limit);
 
@@ -211,7 +212,7 @@ export class TrackController {
   async getTracksByArtist(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { artist } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseQueryInt(req.query.limit, 50);
 
       const result = await trackService.getTracksByArtist(artist, limit);
 
@@ -228,7 +229,7 @@ export class TrackController {
   async getTracksByLabel(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { label } = req.params;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseQueryInt(req.query.limit, 50);
 
       const result = await trackService.getTracksByLabel(label, limit);
 
