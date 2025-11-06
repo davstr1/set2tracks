@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { ConflictError, UnauthorizedError, NotFoundError, ValidationError } from '../../types/errors';
 import config from '../../config';
 import { logAuth, logSecurity, logBusinessEvent } from '../../utils/structuredLogger';
+import prisma from '../../utils/database';
 
 /**
  * Auth Service
@@ -61,20 +62,31 @@ export class AuthService {
       ? acceptedLanguages[0]
       : 'en';
 
-    // Create user
-    const user = await userRepository.createUser({
-      email,
-      fname,
-      password: hashedPassword,
-      type: 'User',
-      connectMethod: 'Site',
-      lang,
-    });
+    // Use transaction to ensure atomic user creation and invite deletion
+    const user = await prisma.$transaction(async (tx) => {
+      // Create user
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          fname,
+          password: hashedPassword,
+          type: 'User',
+          connectMethod: 'Site',
+          lang,
+          regDate: new Date(),
+          acceptedLanguages: acceptedLanguages ? acceptedLanguages.join(',') : 'en',
+        },
+      });
 
-    // Delete invite if used
-    if (inviteCode) {
-      await userRepository.deleteInvite(inviteCode);
-    }
+      // Delete invite if used (must succeed for transaction to commit)
+      if (inviteCode) {
+        await tx.invite.delete({
+          where: { code: inviteCode },
+        });
+      }
+
+      return newUser;
+    });
 
     logAuth('user_registered', {
       userId: user.id,

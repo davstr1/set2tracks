@@ -4,6 +4,10 @@ import path from 'path';
 // Load environment variables
 dotenv.config();
 
+// Validate environment variables (fail fast if invalid/missing)
+// This MUST be done before building the config object
+import './env';
+
 interface Config {
   // Environment
   env: string;

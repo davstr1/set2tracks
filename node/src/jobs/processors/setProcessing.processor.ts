@@ -125,56 +125,61 @@ export async function processSet(job: Job<SetProcessingJobData>): Promise<void> 
       trackRecords.push(track);
     }
 
-    // Step 6: Create Set record
+    // Step 6: Create Set record with transaction
+    // All database operations must succeed or all fail (ACID compliance)
     job.progress(80);
     logger.info(`[${videoId}] Creating set record...`);
 
-    const set = await prisma.set.create({
-      data: {
-        videoId,
-        channelId: channel.id,
-        title: videoInfo.title,
-        duration: videoInfo.duration,
-        publishDate: new Date(videoInfo.publishDate),
-        thumbnail: videoInfo.thumbnail,
-        playableInEmbed: videoInfo.playableInEmbed,
-        chapters: videoInfo.chapters as any,
-        nbTracks: trackRecords.length,
-        likeCount: videoInfo.likeCount,
-        viewCount: videoInfo.viewCount,
-        published: true,
-      },
-    });
-
-    // Create TrackSet relationships
-    for (let i = 0; i < trackRecords.length; i++) {
-      await prisma.trackSet.create({
+    const set = await prisma.$transaction(async (tx) => {
+      // Create Set record
+      const newSet = await tx.set.create({
         data: {
-          trackId: trackRecords[i].id,
-          setId: set.id,
-          pos: i,
-          // startTime and endTime would come from segment timing
+          videoId,
+          channelId: channel.id,
+          title: videoInfo.title,
+          duration: videoInfo.duration,
+          publishDate: new Date(videoInfo.publishDate),
+          thumbnail: videoInfo.thumbnail,
+          playableInEmbed: videoInfo.playableInEmbed,
+          chapters: videoInfo.chapters as any,
+          nbTracks: trackRecords.length,
+          likeCount: videoInfo.likeCount,
+          viewCount: videoInfo.viewCount,
+          published: true,
         },
       });
-    }
 
-    // Update channel's set count
-    await prisma.channel.update({
-      where: { id: channel.id },
-      data: { nbSets: { increment: 1 } },
+      // Create TrackSet relationships
+      for (let i = 0; i < trackRecords.length; i++) {
+        await tx.trackSet.create({
+          data: {
+            trackId: trackRecords[i].id,
+            setId: newSet.id,
+            pos: i,
+            // startTime and endTime would come from segment timing
+          },
+        });
+      }
+
+      // Update channel's set count
+      await tx.channel.update({
+        where: { id: channel.id },
+        data: { nbSets: { increment: 1 } },
+      });
+
+      // Update queue status to done
+      await tx.setQueue.update({
+        where: { id: queueItemId },
+        data: { status: 'done' },
+      });
+
+      return newSet;
     });
 
-    // Step 7: Cleanup temp files
+    // Step 7: Cleanup temp files (outside transaction - file cleanup shouldn't rollback DB)
     job.progress(90);
     logger.info(`[${videoId}] Cleaning up temporary files...`);
     await youtubeService.cleanupVideoFiles(videoId);
-
-    // Step 8: Update queue status
-    job.progress(100);
-    await prisma.setQueue.update({
-      where: { id: queueItemId },
-      data: { status: 'done' },
-    });
 
     // TODO: Send notification email if requested
     // if (sendEmail) {
