@@ -4,6 +4,7 @@ import channelRepository from '../../repositories/channel.repository';
 import userRepository from '../../repositories/user.repository';
 import queueRepository from '../../repositories/queue.repository';
 import prisma from '../../utils/database';
+import { logInfo, logSecurity, logPerformance } from '../../utils/structuredLogger';
 
 /**
  * Admin Service
@@ -14,6 +15,8 @@ export class AdminService {
    * Get dashboard statistics
    */
   async getDashboardStats() {
+    const startTime = Date.now();
+
     const [
       totalSets,
       totalTracks,
@@ -31,6 +34,14 @@ export class AdminService {
       queueRepository.findRecent(10),
       userRepository.findRecentUsers(10),
     ]);
+
+    const duration = Date.now() - startTime;
+    logPerformance('getDashboardStats', duration, {
+      totalSets,
+      totalTracks,
+      totalChannels,
+      totalUsers,
+    });
 
     return {
       stats: {
@@ -77,6 +88,12 @@ export class AdminService {
       queueRepository.findByStatus('failed'),
     ]);
 
+    logInfo('Queue status requested', {
+      pendingCount: pendingQueue.length,
+      processingCount: processingQueue.length,
+      failedCount: failedQueue.length,
+    });
+
     return {
       pendingQueue,
       processingQueue,
@@ -107,6 +124,11 @@ export class AdminService {
       where: { key },
       update: { value },
       create: { key, value },
+    });
+
+    logSecurity('config_updated', {
+      configKey: key,
+      newValue: value,
     });
 
     return { success: true, config };

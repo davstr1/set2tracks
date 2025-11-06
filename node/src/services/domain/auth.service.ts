@@ -3,6 +3,7 @@ import PasswordUtils from '../../utils/password';
 import crypto from 'crypto';
 import { ConflictError, UnauthorizedError, NotFoundError, ValidationError } from '../../types/errors';
 import config from '../../config';
+import { logAuth, logSecurity, logBusinessEvent } from '../../utils/structuredLogger';
 
 /**
  * Auth Service
@@ -75,6 +76,19 @@ export class AuthService {
       await userRepository.deleteInvite(inviteCode);
     }
 
+    logAuth('user_registered', {
+      userId: user.id,
+      email: user.email,
+      connectMethod: 'Site',
+      usedInvite: !!inviteCode,
+    });
+
+    logBusinessEvent('user_registration', {
+      userId: user.id,
+      connectMethod: 'Site',
+      lang,
+    });
+
     return user;
   }
 
@@ -85,14 +99,18 @@ export class AuthService {
     const user = await userRepository.findByEmail(email);
 
     if (!user) {
+      logSecurity('login_failed_user_not_found', { email });
       throw new UnauthorizedError('Invalid email or password');
     }
 
     const isValid = await PasswordUtils.compare(password, user.password);
 
     if (!isValid) {
+      logSecurity('login_failed_invalid_password', { userId: user.id, email });
       throw new UnauthorizedError('Invalid email or password');
     }
+
+    logAuth('login_success', { userId: user.id, email, userType: user.type });
 
     return user;
   }
@@ -122,6 +140,11 @@ export class AuthService {
 
     // TODO: Send email with reset link
     // await emailService.sendPasswordReset(user.email, resetToken);
+
+    logSecurity('password_reset_requested', {
+      userId: user.id,
+      email: user.email,
+    });
 
     return {
       message: 'If that email is registered, a reset link has been sent.',
@@ -160,6 +183,11 @@ export class AuthService {
     await userRepository.updateExtraFields(user.id, {
       resetToken: null,
       resetTokenExpiry: null,
+    });
+
+    logSecurity('password_reset_completed', {
+      userId: user.id,
+      email: user.email,
     });
 
     return {
@@ -202,6 +230,12 @@ export class AuthService {
     }
 
     const user = await userRepository.updateUserType(id, type);
+
+    logSecurity('user_type_changed', {
+      userId: id,
+      newType: type,
+    });
+
     return { success: true, user };
   }
 }

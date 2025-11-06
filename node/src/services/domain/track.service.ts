@@ -1,6 +1,7 @@
 import trackRepository from '../../repositories/track.repository';
 import { NotFoundError } from '../../types/errors';
 import { PAGINATION } from '../../config/constants';
+import { logInfo, logBusinessEvent, logPerformance } from '../../utils/structuredLogger';
 
 /**
  * Track Service
@@ -50,7 +51,18 @@ export class TrackService {
       throw new Error('Search query is required');
     }
 
+    const startTime = Date.now();
+    logInfo('Track search initiated', { query });
+
     const tracks = await trackRepository.searchTracks(query);
+
+    logBusinessEvent('track_search', {
+      query,
+      resultCount: tracks.length,
+    });
+
+    const duration = Date.now() - startTime;
+    logPerformance('searchTracks', duration, { query, resultCount: tracks.length });
 
     return {
       tracks,
@@ -63,10 +75,15 @@ export class TrackService {
    * Get popular tracks
    */
   async getPopularTracks(limit: number, timeframe?: 'week' | 'month' | 'all') {
+    const startTime = Date.now();
+
     const tracks = await trackRepository.findPopularTracks({
       limit,
       timeframe,
     });
+
+    const duration = Date.now() - startTime;
+    logPerformance('getPopularTracks', duration, { limit, timeframe, resultCount: tracks.length });
 
     return { tracks };
   }
@@ -83,6 +100,12 @@ export class TrackService {
     }
 
     const tracks = await trackRepository.findByGenre(genre.id, limit);
+
+    logBusinessEvent('genre_browsing', {
+      genreName,
+      genreId: genre.id,
+      trackCount: tracks.length,
+    });
 
     return { genre, tracks };
   }

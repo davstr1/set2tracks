@@ -2,6 +2,7 @@ import channelRepository from '../../repositories/channel.repository';
 import setRepository from '../../repositories/set.repository';
 import { NotFoundError } from '../../types/errors';
 import { PAGINATION } from '../../config/constants';
+import { logInfo, logBusinessEvent, logPerformance } from '../../utils/structuredLogger';
 
 /**
  * Channel Service
@@ -59,7 +60,18 @@ export class ChannelService {
       throw new Error('Search query is required');
     }
 
+    const startTime = Date.now();
+    logInfo('Channel search initiated', { query });
+
     const channels = await channelRepository.searchChannels(query);
+
+    logBusinessEvent('channel_search', {
+      query,
+      resultCount: channels.length,
+    });
+
+    const duration = Date.now() - startTime;
+    logPerformance('searchChannels', duration, { query, resultCount: channels.length });
 
     return {
       channels,
@@ -89,6 +101,13 @@ export class ChannelService {
       setRepository.countByChannelId(channel.id, true),
     ]);
 
+    logBusinessEvent('channel_browsing', {
+      channelId: id,
+      channelName: channel.author,
+      setCount: total,
+      page,
+    });
+
     return {
       channel,
       sets,
@@ -115,6 +134,7 @@ export class ChannelService {
     channelFollowerCount?: number;
     nbSets?: number;
   }) {
+    logInfo('Channel stats updated', { channelId: id, stats });
     return channelRepository.updateStats(id, stats);
   }
 }
