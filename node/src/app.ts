@@ -30,6 +30,8 @@ import adminRoutes from './routes/admin.routes';
 
 // Import middleware
 import { attachUser } from './middleware/auth';
+import { requestIdMiddleware } from './middleware/requestId';
+import { requestLoggerWithSkip } from './middleware/requestLogger';
 
 class App {
   public app: Application;
@@ -105,11 +107,11 @@ class App {
     this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-    // Request logging
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
-      logger.info(`${req.method} ${req.path}`);
-      next();
-    });
+    // Request ID tracking
+    this.app.use(requestIdMiddleware);
+
+    // Structured request logging (skips health checks)
+    this.app.use(requestLoggerWithSkip);
   }
 
   private initializeTemplateEngine() {

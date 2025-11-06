@@ -7,6 +7,7 @@ import { NotFoundError, ConflictError } from '../../types/errors';
 import { PAGINATION, JOB_PRIORITY } from '../../config/constants';
 import { mapToSetListDto, mapToSetDetailDto, mapToSetQueueDto } from '../../mappers';
 import { PaginatedResponse, SetListDto, SetDetailDto, QueueSubmissionResult } from '../../types/dto';
+import { logInfo, logBusinessEvent, logPerformance } from '../../utils/structuredLogger';
 
 /**
  * Set Service
@@ -71,7 +72,10 @@ export class SetService {
     sendEmail?: boolean;
     playSound?: boolean;
   }): Promise<QueueSubmissionResult> {
+    const startTime = Date.now();
     const { videoId, userId, userType, sendEmail, playSound } = params;
+
+    logInfo('Set queue request received', { videoId, userId, userType });
 
     // Check if already exists in queue or as processed set
     const [existingQueue, existingSet] = await Promise.all([
@@ -80,6 +84,7 @@ export class SetService {
     ]);
 
     if (existingSet) {
+      logInfo('Set already processed', { videoId, setId: existingSet.id });
       return {
         message: 'Set already processed',
         set: mapToSetListDto(existingSet),
@@ -88,6 +93,7 @@ export class SetService {
     }
 
     if (existingQueue) {
+      logInfo('Set already in queue', { videoId, queueId: existingQueue.id });
       return {
         message: 'Set already in queue',
         queueItem: mapToSetQueueDto(existingQueue),
@@ -124,6 +130,19 @@ export class SetService {
         priority: queueItem.userPremium ? JOB_PRIORITY.USER_SUBMITTED : JOB_PRIORITY.AUTO_QUEUED,
       }
     );
+
+    // Log business event
+    logBusinessEvent('set_queued', {
+      videoId,
+      queueItemId: queueItem.id,
+      userId,
+      userPremium,
+      priority: userPremium ? 'high' : 'normal',
+    });
+
+    // Log performance
+    const duration = Date.now() - startTime;
+    logPerformance('queueSet', duration, { videoId, userId });
 
     return {
       message: 'Set queued for processing',
