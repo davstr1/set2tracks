@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import setController from '../controllers/set.controller';
 import { optionalAuth, requireAuth } from '../middleware/auth';
+import { queueLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
@@ -23,8 +24,8 @@ router.get('/recent', optionalAuth, setController.getRecentSets.bind(setControll
 // User's browsing history
 router.get('/history', requireAuth, setController.getUserHistory.bind(setController));
 
-// Queue a set for processing
-router.post('/queue', optionalAuth, setController.queueSet.bind(setController));
+// Queue a set for processing (Rate limited: 10 per hour per user)
+router.post('/queue', optionalAuth, queueLimiter, setController.queueSet.bind(setController));
 
 // Get set by video ID
 router.get('/video/:videoId', optionalAuth, setController.getSetByVideoId.bind(setController));

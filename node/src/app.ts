@@ -4,6 +4,9 @@ import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
 import compression from 'compression';
 import cors from 'cors';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
 import passport from 'passport';
 import nunjucks from 'nunjucks';
 import path from 'path';
@@ -20,6 +23,7 @@ import { NunjucksFilterValue } from './types/nunjucks';
 import './middleware/passport';
 
 // Import routes
+import createHealthRoutes from './routes/health.routes';
 import authRoutes from './routes/auth.routes';
 import setRoutes from './routes/set.routes';
 import trackRoutes from './routes/track.routes';
@@ -32,6 +36,7 @@ import adminRoutes from './routes/admin.routes';
 import { attachUser } from './middleware/auth';
 import { requestIdMiddleware } from './middleware/requestId';
 import { requestLoggerWithSkip } from './middleware/requestLogger';
+import { apiLimiter } from './middleware/rateLimiter';
 
 class App {
   public app: Application;
@@ -70,20 +75,78 @@ class App {
   }
 
   private initializeMiddleware() {
-    // Body parsing middleware
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
+    // ========================================
+    // Security Middleware (Must be first!)
+    // ========================================
+
+    // Helmet - Security headers
+    this.app.use(helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
+          imgSrc: ["'self'", "data:", "https:", "http:"],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'", "data:"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Disable for external images
+      hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true,
+      },
+    }));
+
+    // Body parsing middleware (with size limits)
+    this.app.use(express.json({ limit: '10mb' }));
+    this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+    // Data sanitization against NoSQL injection
+    this.app.use(mongoSanitize({
+      replaceWith: '_',
+      onSanitize: ({ req, key }) => {
+        logger.warn('Attempted NoSQL injection detected', { path: req.path, key });
+      },
+    }));
+
+    // Data sanitization against XSS
+    this.app.use(xss());
 
     // Compression middleware
     this.app.use(compression());
 
-    // CORS middleware
+    // Enhanced CORS middleware
     this.app.use(cors({
-      origin: config.app.baseUrl,
+      origin: (origin, callback) => {
+        const allowedOrigins = [
+          config.app.baseUrl,
+          'http://localhost:3000',
+          'http://localhost:5173', // Vite dev server
+        ];
+
+        // Allow requests with no origin (mobile apps, Postman, curl, etc.)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          logger.warn('Blocked by CORS', { origin });
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+      exposedHeaders: ['X-Request-ID'],
+      maxAge: 86400, // 24 hours
     }));
 
-    // Session middleware
+    // Enhanced session middleware
     const redisStore = new RedisStore({
       client: this.redisClient,
       prefix: 'sess:',
@@ -93,12 +156,15 @@ class App {
       session({
         store: redisStore,
         secret: config.security.sessionSecret,
+        name: 'sessionId', // Don't use default 'connect.sid'
         resave: false,
         saveUninitialized: false,
+        rolling: true, // Reset expiration on activity
         cookie: {
-          secure: config.env === 'production',
-          httpOnly: true,
-          maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+          secure: config.env === 'production', // HTTPS only in production
+          httpOnly: true, // Prevent XSS access to cookie
+          maxAge: 1000 * 60 * 60 * 24, // 24 hours
+          sameSite: 'strict', // CSRF protection
         },
       })
     );
@@ -112,6 +178,12 @@ class App {
 
     // Structured request logging (skips health checks)
     this.app.use(requestLoggerWithSkip);
+
+    // ========================================
+    // Rate Limiting (Applied to all routes)
+    // ========================================
+    // Apply general rate limiting to all API routes
+    this.app.use('/api', apiLimiter);
   }
 
   private initializeTemplateEngine() {
@@ -164,11 +236,16 @@ class App {
   }
 
   private initializeRoutes() {
-    // Health check
-    this.app.get('/health', (req: Request, res: Response) => {
-      res.json({ status: 'ok', timestamp: new Date().toISOString() });
-    });
+    // ========================================
+    // Health Check Routes (No auth, no rate limiting)
+    // Must be first for load balancer access
+    // ========================================
+    const healthRoutes = createHealthRoutes(this.redisClient);
+    this.app.use('/', healthRoutes);
 
+    // ========================================
+    // Application Routes
+    // ========================================
     // Mount route modules
     this.app.use('/auth', authRoutes);
     this.app.use('/set', setRoutes);
