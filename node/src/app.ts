@@ -20,6 +20,7 @@ import logger from './utils/logger';
 import { RedisClient } from './types/redis';
 import { NunjucksFilterValue } from './types/nunjucks';
 import { swaggerSpec } from './config/swagger';
+import { initializeCacheService, closeCacheService } from './utils/cacheInstance';
 
 // Import passport config
 import './middleware/passport';
@@ -47,6 +48,7 @@ class App {
   constructor() {
     this.app = express();
     this.initializeRedis();
+    this.initializeCache();
     this.initializeMiddleware();
     this.initializeTemplateEngine();
     this.initializeI18n();
@@ -70,10 +72,16 @@ class App {
     });
 
     this.redisClient.on('connect', () => {
-      logger.info('Redis Client Connected');
+      logger.info('Redis Client Connected (Sessions)');
     });
 
     await this.redisClient.connect();
+  }
+
+  private async initializeCache() {
+    // Initialize separate Redis client for caching
+    await initializeCacheService();
+    logger.info('Cache Service initialized');
   }
 
   private initializeMiddleware() {
@@ -290,6 +298,9 @@ class App {
     if (this.redisClient) {
       await this.redisClient.quit();
     }
+
+    // Close cache service
+    await closeCacheService();
   }
 }
 

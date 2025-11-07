@@ -224,6 +224,9 @@ model Set {
   @@index([likeCount])
   @@index([viewCount])
   @@index([hidden])
+  // Composite indexes for common query patterns
+  @@index([published, hidden, publishDate], name: "idx_published_sets")
+  @@index([published, hidden, likeCount, viewCount], name: "idx_popular_sets")
   @@map("sets")
 }
 
@@ -279,6 +282,9 @@ model SetQueue {
   @@index([playSound])
   @@index([notificationEmailSent])
   @@index([notificationSoundSent])
+  // Composite indexes for queue processing
+  @@index([status, queuedAt], name: "idx_queue_processing")
+  @@index([status, userPremium, queuedAt], name: "idx_queue_priority")
   @@map("set_queue")
 }
 

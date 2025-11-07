@@ -8,6 +8,18 @@ import { PAGINATION, JOB_PRIORITY } from '../../config/constants';
 import { mapToSetListDto, mapToSetDetailDto, mapToSetQueueDto } from '../../mappers';
 import { PaginatedResponse, SetListDto, SetDetailDto, QueueSubmissionResult } from '../../types/dto';
 import { logInfo, logBusinessEvent, logPerformance } from '../../utils/structuredLogger';
+import { getCacheService } from '../../utils/cacheInstance';
+
+/**
+ * Cache TTL constants (in seconds)
+ */
+const CACHE_TTL = {
+  PUBLISHED_SETS: 300, // 5 minutes
+  SET_DETAIL: 600, // 10 minutes
+  POPULAR_SETS: 300, // 5 minutes
+  RECENT_SETS: 180, // 3 minutes
+  SEARCH_RESULTS: 300, // 5 minutes
+};
 
 /**
  * Set Service
@@ -18,48 +30,76 @@ export class SetService {
    * Get published sets with pagination
    */
   async getPublishedSets(page: number, limit: number): Promise<PaginatedResponse<SetListDto>> {
-    const skip = (page - 1) * limit;
+    const cacheKey = `sets:published:${page}:${limit}`;
+    const cache = getCacheService();
 
-    const [sets, total] = await Promise.all([
-      setRepository.findPublishedSets({ skip, take: limit }),
-      setRepository.countPublishedSets(),
-    ]);
+    // Try to get from cache
+    return await cache.getOrSet(
+      cacheKey,
+      async () => {
+        const skip = (page - 1) * limit;
 
-    return {
-      items: sets.map(mapToSetListDto),
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        const [sets, total] = await Promise.all([
+          setRepository.findPublishedSets({ skip, take: limit }),
+          setRepository.countPublishedSets(),
+        ]);
+
+        return {
+          items: sets.map(mapToSetListDto),
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+          },
+        };
       },
-    };
+      CACHE_TTL.PUBLISHED_SETS
+    );
   }
 
   /**
    * Get a single set by ID with full details
    */
   async getSetById(id: number): Promise<SetDetailDto> {
-    const set = await setRepository.findByIdWithDetails(id);
+    const cacheKey = `set:detail:${id}`;
+    const cache = getCacheService();
 
-    if (!set) {
-      throw new NotFoundError('Set', id);
-    }
+    return await cache.getOrSet(
+      cacheKey,
+      async () => {
+        const set = await setRepository.findByIdWithDetails(id);
 
-    return mapToSetDetailDto(set);
+        if (!set) {
+          throw new NotFoundError('Set', id);
+        }
+
+        return mapToSetDetailDto(set);
+      },
+      CACHE_TTL.SET_DETAIL
+    );
   }
 
   /**
    * Get set by video ID
    */
   async getSetByVideoId(videoId: string): Promise<SetDetailDto> {
-    const set = await setRepository.findByVideoId(videoId);
+    const cacheKey = `set:video:${videoId}`;
+    const cache = getCacheService();
 
-    if (!set) {
-      throw new NotFoundError('Set');
-    }
+    return await cache.getOrSet(
+      cacheKey,
+      async () => {
+        const set = await setRepository.findByVideoId(videoId);
 
-    return mapToSetDetailDto(set);
+        if (!set) {
+          throw new NotFoundError('Set');
+        }
+
+        return mapToSetDetailDto(set);
+      },
+      CACHE_TTL.SET_DETAIL
+    );
   }
 
   /**
@@ -144,6 +184,12 @@ export class SetService {
     const duration = Date.now() - startTime;
     logPerformance('queueSet', duration, { videoId, userId });
 
+    // Invalidate relevant caches (new set will appear in lists after processing)
+    const cache = getCacheService();
+    await cache.delPattern('sets:published:*');
+    await cache.delPattern('sets:popular:*');
+    await cache.delPattern('sets:recent:*');
+
     return {
       message: 'Set queued for processing',
       queueItem: mapToSetQueueDto(queueItem),
@@ -159,16 +205,27 @@ export class SetService {
       throw new Error('Search query is required');
     }
 
-    const sets = await setRepository.searchSets(query);
+    const cacheKey = `sets:search:${query.toLowerCase().trim()}`;
+    const cache = getCacheService();
 
-    // Record search query
-    await userRepository.recordSearchQuery(query, sets.length);
+    return await cache.getOrSet(
+      cacheKey,
+      async () => {
+        const sets = await setRepository.searchSets(query);
 
-    return {
-      items: sets.map(mapToSetListDto),
-      query,
-      count: sets.length,
-    };
+        // Record search query (don't await, run async)
+        userRepository.recordSearchQuery(query, sets.length).catch((err) => {
+          logInfo('Failed to record search query', { error: err.message });
+        });
+
+        return {
+          items: sets.map(mapToSetListDto),
+          query,
+          count: sets.length,
+        };
+      },
+      CACHE_TTL.SEARCH_RESULTS
+    );
   }
 
   /**
@@ -196,16 +253,34 @@ export class SetService {
    * Get popular sets
    */
   async getPopularSets(limit: number = PAGINATION.DEFAULT_PAGE_SIZE) {
-    const sets = await setRepository.findPopularSets(limit);
-    return { items: sets.map(mapToSetListDto) };
+    const cacheKey = `sets:popular:${limit}`;
+    const cache = getCacheService();
+
+    return await cache.getOrSet(
+      cacheKey,
+      async () => {
+        const sets = await setRepository.findPopularSets(limit);
+        return { items: sets.map(mapToSetListDto) };
+      },
+      CACHE_TTL.POPULAR_SETS
+    );
   }
 
   /**
    * Get recent sets
    */
   async getRecentSets(limit: number = PAGINATION.DEFAULT_PAGE_SIZE) {
-    const sets = await setRepository.findRecentSets(limit);
-    return { items: sets.map(mapToSetListDto) };
+    const cacheKey = `sets:recent:${limit}`;
+    const cache = getCacheService();
+
+    return await cache.getOrSet(
+      cacheKey,
+      async () => {
+        const sets = await setRepository.findRecentSets(limit);
+        return { items: sets.map(mapToSetListDto) };
+      },
+      CACHE_TTL.RECENT_SETS
+    );
   }
 
   /**
@@ -213,6 +288,12 @@ export class SetService {
    */
   async toggleVisibility(id: number, hidden: boolean) {
     const set = await setRepository.toggleVisibility(id, hidden);
+
+    // Invalidate caches
+    const cache = getCacheService();
+    await cache.delPattern('sets:*');
+    await cache.del(`set:detail:${id}`);
+
     return { success: true, set };
   }
 
@@ -221,6 +302,12 @@ export class SetService {
    */
   async deleteSet(id: number) {
     await setRepository.delete(id);
+
+    // Invalidate caches
+    const cache = getCacheService();
+    await cache.delPattern('sets:*');
+    await cache.del(`set:detail:${id}`);
+
     return { success: true, message: 'Set deleted successfully' };
   }
 }
