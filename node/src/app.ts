@@ -13,11 +13,13 @@ import path from 'path';
 import i18next from 'i18next';
 import i18nextMiddleware from 'i18next-http-middleware';
 import Backend from 'i18next-fs-backend';
+import swaggerUi from 'swagger-ui-express';
 
 import config from './config';
 import logger from './utils/logger';
 import { RedisClient } from './types/redis';
 import { NunjucksFilterValue } from './types/nunjucks';
+import { swaggerSpec } from './config/swagger';
 
 // Import passport config
 import './middleware/passport';
@@ -242,6 +244,14 @@ class App {
     // ========================================
     const healthRoutes = createHealthRoutes(this.redisClient);
     this.app.use('/', healthRoutes);
+
+    // ========================================
+    // API Documentation (Swagger UI)
+    // ========================================
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'Set2Tracks API Docs',
+    }));
 
     // ========================================
     // Application Routes
